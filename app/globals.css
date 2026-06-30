@@ -60,12 +60,21 @@
   --destructive-foreground: #ffffff;
   --success: var(--forest-600);
 
-  /* — Bespoke elevation: soft, warm, gold-tinted (never harsh) — */
-  --shadow-xs: 0 1px 2px rgba(31, 41, 31, 0.04);
-  --shadow-sm: 0 2px 8px rgba(31, 41, 31, 0.05);
-  --shadow-md: 0 10px 30px -12px rgba(27, 67, 50, 0.18);
-  --shadow-lg: 0 24px 60px -20px rgba(27, 67, 50, 0.22);
-  --shadow-gold: 0 18px 50px -18px rgba(169, 135, 41, 0.35);
+  /* — Bespoke elevation: layered (contact + diffuse), warm, never harsh —
+     Two-tone shadows read more premium than a single blur. */
+  --shadow-xs: 0 1px 2px rgba(31, 41, 31, 0.05);
+  --shadow-sm:
+    0 1px 2px rgba(27, 67, 50, 0.06),
+    0 3px 10px -3px rgba(27, 67, 50, 0.08);
+  --shadow-md:
+    0 2px 4px rgba(27, 67, 50, 0.06),
+    0 12px 28px -10px rgba(27, 67, 50, 0.18);
+  --shadow-lg:
+    0 4px 8px rgba(27, 67, 50, 0.07),
+    0 28px 60px -18px rgba(27, 67, 50, 0.26);
+  --shadow-gold:
+    0 2px 6px rgba(169, 135, 41, 0.18),
+    0 20px 50px -16px rgba(169, 135, 41, 0.38);
 
   /* — Motion tokens (single source of truth; see UX-BIBLE.md) — */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* enter — gentle overshoot-free settle */
@@ -150,6 +159,24 @@
   --radius-2xl: 2rem;
   --radius-3xl: 2.75rem;
   --radius-full: 9999px;
+}
+
+/* Ambient motion keyframes — transform/opacity only (GPU-friendly). */
+@keyframes ambient-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ambient-breathe {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.36;
+    transform: scale(1.06);
+  }
 }
 
 /* ============================================================
@@ -266,6 +293,25 @@
     --pattern-paisley: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84' viewBox='0 0 84 84' fill='none' stroke='%23a98729' stroke-width='1.1'%3E%3Cpath d='M30 8c10 4 13 16 7 25-5 8-16 9-22 3-5-5-4-13 2-17 4-3 10-2 12 2 1 3 0 6-2 8'/%3E%3Cpath d='M64 50c10 4 13 16 7 25-5 8-16 9-22 3-5-5-4-13 2-17 4-3 10-2 12 2 1 3 0 6-2 8' opacity='0.6'/%3E%3Ccircle cx='24' cy='30' r='1.2' fill='%23a98729' stroke='none'/%3E%3Ccircle cx='58' cy='72' r='1.2' fill='%23a98729' stroke='none'/%3E%3C/svg%3E");
   }
 
+  /* ── Capped ambient motion ──────────────────────────────────────────
+     Gentle continuous motion that is PAUSED by default and only runs while
+     its section is on-screen (an ancestor has .in-view, toggled by the
+     IntersectionObserver). Off-screen → paused → zero GPU. GPU-friendly
+     (transform/opacity only). Reduced-motion disables it entirely.
+     Cap: ≤2 of these on the landing page. */
+  .ambient-spin {
+    animation: ambient-rotate 110s linear infinite;
+    animation-play-state: paused;
+  }
+  .ambient-glow {
+    animation: ambient-breathe 7s ease-in-out infinite;
+    animation-play-state: paused;
+  }
+  .in-view .ambient-spin,
+  .in-view .ambient-glow {
+    animation-play-state: running;
+  }
+
   /* One-shot "draw-in" for line-art SVG (lotus/paisley). Runs once via
      .reveal.is-visible; never loops. Reduced-motion shows it fully drawn. */
   .draw path {
@@ -307,6 +353,13 @@
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+  /* Hard-stop ambient motion regardless of in-view state */
+  .ambient-spin,
+  .ambient-glow,
+  .in-view .ambient-spin,
+  .in-view .ambient-glow {
+    animation: none !important;
   }
   .reveal {
     opacity: 1;

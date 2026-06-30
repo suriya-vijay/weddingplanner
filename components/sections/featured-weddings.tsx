@@ -58,7 +58,7 @@ function WeddingCard({ wedding }: { wedding: FeaturedWedding }) {
     <a
       href="#"
       className={cn(
-        "group relative block h-full min-h-[16rem] overflow-hidden rounded-3xl shadow-[var(--shadow-sm)] transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-1.5 hover:shadow-[var(--shadow-lg)]",
+        "group relative block h-full min-h-[16rem] overflow-hidden rounded-3xl shadow-[var(--shadow-md)] ring-1 ring-forest-900/5 transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-2 hover:shadow-[var(--shadow-lg)]",
         wedding.large && "min-h-[22rem]",
       )}
     >

@@ -1,17 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { MandalaRing } from "@/components/brand/motifs";
 import { MandalaCorner } from "@/components/brand/patterns";
+import { AmbientZone } from "@/components/ui/ambient-zone";
 import { GlobalSearch } from "./global-search";
 
 /**
  * Hero — full-viewport, editorial, Indian-luxury. Deep forest ground with a
- * faint STATIC paisley fabric texture, gold mandala corner flourishes, and a
- * static mandala accent. Oversized Playfair headline, dual CTA, global search.
- * Perf: everything here is static — no animation, no blur filters.
+ * faint paisley fabric texture, gold mandala corners (draw-in), a slowly
+ * drifting mandala, and a softly breathing blush glow.
+ * Perf: ambient motion is capped (2: drift + glow), GPU-friendly, and PAUSED
+ * whenever the hero is off-screen (AmbientZone toggles .in-view). One small
+ * header blur lives in the header, not here. Reduced-motion = fully static.
  */
 export function Hero() {
   return (
-    <section className="texture-paisley on-dark relative flex min-h-dvh flex-col justify-center overflow-hidden bg-forest-900 pt-32 pb-16">
+    <AmbientZone
+      as="section"
+      className="texture-paisley on-dark relative flex min-h-dvh flex-col justify-center overflow-hidden bg-forest-900 pt-32 pb-16"
+    >
       {/* Ambient ground (over the paisley texture via gradient transparency) */}
       <div
         aria-hidden
@@ -22,23 +28,20 @@ export function Hero() {
         }}
       />
       {/* Gold mandala corner flourishes (static) */}
-      <MandalaCorner
-        className="pointer-events-none absolute left-0 top-0 h-44 w-44 text-gold-400/25 sm:h-56 sm:w-56"
-      />
-      <MandalaCorner
-        className="pointer-events-none absolute bottom-0 right-0 h-44 w-44 rotate-180 text-gold-400/20 sm:h-56 sm:w-56"
-      />
-      {/* Faint static mandala motif, right (no rotation; modest 40rem size) */}
+      <MandalaCorner className="pointer-events-none absolute left-0 top-0 h-44 w-44 text-gold-400/30 sm:h-56 sm:w-56" />
+      <MandalaCorner className="pointer-events-none absolute bottom-0 right-0 h-44 w-44 rotate-180 text-gold-400/25 sm:h-56 sm:w-56" />
+      {/* Slowly drifting mandala, right (paused off-screen via .ambient-spin) */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-32 top-1/2 hidden h-[40rem] w-[40rem] -translate-y-1/2 text-gold-400/[0.10] md:block"
+        className="ambient-spin pointer-events-none absolute -right-32 top-1/2 hidden h-[40rem] w-[40rem] -translate-y-1/2 text-gold-400/[0.12] md:block"
+        style={{ transformOrigin: "center" }}
       >
         <MandalaRing />
       </div>
-      {/* Soft blush glow, lower-left — plain gradient, no blur filter */}
+      {/* Soft blush glow, lower-left — gently breathing (no blur filter) */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-40 -left-40 h-[34rem] w-[34rem] rounded-full opacity-30"
+        className="ambient-glow pointer-events-none absolute -bottom-40 -left-40 h-[34rem] w-[34rem] rounded-full"
         style={{ background: "radial-gradient(circle, #e8b4b8 0%, transparent 68%)" }}
       />
 
@@ -94,6 +97,6 @@ export function Hero() {
           ))}
         </dl>
       </div>
-    </section>
+    </AmbientZone>
   );
 }

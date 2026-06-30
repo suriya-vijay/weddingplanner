@@ -66,7 +66,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
   return (
     <a
       href="#"
-      className="group flex h-full flex-col overflow-hidden rounded-3xl bg-ivory shadow-[var(--shadow-sm)] transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-1.5 hover:shadow-[var(--shadow-lg)]"
+      className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border/70 bg-ivory shadow-[var(--shadow-sm)] transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-2 hover:border-gold-200 hover:shadow-[var(--shadow-lg)]"
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <div

@@ -23,7 +23,9 @@ export function PlatformFeatures() {
           </p>
         </Reveal>
 
-        <KalashDivider className="my-12" />
+        <Reveal>
+          <KalashDivider className="draw my-12" />
+        </Reveal>
 
         <div className="grid gap-x-10 gap-y-2 md:grid-cols-2 lg:gap-x-16">
           {features.map((f, i) => {

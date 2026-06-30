@@ -47,7 +47,7 @@ export function Header() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-[var(--dur-base)] ease-[var(--ease-soft)]",
         solid
-          ? "border-b border-border bg-cream py-3 shadow-[var(--shadow-sm)]"
+          ? "border-b border-border bg-cream/85 py-3 shadow-[var(--shadow-sm)] backdrop-blur-md"
           : "border-b border-transparent py-5",
       )}
     >
