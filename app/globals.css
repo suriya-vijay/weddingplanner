@@ -1,0 +1,305 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Kalyanam & Co. — Design Tokens
+   Brand: Forest Green (primary) · Gold (secondary) · Blush (accent)
+   Light mode only. Fonts: Playfair Display (serif) + Inter (sans).
+   ============================================================ */
+
+:root {
+  /* — Brand scales — */
+  --forest-900: #0f2c1f; /* deepest — near-black green, for text */
+  --forest-800: #143a29;
+  --forest-700: #1b4332; /* primary */
+  --forest-600: #2d6a4f; /* mid tone */
+  --forest-500: #40916c;
+  --forest-300: #95d5b2;
+  --forest-100: #d8f3e3;
+
+  --gold-700: #8a6d1f;
+  --gold-600: #a98729;
+  --gold-500: #c9a227; /* secondary — luxe gold */
+  --gold-400: #d8b961;
+  --gold-200: #ecdcae;
+  --gold-100: #f6eed4;
+
+  --blush-600: #d99aa0;
+  --blush-500: #e8b4b8; /* accent */
+  --blush-300: #f3d4d2;
+  --blush-100: #f9e9e6;
+
+  /* — Surfaces — */
+  --cream: #fbf8f3; /* page background — warm off-white */
+  --cream-deep: #f4eee3; /* sunken sections */
+  --ivory: #ffffff; /* cards */
+  --ink: #16241c; /* primary text — green-black */
+  --ink-soft: #4a5a50; /* secondary text */
+  --ink-faint: #8a968e; /* tertiary / captions */
+
+  /* — Semantic tokens (consumed by components) — */
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --primary: var(--forest-700);
+  --primary-foreground: #ffffff;
+  --secondary: var(--gold-500);
+  --secondary-foreground: var(--forest-900);
+  --accent: var(--blush-500);
+  --accent-foreground: var(--forest-900);
+  --muted: var(--cream-deep);
+  --muted-foreground: var(--ink-soft);
+  --card: var(--ivory);
+  --card-foreground: var(--ink);
+  --border: #e8e0d2; /* warm hairline */
+  --border-strong: #d9cdb8;
+  --ring: var(--gold-500);
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --success: var(--forest-600);
+
+  /* — Bespoke elevation: soft, warm, gold-tinted (never harsh) — */
+  --shadow-xs: 0 1px 2px rgba(31, 41, 31, 0.04);
+  --shadow-sm: 0 2px 8px rgba(31, 41, 31, 0.05);
+  --shadow-md: 0 10px 30px -12px rgba(27, 67, 50, 0.18);
+  --shadow-lg: 0 24px 60px -20px rgba(27, 67, 50, 0.22);
+  --shadow-gold: 0 18px 50px -18px rgba(169, 135, 41, 0.35);
+
+  /* — Motion tokens (single source of truth; see UX-BIBLE.md) — */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* enter — gentle overshoot-free settle */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* exit */
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1); /* default UI */
+  --dur-fast: 180ms; /* micro: hovers, color shifts */
+  --dur-base: 280ms; /* standard: state changes */
+  --dur-slow: 460ms; /* entrances, reveals */
+
+  /* — Editorial type scale (fluid) — */
+  --step--1: clamp(0.83rem, 0.78rem + 0.2vw, 0.92rem);
+  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --step-3: clamp(2rem, 1.6rem + 2vw, 3rem);
+  --step-4: clamp(2.6rem, 2rem + 3vw, 4.25rem);
+  --step-5: clamp(3.2rem, 2.2rem + 5vw, 6rem);
+}
+
+/* Map tokens into Tailwind's theme so utilities like bg-forest-700, text-gold-500, shadow-lg work */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-forest-900: var(--forest-900);
+  --color-forest-800: var(--forest-800);
+  --color-forest-700: var(--forest-700);
+  --color-forest-600: var(--forest-600);
+  --color-forest-500: var(--forest-500);
+  --color-forest-300: var(--forest-300);
+  --color-forest-100: var(--forest-100);
+
+  --color-gold-700: var(--gold-700);
+  --color-gold-600: var(--gold-600);
+  --color-gold-500: var(--gold-500);
+  --color-gold-400: var(--gold-400);
+  --color-gold-200: var(--gold-200);
+  --color-gold-100: var(--gold-100);
+
+  --color-blush-600: var(--blush-600);
+  --color-blush-500: var(--blush-500);
+  --color-blush-300: var(--blush-300);
+  --color-blush-100: var(--blush-100);
+
+  --color-cream: var(--cream);
+  --color-cream-deep: var(--cream-deep);
+  --color-ivory: var(--ivory);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+
+  --font-serif: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-gold: var(--shadow-gold);
+
+  /* Bespoke radii — generous, organic */
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.75rem;
+  --radius-full: 9999px;
+
+  /* Reveal animation used by scroll-in sections */
+  --animate-rise: rise var(--dur-slow) var(--ease-out) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--ink);
+    line-height: 1.08;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: var(--gold-200);
+    color: var(--forest-900);
+  }
+  /* Refined, on-brand focus ring (never removed) */
+  :focus-visible {
+    outline: 2px solid var(--gold-500);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* ============================================================
+   Brand utilities
+   ============================================================ */
+@layer utilities {
+  /* Section padding rhythm — generous, editorial */
+  .section {
+    padding-block: clamp(4.5rem, 3rem + 7vw, 9rem);
+  }
+  .container-luxe {
+    width: 100%;
+    max-width: 80rem; /* 1280px */
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 0.5rem + 3vw, 3.5rem);
+  }
+  /* Eyebrow / kicker label — small caps gold */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-600);
+  }
+  /* Gold hairline rule used as elegant divider */
+  .rule-gold {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--gold-400),
+      transparent
+    );
+  }
+  /* Fluid display type helpers */
+  .text-display { font-size: var(--step-5); }
+  .text-h1 { font-size: var(--step-4); }
+  .text-h2 { font-size: var(--step-3); }
+  .text-h3 { font-size: var(--step-2); }
+  .lede { font-size: var(--step-1); color: var(--ink-soft); line-height: 1.5; }
+
+  /* Subtle paper grain / warmth wash for sunken sections */
+  .bg-sunken {
+    background:
+      radial-gradient(120% 80% at 50% 0%, var(--cream) 0%, var(--cream-deep) 100%);
+  }
+
+  /* Shimmer skeleton (on-brand cream, not gray) */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--cream-deep);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
+    animation: shimmer 1.6s infinite;
+  }
+
+  /* Scroll-reveal: hidden until .is-visible toggled by IntersectionObserver */
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Honor reduced-motion globally */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

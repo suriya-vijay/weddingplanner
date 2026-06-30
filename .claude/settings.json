@@ -17,7 +17,8 @@
       "Bash(git branch *)",
       "Bash(git ls-remote *)",
       "Bash(echo \"exit: $?\")",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(python scripts/search.py \"animation easing duration hover transition reduced-motion\" --domain ux -n 6 -f markdown)"
     ]
   }
 }
