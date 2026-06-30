@@ -24,7 +24,7 @@ export function Testimonials() {
 
           <div className="mt-14 grid gap-6 lg:grid-cols-2">
             <Reveal>
-              <figure className="flex h-full flex-col justify-between rounded-3xl bg-cream/[0.06] p-8 ring-1 ring-cream/10 backdrop-blur-sm sm:p-10">
+              <figure className="flex h-full flex-col justify-between rounded-3xl bg-cream/[0.06] p-8 ring-1 ring-cream/10 sm:p-10">
                 <div>
                   <Quote className="h-9 w-9 text-gold-400" aria-hidden />
                   <blockquote className="mt-5 font-serif text-2xl leading-snug text-cream sm:text-[1.7rem]">

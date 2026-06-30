@@ -75,7 +75,7 @@ function WeddingCard({ wedding }: { wedding: FeaturedWedding }) {
       />
 
       <div className="relative flex h-full flex-col justify-end p-6 sm:p-7">
-        <Badge tone="gold" className="mb-3 w-fit bg-cream/15 text-cream backdrop-blur-sm">
+        <Badge tone="gold" className="mb-3 w-fit bg-forest-900/35 text-cream">
           {wedding.tradition}
         </Badge>
         <h3
@@ -96,7 +96,7 @@ function WeddingCard({ wedding }: { wedding: FeaturedWedding }) {
           {wedding.vendors.map((v) => (
             <span
               key={v}
-              className="rounded-full bg-cream/15 px-3 py-1 text-xs text-cream backdrop-blur-sm"
+              className="rounded-full bg-forest-900/35 px-3 py-1 text-xs text-cream"
             >
               {v}
             </span>

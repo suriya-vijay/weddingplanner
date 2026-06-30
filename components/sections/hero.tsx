@@ -3,9 +3,10 @@ import { MandalaRing } from "@/components/brand/motifs";
 import { GlobalSearch } from "./global-search";
 
 /**
- * Hero — full-viewport, editorial. Deep forest ground with a faint gold
- * mandala drift, oversized Playfair headline, dual CTA, and the global
- * search nested at the fold. Non-boxy: content sits asymmetrically left.
+ * Hero — full-viewport, editorial. Deep forest ground with a faint, STATIC gold
+ * mandala accent, oversized Playfair headline, dual CTA, and the global search
+ * nested at the fold. Non-boxy: content sits asymmetrically left.
+ * Perf: no animation, no blur filters — gradients only.
  */
 export function Hero() {
   return (
@@ -19,18 +20,18 @@ export function Hero() {
             "radial-gradient(120% 90% at 15% 10%, #1b4332 0%, #0f2c1f 55%, #0b2017 100%)",
         }}
       />
-      {/* Faint mandala motif, right */}
+      {/* Faint static mandala motif, right (no rotation; modest 40rem size) */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-[18%] top-1/2 hidden h-[120vh] w-[120vh] -translate-y-1/2 text-gold-400/[0.12] motion-safe:animate-[spin_120s_linear_infinite] md:block"
+        className="pointer-events-none absolute -right-32 top-1/2 hidden h-[40rem] w-[40rem] -translate-y-1/2 text-gold-400/[0.10] md:block"
       >
         <MandalaRing />
       </div>
-      {/* Soft blush glow, lower-left */}
+      {/* Soft blush glow, lower-left — plain gradient, no blur filter */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-32 -left-32 h-[28rem] w-[28rem] rounded-full opacity-25 blur-3xl"
-        style={{ background: "radial-gradient(circle, #e8b4b8 0%, transparent 70%)" }}
+        className="pointer-events-none absolute -bottom-40 -left-40 h-[34rem] w-[34rem] rounded-full opacity-30"
+        style={{ background: "radial-gradient(circle, #e8b4b8 0%, transparent 68%)" }}
       />
 
       <div className="container-luxe relative">

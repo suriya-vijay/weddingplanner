@@ -74,7 +74,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
           className="absolute inset-0 transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.05]"
           style={{ background: vendor.plate }}
         />
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-cream/90 px-2.5 py-1 text-xs font-medium text-forest-700 backdrop-blur-sm">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-forest-700 shadow-[var(--shadow-xs)]">
           <Star className="h-3.5 w-3.5 fill-gold-500 text-gold-500" aria-hidden />
           {vendor.rating.toFixed(1)}
         </span>

@@ -18,7 +18,11 @@
       "Bash(git ls-remote *)",
       "Bash(echo \"exit: $?\")",
       "Bash(git push *)",
-      "Bash(python scripts/search.py \"animation easing duration hover transition reduced-motion\" --domain ux -n 6 -f markdown)"
+      "Bash(python scripts/search.py \"animation easing duration hover transition reduced-motion\" --domain ux -n 6 -f markdown)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(grep -rn \"infinite\\\\|animate-\\\\[spin\\\\|animate-spin\" app components)",
+      "Bash(grep -rn \"backdrop-blur\\\\|blur-2xl\\\\|blur-3xl\\\\|backdrop-filter\" app components)",
+      "Bash(grep -rn \"embla\" app components lib package.json)"
     ]
   }
 }

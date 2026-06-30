@@ -144,26 +144,6 @@
   --radius-2xl: 2rem;
   --radius-3xl: 2.75rem;
   --radius-full: 9999px;
-
-  /* Reveal animation used by scroll-in sections */
-  --animate-rise: rise var(--dur-slow) var(--ease-out) both;
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
 }
 
 /* ============================================================
@@ -251,27 +231,9 @@
       radial-gradient(120% 80% at 50% 0%, var(--cream) 0%, var(--cream-deep) 100%);
   }
 
-  /* Shimmer skeleton (on-brand cream, not gray) */
-  .skeleton {
-    position: relative;
-    overflow: hidden;
-    background: var(--cream-deep);
-  }
-  .skeleton::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.55),
-      transparent
-    );
-    animation: shimmer 1.6s infinite;
-  }
-
-  /* Scroll-reveal: hidden until .is-visible toggled by IntersectionObserver */
+  /* Scroll-reveal: hidden until .is-visible toggled by IntersectionObserver.
+     will-change only while still hidden — dropped after reveal so we don't
+     keep a permanent GPU layer per element. */
   .reveal {
     opacity: 0;
     transform: translateY(22px);
@@ -283,6 +245,7 @@
   .reveal.is-visible {
     opacity: 1;
     transform: none;
+    will-change: auto;
   }
 }
 
