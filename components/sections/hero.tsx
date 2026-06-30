@@ -68,7 +68,7 @@ export function Hero() {
               Begin Your Journey
             </Button>
             <Button
-              href="#inspiration"
+              href="/inspiration"
               variant="ghost"
               size="lg"
               className="text-cream hover:bg-cream/10"

@@ -26,7 +26,7 @@ export function FeaturedWeddings() {
           </Reveal>
           <Reveal delay={80}>
             <a
-              href="#"
+              href="/inspiration"
               className="group inline-flex items-center gap-2 font-medium text-forest-700 transition-colors hover:text-gold-600"
             >
               View the gallery
