@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/ui/reveal";
-import { DividerOrnament } from "@/components/brand/motifs";
+import { KalashDivider } from "@/components/brand/patterns";
 import { features } from "@/lib/mock-data";
 
 /**
@@ -23,7 +23,7 @@ export function PlatformFeatures() {
           </p>
         </Reveal>
 
-        <DividerOrnament className="my-12" />
+        <KalashDivider className="my-12" />
 
         <div className="grid gap-x-10 gap-y-2 md:grid-cols-2 lg:gap-x-16">
           {features.map((f, i) => {

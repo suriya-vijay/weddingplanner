@@ -28,6 +28,10 @@
   --blush-300: #f3d4d2;
   --blush-100: #f9e9e6;
 
+  /* — Jewel-tone accents (used sparingly; gold stays the hero accent) — */
+  --maroon: #7b2d26; /* deep Indian wedding red */
+  --peacock: #0e5c63; /* peacock teal */
+
   /* — Surfaces — */
   --cream: #fbf8f3; /* page background — warm off-white */
   --cream-deep: #f4eee3; /* sunken sections */
@@ -112,6 +116,8 @@
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
+  --color-maroon: var(--maroon);
+  --color-peacock: var(--peacock);
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -231,6 +237,47 @@
       radial-gradient(120% 80% at 50% 0%, var(--cream) 0%, var(--cream-deep) 100%);
   }
 
+  /* ── Cultural fabric textures (STATIC — tiled SVG, rasterized once) ──
+     Applied via a ::before layer so the pattern sits behind content and
+     never affects text contrast. Low opacity. No animation, no blur.
+     The tile is a small paisley/buti motif (~80px), repeated. */
+  .texture-paisley {
+    position: relative;
+    isolation: isolate;
+  }
+  .texture-paisley::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--pattern-paisley);
+    background-size: 84px 84px;
+    background-repeat: repeat;
+  }
+  /* Gold-on-dark (for forest grounds: hero, CTA, footer) */
+  .texture-paisley.on-dark::before {
+    opacity: 0.06;
+    --pattern-paisley: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84' viewBox='0 0 84 84' fill='none' stroke='%23d8b961' stroke-width='1.1'%3E%3Cpath d='M30 8c10 4 13 16 7 25-5 8-16 9-22 3-5-5-4-13 2-17 4-3 10-2 12 2 1 3 0 6-2 8'/%3E%3Cpath d='M64 50c10 4 13 16 7 25-5 8-16 9-22 3-5-5-4-13 2-17 4-3 10-2 12 2 1 3 0 6-2 8' opacity='0.6'/%3E%3Ccircle cx='24' cy='30' r='1.2' fill='%23d8b961' stroke='none'/%3E%3Ccircle cx='58' cy='72' r='1.2' fill='%23d8b961' stroke='none'/%3E%3C/svg%3E");
+  }
+  /* Gold-on-light (for cream grounds) */
+  .texture-paisley.on-light::before {
+    opacity: 0.05;
+    --pattern-paisley: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84' viewBox='0 0 84 84' fill='none' stroke='%23a98729' stroke-width='1.1'%3E%3Cpath d='M30 8c10 4 13 16 7 25-5 8-16 9-22 3-5-5-4-13 2-17 4-3 10-2 12 2 1 3 0 6-2 8'/%3E%3Cpath d='M64 50c10 4 13 16 7 25-5 8-16 9-22 3-5-5-4-13 2-17 4-3 10-2 12 2 1 3 0 6-2 8' opacity='0.6'/%3E%3Ccircle cx='24' cy='30' r='1.2' fill='%23a98729' stroke='none'/%3E%3Ccircle cx='58' cy='72' r='1.2' fill='%23a98729' stroke='none'/%3E%3C/svg%3E");
+  }
+
+  /* One-shot "draw-in" for line-art SVG (lotus/paisley). Runs once via
+     .reveal.is-visible; never loops. Reduced-motion shows it fully drawn. */
+  .draw path {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    transition: stroke-dashoffset 900ms var(--ease-out);
+  }
+  .reveal.is-visible .draw path,
+  .draw.is-visible path {
+    stroke-dashoffset: 0;
+  }
+
   /* Scroll-reveal: hidden until .is-visible toggled by IntersectionObserver.
      will-change only while still hidden — dropped after reveal so we don't
      keep a permanent GPU layer per element. */
@@ -264,5 +311,9 @@
   .reveal {
     opacity: 1;
     transform: none;
+  }
+  /* Show line-art fully drawn (no draw-in animation) */
+  .draw path {
+    stroke-dashoffset: 0 !important;
   }
 }

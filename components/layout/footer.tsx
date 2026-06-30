@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { LotusMark, DividerOrnament } from "@/components/brand/motifs";
+import { PaisleyBorder } from "@/components/brand/patterns";
 
 /** Brand glyphs (lucide dropped these) — simple, on-brand SVG marks. */
 function InstagramIcon({ className }: { className?: string }) {
@@ -57,8 +58,9 @@ const COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="bg-forest-900 text-cream/80">
+    <footer className="texture-paisley on-dark bg-forest-900 text-cream/80">
       <div className="container-luxe py-16 sm:py-20">
+        <PaisleyBorder className="mb-12" />
         <DividerOrnament className="mb-14 [&_span]:via-gold-400/40 [&_svg]:text-gold-400" />
 
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">

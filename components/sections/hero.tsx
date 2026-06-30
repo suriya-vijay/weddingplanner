@@ -1,24 +1,32 @@
 import { Button } from "@/components/ui/button";
 import { MandalaRing } from "@/components/brand/motifs";
+import { MandalaCorner } from "@/components/brand/patterns";
 import { GlobalSearch } from "./global-search";
 
 /**
- * Hero — full-viewport, editorial. Deep forest ground with a faint, STATIC gold
- * mandala accent, oversized Playfair headline, dual CTA, and the global search
- * nested at the fold. Non-boxy: content sits asymmetrically left.
- * Perf: no animation, no blur filters — gradients only.
+ * Hero — full-viewport, editorial, Indian-luxury. Deep forest ground with a
+ * faint STATIC paisley fabric texture, gold mandala corner flourishes, and a
+ * static mandala accent. Oversized Playfair headline, dual CTA, global search.
+ * Perf: everything here is static — no animation, no blur filters.
  */
 export function Hero() {
   return (
-    <section className="relative flex min-h-dvh flex-col justify-center overflow-hidden bg-forest-900 pt-32 pb-16">
-      {/* Ambient ground */}
+    <section className="texture-paisley on-dark relative flex min-h-dvh flex-col justify-center overflow-hidden bg-forest-900 pt-32 pb-16">
+      {/* Ambient ground (over the paisley texture via gradient transparency) */}
       <div
         aria-hidden
-        className="absolute inset-0"
+        className="absolute inset-0 -z-0"
         style={{
           background:
-            "radial-gradient(120% 90% at 15% 10%, #1b4332 0%, #0f2c1f 55%, #0b2017 100%)",
+            "radial-gradient(120% 90% at 15% 10%, rgba(27,67,50,0.92) 0%, rgba(15,44,31,0.96) 55%, #0b2017 100%)",
         }}
+      />
+      {/* Gold mandala corner flourishes (static) */}
+      <MandalaCorner
+        className="pointer-events-none absolute left-0 top-0 h-44 w-44 text-gold-400/25 sm:h-56 sm:w-56"
+      />
+      <MandalaCorner
+        className="pointer-events-none absolute bottom-0 right-0 h-44 w-44 rotate-180 text-gold-400/20 sm:h-56 sm:w-56"
       />
       {/* Faint static mandala motif, right (no rotation; modest 40rem size) */}
       <div
