@@ -24,8 +24,20 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 64);
-    onScroll();
+    // Throttle with requestAnimationFrame: the scroll event can fire 60+×/sec,
+    // but we only read scrollY once per frame and only setState on change.
+    let ticking = false;
+    const update = () => {
+      setScrolled(window.scrollY > 64);
+      ticking = false;
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);

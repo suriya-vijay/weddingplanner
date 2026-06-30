@@ -1,10 +1,11 @@
-"use client";
-
 import * as React from "react";
 import Link from "next/link";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// No client hooks here — this is a Server Component. Buttons that need an
+// onClick should live in a client component (e.g. the header, global search).
 
 /**
  * Kalyanam button — fully re-skinned (no default shadcn look).
