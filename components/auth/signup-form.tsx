@@ -172,10 +172,17 @@ export function SignupForm() {
         </Button>
 
         {notice && (
-          <p className="rounded-xl bg-gold-100 px-4 py-3 text-center text-sm text-gold-700">
-            Accounts aren’t live yet — this is a preview. Sign-up will work once
-            we connect the backend.
-          </p>
+          <div className="space-y-3 rounded-xl bg-gold-100 px-4 py-3 text-center text-sm text-gold-700">
+            <p>
+              Accounts aren’t live yet — this is a preview. Sign-up will work
+              once we connect the backend.
+            </p>
+            {account === "couple" && (
+              <Button href="/dashboard" variant="primary" size="sm">
+                Preview your wedding dashboard
+              </Button>
+            )}
+          </div>
         )}
       </form>
 

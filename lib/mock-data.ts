@@ -910,3 +910,171 @@ export const vendors: VendorProfile[] = [
 export function getVendorBySlug(slug: string): VendorProfile | undefined {
   return vendors.find((v) => v.slug === slug);
 }
+
+// ── Customer Dashboard (the couple's private workspace) ─────────
+// Mock/seed data for the planning workspace. Local state only — nothing here
+// persists yet (that arrives with the backend). Dates are ISO strings so the
+// countdown/timeline compute the same on server and client.
+
+export type WeddingProfile = {
+  coupleNames: string;
+  partnerA: string;
+  partnerB: string;
+  /** ISO date (YYYY-MM-DD) of the main ceremony */
+  date: string;
+  city: string;
+  venue: string;
+  tradition: string;
+  guestEstimate: number;
+  totalBudget: number;
+  currency: "₹";
+};
+
+export const weddingProfile: WeddingProfile = {
+  coupleNames: "Aanya & Vikram",
+  partnerA: "Aanya",
+  partnerB: "Vikram",
+  date: "2026-12-05",
+  city: "Udaipur, Rajasthan",
+  venue: "The Grand Udaipur",
+  tradition: "North Indian · Hindu",
+  guestEstimate: 420,
+  totalBudget: 8000000,
+  currency: "₹",
+};
+
+/** Assigned human planner (a core PRD promise). */
+export const assignedPlanner = {
+  name: "Meera Kapoor",
+  title: "Lead Wedding Planner",
+  initials: "MK",
+  since: "Jan 2026",
+  phone: "+91 98••• •••42",
+  email: "meera@kalyanam.co",
+  plate: plates.forest,
+};
+
+// ── Checklist ───────────────────────────────────────────────────
+export type ChecklistPhase =
+  | "12+ months"
+  | "9–12 months"
+  | "6–9 months"
+  | "3–6 months"
+  | "1–3 months"
+  | "Final month";
+
+export type ChecklistItem = {
+  id: string;
+  task: string;
+  phase: ChecklistPhase;
+  category: string;
+  done: boolean;
+};
+
+export const checklistPhases: ChecklistPhase[] = [
+  "12+ months",
+  "9–12 months",
+  "6–9 months",
+  "3–6 months",
+  "1–3 months",
+  "Final month",
+];
+
+export const checklistItems: ChecklistItem[] = [
+  { id: "c1", task: "Set your wedding budget together", phase: "12+ months", category: "Planning", done: true },
+  { id: "c2", task: "Finalise the guest count estimate", phase: "12+ months", category: "Guests", done: true },
+  { id: "c3", task: "Shortlist and book the venue", phase: "12+ months", category: "Venue", done: true },
+  { id: "c4", task: "Choose your wedding dates (muhurat)", phase: "12+ months", category: "Planning", done: true },
+  { id: "c5", task: "Book photographer & videographer", phase: "9–12 months", category: "Vendors", done: true },
+  { id: "c6", task: "Book decorator & mandap designer", phase: "9–12 months", category: "Vendors", done: true },
+  { id: "c7", task: "Book caterer & finalise menu tasting", phase: "9–12 months", category: "Catering", done: false },
+  { id: "c8", task: "Reserve blocks of guest hotel rooms", phase: "6–9 months", category: "Guests", done: false },
+  { id: "c9", task: "Order bridal outfit & begin fittings", phase: "6–9 months", category: "Fashion", done: true },
+  { id: "c10", task: "Book mehendi artist & makeup artist", phase: "6–9 months", category: "Beauty", done: false },
+  { id: "c11", task: "Design & send save-the-dates", phase: "6–9 months", category: "Invitations", done: false },
+  { id: "c12", task: "Book sangeet DJ & choreographer", phase: "3–6 months", category: "Entertainment", done: false },
+  { id: "c13", task: "Finalise & print invitations", phase: "3–6 months", category: "Invitations", done: false },
+  { id: "c14", task: "Plan haldi, mehendi & sangeet functions", phase: "3–6 months", category: "Ceremonies", done: false },
+  { id: "c15", task: "Arrange guest transport & logistics", phase: "1–3 months", category: "Guests", done: false },
+  { id: "c16", task: "Confirm final guest count with vendors", phase: "1–3 months", category: "Guests", done: false },
+  { id: "c17", task: "Bridal & groom trials (hair, makeup)", phase: "1–3 months", category: "Beauty", done: false },
+  { id: "c18", task: "Share the day-of timeline with the planner", phase: "Final month", category: "Planning", done: false },
+  { id: "c19", task: "Confirm payments & final vendor briefs", phase: "Final month", category: "Vendors", done: false },
+  { id: "c20", task: "Pack for the honeymoon", phase: "Final month", category: "Personal", done: false },
+];
+
+// ── Budget ──────────────────────────────────────────────────────
+export type BudgetItem = {
+  id: string;
+  category: string;
+  label: string;
+  /** planned allocation, in ₹ */
+  estimated: number;
+  /** actually spent so far, in ₹ */
+  spent: number;
+  status: "Paid" | "Deposit paid" | "Not started";
+};
+
+export const budgetItems: BudgetItem[] = [
+  { id: "b1", category: "Venue", label: "The Grand Udaipur — weekend takeover", estimated: 1800000, spent: 900000, status: "Deposit paid" },
+  { id: "b2", category: "Catering", label: "Saffron Catering — 420 guests", estimated: 1400000, spent: 200000, status: "Deposit paid" },
+  { id: "b3", category: "Decor", label: "Mandap Studio — all functions", estimated: 1400000, spent: 700000, status: "Deposit paid" },
+  { id: "b4", category: "Photography", label: "The Lighthouse Films — Luxe", estimated: 1200000, spent: 1200000, status: "Paid" },
+  { id: "b5", category: "Fashion", label: "Bridal & groom outfits", estimated: 900000, spent: 450000, status: "Deposit paid" },
+  { id: "b6", category: "Entertainment", label: "DJ Aurelius + Raga Live", estimated: 500000, spent: 0, status: "Not started" },
+  { id: "b7", category: "Beauty", label: "Anita Makeovers + House of Mehendi", estimated: 300000, spent: 65000, status: "Deposit paid" },
+  { id: "b8", category: "Invitations", label: "Cards, save-the-dates & stationery", estimated: 250000, spent: 0, status: "Not started" },
+  { id: "b9", category: "Florals", label: "Petal & Pearl — ceremony & tables", estimated: 250000, spent: 0, status: "Not started" },
+];
+
+// ── Timeline ────────────────────────────────────────────────────
+export type TimelineMilestone = {
+  id: string;
+  title: string;
+  detail: string;
+  /** ISO date */
+  date: string;
+  status: "done" | "upcoming";
+};
+
+export const timelineMilestones: TimelineMilestone[] = [
+  { id: "t1", title: "Venue booked", detail: "The Grand Udaipur reserved for the wedding weekend.", date: "2026-01-18", status: "done" },
+  { id: "t2", title: "Photographer confirmed", detail: "The Lighthouse Films — Luxe package paid in full.", date: "2026-02-10", status: "done" },
+  { id: "t3", title: "Decor & mandap locked", detail: "Mandap Studio deposit paid; design approved.", date: "2026-03-02", status: "done" },
+  { id: "t4", title: "Bridal outfit — first fitting", detail: "Lehenga fitting and jewellery selection.", date: "2026-05-15", status: "done" },
+  { id: "t5", title: "Menu tasting", detail: "Final tasting with Saffron Catering.", date: "2026-08-20", status: "upcoming" },
+  { id: "t6", title: "Invitations sent", detail: "Printed invitations dispatched to all guests.", date: "2026-09-15", status: "upcoming" },
+  { id: "t7", title: "Sangeet rehearsal", detail: "Choreography rehearsal with the families.", date: "2026-11-20", status: "upcoming" },
+  { id: "t8", title: "Wedding weekend", detail: "Haldi, Mehendi, Sangeet, Pheras & Reception.", date: "2026-12-05", status: "upcoming" },
+];
+
+// ── Guests ──────────────────────────────────────────────────────
+export type RsvpStatus = "Confirmed" | "Pending" | "Declined";
+export type GuestSide = "Bride" | "Groom" | "Both";
+export type MealPref = "Veg" | "Non-veg" | "Jain" | "Vegan";
+
+export type Guest = {
+  id: string;
+  name: string;
+  side: GuestSide;
+  group: string;
+  count: number;
+  rsvp: RsvpStatus;
+  meal: MealPref;
+};
+
+export const guests: Guest[] = [
+  { id: "g1", name: "Rao Family", side: "Bride", group: "Immediate family", count: 6, rsvp: "Confirmed", meal: "Veg" },
+  { id: "g2", name: "Shah Family", side: "Groom", group: "Immediate family", count: 5, rsvp: "Confirmed", meal: "Non-veg" },
+  { id: "g3", name: "Priya & Arjun", side: "Bride", group: "Close friends", count: 2, rsvp: "Confirmed", meal: "Veg" },
+  { id: "g4", name: "Dr. Sunita Mehra", side: "Bride", group: "Relatives", count: 1, rsvp: "Pending", meal: "Jain" },
+  { id: "g5", name: "The Kapoors", side: "Groom", group: "Relatives", count: 4, rsvp: "Confirmed", meal: "Veg" },
+  { id: "g6", name: "Karan Singh", side: "Groom", group: "Close friends", count: 1, rsvp: "Pending", meal: "Non-veg" },
+  { id: "g7", name: "Neha & Rohan", side: "Both", group: "College friends", count: 2, rsvp: "Confirmed", meal: "Vegan" },
+  { id: "g8", name: "Iyer Family", side: "Bride", group: "Relatives", count: 5, rsvp: "Declined", meal: "Veg" },
+  { id: "g9", name: "Malhotra Family", side: "Groom", group: "Family friends", count: 4, rsvp: "Pending", meal: "Non-veg" },
+  { id: "g10", name: "Aunt Lakshmi", side: "Bride", group: "Relatives", count: 2, rsvp: "Confirmed", meal: "Jain" },
+];
+
+/** Saved inspiration for the overview strip — reuse the gallery items. */
+export const savedInspirationIds = ["insp-1", "insp-4", "insp-7", "insp-10", "insp-11"];
