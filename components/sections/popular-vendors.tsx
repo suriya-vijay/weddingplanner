@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Star, MapPin } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { Button } from "@/components/ui/button";
@@ -30,13 +31,13 @@ export function PopularVendors() {
           <Reveal delay={60}>
             <div className="mt-10 flex flex-wrap justify-center gap-2.5">
               {vendorCategories.map((c) => (
-                <a
+                <Link
                   key={c}
-                  href="#"
+                  href="/vendors"
                   className="rounded-full border border-border-strong bg-ivory px-4 py-2 text-sm text-ink-soft transition-all duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:border-gold-400 hover:text-forest-700 hover:shadow-[var(--shadow-sm)]"
                 >
                   {c}
-                </a>
+                </Link>
               ))}
             </div>
           </Reveal>
@@ -51,7 +52,7 @@ export function PopularVendors() {
           </div>
 
           <Reveal className="mt-12 text-center">
-            <Button href="#" variant="outline" size="lg">
+            <Button href="/vendors" variant="outline" size="lg">
               Explore all vendors
             </Button>
           </Reveal>
@@ -62,10 +63,18 @@ export function PopularVendors() {
   );
 }
 
+function slugify(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function VendorCard({ vendor }: { vendor: Vendor }) {
   return (
-    <a
-      href="#"
+    <Link
+      href={`/vendors/${slugify(vendor.name)}`}
       className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border/70 bg-ivory shadow-[var(--shadow-sm)] transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-2 hover:border-gold-200 hover:shadow-[var(--shadow-lg)]"
     >
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -98,6 +107,6 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
           </span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }

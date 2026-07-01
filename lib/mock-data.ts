@@ -485,3 +485,428 @@ export const inspirationItems: InspirationItem[] = [
     aspect: 0.95,
   },
 ];
+
+// ── Vendor Marketplace (rich profiles) ──────────────────────────
+// Full vendor profiles for the marketplace + profile pages. Mock data.
+
+export type VendorPackage = {
+  name: string;
+  price: string;
+  features: string[];
+};
+
+export type VendorReview = {
+  author: string;
+  rating: number;
+  text: string;
+  wedding: string;
+};
+
+export type VendorProfile = {
+  slug: string;
+  name: string;
+  category: string;
+  tagline: string;
+  location: string;
+  serviceAreas: string[];
+  rating: number;
+  reviews: number;
+  startingAt: string;
+  priceTier: "₹" | "₹₹" | "₹₹₹" | "₹₹₹₹";
+  verified: boolean;
+  styles: string[];
+  about: string;
+  packages: VendorPackage[];
+  gallery: Plate[];
+  cover: Plate;
+  logoPlate: Plate;
+  instagram: string;
+  website: string;
+  availability: string;
+  reviewList: VendorReview[];
+};
+
+/** Marketplace vendor categories (with counts derived below). */
+export const marketplaceCategories = [
+  "All",
+  "Photography",
+  "Decor",
+  "Catering",
+  "Mehendi",
+  "Makeup",
+  "Entertainment",
+  "Florists",
+  "Venues",
+] as const;
+
+export const vendorLocations = [
+  "Mumbai",
+  "Delhi NCR",
+  "Jaipur",
+  "Udaipur",
+  "Goa",
+  "Hyderabad",
+] as const;
+
+const gp = {
+  forest: "linear-gradient(135deg, #1b4332 0%, #2d6a4f 55%, #40916c 100%)",
+  gold: "linear-gradient(135deg, #8a6d1f 0%, #c9a227 60%, #ecdcae 100%)",
+  blush: "linear-gradient(135deg, #d99aa0 0%, #e8b4b8 55%, #f9e9e6 100%)",
+  dusk: "linear-gradient(140deg, #0f2c1f 0%, #2d6a4f 60%, #c9a227 130%)",
+  rose: "linear-gradient(140deg, #1b4332 0%, #d99aa0 130%)",
+  champagne: "linear-gradient(135deg, #2d6a4f 0%, #d8b961 70%, #f6eed4 100%)",
+  peacock: "linear-gradient(150deg, #0a3b40 0%, #0e5c63 55%, #2d9aa3 120%)",
+  maroon: "linear-gradient(150deg, #4a1418 0%, #7b2d26 60%, #b5564a 120%)",
+};
+
+function reviews(n: number): VendorReview[] {
+  const base: VendorReview[] = [
+    {
+      author: "Aanya M.",
+      rating: 5,
+      text: "Absolutely exceptional — they understood our vision instantly and elevated every detail.",
+      wedding: "Udaipur, 2025",
+    },
+    {
+      author: "Rohan & Neha",
+      rating: 5,
+      text: "Professional, warm, and worth every rupee. Our families are still talking about it.",
+      wedding: "Jaipur, 2025",
+    },
+    {
+      author: "Simran K.",
+      rating: 4,
+      text: "Beautiful work and great communication throughout the planning process.",
+      wedding: "Goa, 2024",
+    },
+  ];
+  return base.slice(0, n);
+}
+
+export const vendors: VendorProfile[] = [
+  {
+    slug: "the-lighthouse-films",
+    name: "The Lighthouse Films",
+    category: "Photography",
+    tagline: "Cinematic wedding films & timeless portraits",
+    location: "Mumbai",
+    serviceAreas: ["Mumbai", "Goa", "Udaipur", "Destination"],
+    rating: 4.9,
+    reviews: 218,
+    startingAt: "₹3,50,000",
+    priceTier: "₹₹₹₹",
+    verified: true,
+    styles: ["Cinematic", "Editorial", "Candid"],
+    about:
+      "An award-winning studio crafting cinematic wedding films and editorial portraiture for luxury Indian celebrations across the globe. We tell your story with restraint, warmth and an eye for light.",
+    packages: [
+      { name: "Essential", price: "₹3,50,000", features: ["1-day coverage", "2 photographers", "Online gallery"] },
+      { name: "Signature", price: "₹6,50,000", features: ["2-day coverage", "Film + photo", "Highlight reel", "Album"] },
+      { name: "Luxe", price: "₹12,00,000", features: ["Full multi-day", "Cinematic film", "Drone", "Fine-art album"] },
+    ],
+    cover: gp.dusk,
+    logoPlate: gp.forest,
+    gallery: [gp.forest, gp.dusk, gp.champagne, gp.gold, gp.rose, gp.blush],
+    instagram: "@lighthousefilms",
+    website: "lighthousefilms.in",
+    availability: "Booking 2025–2026",
+    reviewList: reviews(3),
+  },
+  {
+    slug: "mandap-studio",
+    name: "Mandap Studio",
+    category: "Decor",
+    tagline: "Bespoke mandaps & floral architecture",
+    location: "Delhi NCR",
+    serviceAreas: ["Delhi NCR", "Jaipur", "Udaipur"],
+    rating: 4.8,
+    reviews: 164,
+    startingAt: "₹6,00,000",
+    priceTier: "₹₹₹₹",
+    verified: true,
+    styles: ["Regal", "Floral", "Contemporary"],
+    about:
+      "We design and build bespoke mandaps and immersive floral sets that turn venues into worlds. From heritage palaces to modern ballrooms, every structure is custom to your story.",
+    packages: [
+      { name: "Ceremony", price: "₹6,00,000", features: ["Custom mandap", "Stage & aisle", "Floral install"] },
+      { name: "Full Event", price: "₹14,00,000", features: ["All functions", "Lighting design", "Seating & lounge"] },
+    ],
+    cover: gp.gold,
+    logoPlate: gp.maroon,
+    gallery: [gp.gold, gp.maroon, gp.champagne, gp.rose, gp.forest, gp.blush],
+    instagram: "@mandapstudio",
+    website: "mandapstudio.in",
+    availability: "Limited 2025 dates",
+    reviewList: reviews(3),
+  },
+  {
+    slug: "house-of-mehendi",
+    name: "House of Mehendi",
+    category: "Mehendi",
+    tagline: "Intricate bridal mehendi artistry",
+    location: "Jaipur",
+    serviceAreas: ["Jaipur", "Udaipur", "Delhi NCR"],
+    rating: 5.0,
+    reviews: 97,
+    startingAt: "₹45,000",
+    priceTier: "₹₹",
+    verified: true,
+    styles: ["Rajasthani", "Arabic", "Minimal"],
+    about:
+      "Heritage bridal mehendi with a modern sensibility — intricate, personal and photographed beautifully. Our artists travel with your celebration.",
+    packages: [
+      { name: "Bridal", price: "₹45,000", features: ["Full bridal mehendi", "Trial session"] },
+      { name: "Bridal + Family", price: "₹90,000", features: ["Bridal", "Up to 10 guests", "On-site team"] },
+    ],
+    cover: gp.blush,
+    logoPlate: gp.rose,
+    gallery: [gp.blush, gp.rose, gp.gold, gp.champagne, gp.maroon, gp.forest],
+    instagram: "@houseofmehendi",
+    website: "houseofmehendi.in",
+    availability: "Open 2025–2026",
+    reviewList: reviews(2),
+  },
+  {
+    slug: "saffron-catering",
+    name: "Saffron Catering",
+    category: "Catering",
+    tagline: "Regional Indian fine-dining, at scale",
+    location: "Hyderabad",
+    serviceAreas: ["Hyderabad", "Mumbai", "Goa"],
+    rating: 4.7,
+    reviews: 301,
+    startingAt: "₹1,800 / plate",
+    priceTier: "₹₹₹",
+    verified: true,
+    styles: ["Multi-cuisine", "Live counters", "Regional"],
+    about:
+      "From Awadhi to Chettinad, we bring regional Indian fine-dining to weddings of every scale, with live counters, plated services and impeccable hospitality.",
+    packages: [
+      { name: "Classic", price: "₹1,800 / plate", features: ["3 cuisines", "Live counters", "Dessert bar"] },
+      { name: "Grand", price: "₹3,200 / plate", features: ["6 cuisines", "Plated + buffet", "Mixology"] },
+    ],
+    cover: gp.champagne,
+    logoPlate: gp.gold,
+    gallery: [gp.champagne, gp.gold, gp.forest, gp.rose, gp.blush, gp.dusk],
+    instagram: "@saffroncatering",
+    website: "saffroncatering.in",
+    availability: "Booking year-round",
+    reviewList: reviews(3),
+  },
+  {
+    slug: "gulaal-decor",
+    name: "Gulaal Decor",
+    category: "Decor",
+    tagline: "Colour-drenched, joyful set design",
+    location: "Jaipur",
+    serviceAreas: ["Jaipur", "Udaipur"],
+    rating: 4.8,
+    reviews: 142,
+    startingAt: "₹4,50,000",
+    priceTier: "₹₹₹",
+    verified: false,
+    styles: ["Vibrant", "Traditional", "Boho"],
+    about:
+      "We love colour. Gulaal creates joyful, richly textured sets that celebrate Indian tradition with a fresh, editorial eye.",
+    packages: [
+      { name: "Function", price: "₹4,50,000", features: ["Single function decor", "Florals", "Lighting"] },
+    ],
+    cover: gp.rose,
+    logoPlate: gp.maroon,
+    gallery: [gp.rose, gp.maroon, gp.gold, gp.blush, gp.champagne, gp.forest],
+    instagram: "@gulaaldecor",
+    website: "gulaaldecor.in",
+    availability: "Open 2025",
+    reviewList: reviews(2),
+  },
+  {
+    slug: "dj-aurelius",
+    name: "DJ Aurelius",
+    category: "Entertainment",
+    tagline: "Sangeet sets & luxe reception sound",
+    location: "Mumbai",
+    serviceAreas: ["Mumbai", "Goa", "Destination"],
+    rating: 4.9,
+    reviews: 188,
+    startingAt: "₹1,20,000",
+    priceTier: "₹₹",
+    verified: true,
+    styles: ["Bollywood", "House", "Fusion"],
+    about:
+      "High-energy sangeets and refined reception sound. Aurelius reads the room and keeps the dancefloor full from first beat to last.",
+    packages: [
+      { name: "Sangeet", price: "₹1,20,000", features: ["4-hour set", "Sound + lighting"] },
+      { name: "Full Weekend", price: "₹3,50,000", features: ["All functions", "MC", "Premium rig"] },
+    ],
+    cover: gp.peacock,
+    logoPlate: gp.forest,
+    gallery: [gp.peacock, gp.dusk, gp.forest, gp.gold, gp.maroon, gp.rose],
+    instagram: "@djaurelius",
+    website: "djaurelius.com",
+    availability: "Few 2025 weekends left",
+    reviewList: reviews(3),
+  },
+  {
+    slug: "anita-makeovers",
+    name: "Anita Makeovers",
+    category: "Makeup",
+    tagline: "Luminous bridal makeup & hair",
+    location: "Delhi NCR",
+    serviceAreas: ["Delhi NCR", "Jaipur", "Udaipur"],
+    rating: 4.9,
+    reviews: 210,
+    startingAt: "₹65,000",
+    priceTier: "₹₹₹",
+    verified: true,
+    styles: ["Luminous", "Classic", "HD"],
+    about:
+      "Skin-first bridal makeup that photographs beautifully and lasts through every function. Trials, on-site team and family looks included.",
+    packages: [
+      { name: "Bridal", price: "₹65,000", features: ["Bridal makeup + hair", "Trial"] },
+      { name: "Bridal + Party", price: "₹1,40,000", features: ["Bridal", "Up to 6 family", "On-site"] },
+    ],
+    cover: gp.blush,
+    logoPlate: gp.rose,
+    gallery: [gp.blush, gp.champagne, gp.rose, gp.gold, gp.forest, gp.maroon],
+    instagram: "@anitamakeovers",
+    website: "anitamakeovers.in",
+    availability: "Open 2025–2026",
+    reviewList: reviews(3),
+  },
+  {
+    slug: "seaside-frames",
+    name: "Seaside Frames",
+    category: "Photography",
+    tagline: "Sun-soaked destination photography",
+    location: "Goa",
+    serviceAreas: ["Goa", "Kerala", "Destination"],
+    rating: 4.8,
+    reviews: 121,
+    startingAt: "₹2,80,000",
+    priceTier: "₹₹₹",
+    verified: false,
+    styles: ["Candid", "Travel", "Documentary"],
+    about:
+      "Golden-hour specialists for beach and destination weddings. Relaxed, documentary coverage that feels like your celebration.",
+    packages: [
+      { name: "Destination", price: "₹2,80,000", features: ["2-day coverage", "Travel included", "Gallery"] },
+    ],
+    cover: gp.champagne,
+    logoPlate: gp.peacock,
+    gallery: [gp.champagne, gp.peacock, gp.gold, gp.blush, gp.forest, gp.dusk],
+    instagram: "@seasideframes",
+    website: "seasideframes.in",
+    availability: "Open 2025",
+    reviewList: reviews(2),
+  },
+  {
+    slug: "petal-and-pearl",
+    name: "Petal & Pearl",
+    category: "Florists",
+    tagline: "Fine-art florals & tablescapes",
+    location: "Goa",
+    serviceAreas: ["Goa", "Mumbai"],
+    rating: 4.9,
+    reviews: 88,
+    startingAt: "₹2,00,000",
+    priceTier: "₹₹₹",
+    verified: true,
+    styles: ["Fine-art", "Garden", "Modern"],
+    about:
+      "Seasonal, fine-art florals and tablescapes designed to feel effortless and abundant. We source the freshest blooms for every celebration.",
+    packages: [
+      { name: "Ceremony Florals", price: "₹2,00,000", features: ["Aisle + mandap florals", "Bouquets"] },
+      { name: "Full Floral", price: "₹5,50,000", features: ["All functions", "Tablescapes", "Installations"] },
+    ],
+    cover: gp.blush,
+    logoPlate: gp.forest,
+    gallery: [gp.blush, gp.rose, gp.champagne, gp.gold, gp.forest, gp.peacock],
+    instagram: "@petalandpearl",
+    website: "petalandpearl.in",
+    availability: "Open 2025–2026",
+    reviewList: reviews(2),
+  },
+  {
+    slug: "bloom-and-co",
+    name: "Bloom & Co.",
+    category: "Florists",
+    tagline: "Destination floral design",
+    location: "Mumbai",
+    serviceAreas: ["Mumbai", "Lake Como", "Destination"],
+    rating: 4.7,
+    reviews: 76,
+    startingAt: "₹2,40,000",
+    priceTier: "₹₹₹",
+    verified: false,
+    styles: ["Lush", "European", "Romantic"],
+    about:
+      "Romantic, European-inflected floral design for destination weddings — from Mumbai ballrooms to lakeside Italian villas.",
+    packages: [
+      { name: "Destination Florals", price: "₹2,40,000", features: ["Travel floral team", "Ceremony + reception"] },
+    ],
+    cover: gp.rose,
+    logoPlate: gp.blush,
+    gallery: [gp.rose, gp.champagne, gp.blush, gp.gold, gp.forest, gp.dusk],
+    instagram: "@bloomandco",
+    website: "bloomandco.in",
+    availability: "Booking 2026",
+    reviewList: reviews(2),
+  },
+  {
+    slug: "the-grand-udaipur",
+    name: "The Grand Udaipur",
+    category: "Venues",
+    tagline: "Lakeside palace weddings",
+    location: "Udaipur",
+    serviceAreas: ["Udaipur"],
+    rating: 4.9,
+    reviews: 64,
+    startingAt: "₹18,00,000",
+    priceTier: "₹₹₹₹",
+    verified: true,
+    styles: ["Palace", "Lakeside", "Heritage"],
+    about:
+      "A heritage lakeside palace offering breathtaking backdrops, world-class hospitality and full-service celebration planning for up to 800 guests.",
+    packages: [
+      { name: "Weekend Takeover", price: "₹18,00,000", features: ["Full venue", "120 rooms", "In-house catering"] },
+    ],
+    cover: gp.dusk,
+    logoPlate: gp.gold,
+    gallery: [gp.dusk, gp.gold, gp.champagne, gp.forest, gp.maroon, gp.rose],
+    instagram: "@thegrandudaipur",
+    website: "thegrandudaipur.com",
+    availability: "Select 2026 dates",
+    reviewList: reviews(3),
+  },
+  {
+    slug: "raga-live",
+    name: "Raga Live",
+    category: "Entertainment",
+    tagline: "Live classical & fusion ensembles",
+    location: "Hyderabad",
+    serviceAreas: ["Hyderabad", "Mumbai", "Delhi NCR"],
+    rating: 4.8,
+    reviews: 54,
+    startingAt: "₹90,000",
+    priceTier: "₹₹",
+    verified: false,
+    styles: ["Classical", "Fusion", "Sufi"],
+    about:
+      "Live classical, Sufi and fusion ensembles that bring soul to your ceremonies — from serene pheras to joyful baraats.",
+    packages: [
+      { name: "Ceremony", price: "₹90,000", features: ["3-piece ensemble", "2-hour set"] },
+      { name: "Full Day", price: "₹2,20,000", features: ["Ensemble + vocals", "All functions"] },
+    ],
+    cover: gp.peacock,
+    logoPlate: gp.maroon,
+    gallery: [gp.peacock, gp.maroon, gp.gold, gp.forest, gp.champagne, gp.dusk],
+    instagram: "@ragalive",
+    website: "ragalive.in",
+    availability: "Open 2025",
+    reviewList: reviews(2),
+  },
+];
+
+export function getVendorBySlug(slug: string): VendorProfile | undefined {
+  return vendors.find((v) => v.slug === slug);
+}

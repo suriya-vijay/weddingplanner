@@ -31,7 +31,7 @@ const COLUMNS = [
     title: "Platform",
     links: [
       { label: "Inspiration Gallery", href: "/inspiration" },
-      { label: "Vendor Marketplace", href: "#vendors" },
+      { label: "Vendor Marketplace", href: "/vendors" },
       { label: "Wedding Dashboard", href: "#features" },
       { label: "AI Assistant", href: "#features" },
     ],
