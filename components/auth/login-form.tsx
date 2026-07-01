@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Heart, Shield } from "lucide-react";
+import { Eye, EyeOff, Heart, Shield, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSession, type Role } from "@/components/auth/session";
@@ -14,9 +14,16 @@ import {
   AuthSwitch,
 } from "./auth-shell";
 
+/** Which panel each demo role lands on after sign-in. */
+const PANEL_FOR: Record<Role, string> = {
+  couple: "/dashboard",
+  admin: "/admin",
+  vendor: "/vendor",
+};
+
 /**
- * Login form — UI only this phase (validates, then shows a "demo" notice;
- * real Supabase auth comes later). Lightweight: plain React state, no form libs.
+ * Login form — UI only this phase (validates, then starts a mock session and
+ * routes into the panel for the picked role). Real Supabase auth comes later.
  */
 export function LoginForm() {
   const { signIn } = useSession();
@@ -24,7 +31,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [role, setRole] = useState<Extract<Role, "couple" | "admin">>("couple");
+  const [role, setRole] = useState<Role>("couple");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -46,7 +53,7 @@ export function LoginForm() {
     // route into the matching panel.
     setTimeout(() => {
       signIn(role);
-      router.push(role === "admin" ? "/admin" : "/dashboard");
+      router.push(PANEL_FOR[role]);
     }, 500);
   }
 
@@ -74,13 +81,19 @@ export function LoginForm() {
         <div
           role="radiogroup"
           aria-label="Demo role"
-          className="grid grid-cols-2 gap-2 rounded-2xl bg-cream-deep/60 p-1.5"
+          className="grid grid-cols-3 gap-2 rounded-2xl bg-cream-deep/60 p-1.5"
         >
           <RoleOption
             active={role === "couple"}
             onClick={() => setRole("couple")}
             icon={<Heart className="h-4 w-4" />}
             label="Couple"
+          />
+          <RoleOption
+            active={role === "vendor"}
+            onClick={() => setRole("vendor")}
+            icon={<Store className="h-4 w-4" />}
+            label="Vendor"
           />
           <RoleOption
             active={role === "admin"}
@@ -143,7 +156,11 @@ export function LoginForm() {
         </AuthField>
 
         <Button type="submit" variant="primary" size="lg" loading={submitting} className="w-full">
-          {role === "admin" ? "Enter admin panel" : "Sign In"}
+          {role === "admin"
+            ? "Enter admin panel"
+            : role === "vendor"
+              ? "Enter vendor portal"
+              : "Sign In"}
         </Button>
       </form>
 

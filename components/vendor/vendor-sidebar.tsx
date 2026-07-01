@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  ListChecks,
-  Wallet,
-  CalendarClock,
-  Users,
+  Store,
+  Package,
+  Inbox,
+  Star,
   Settings,
 } from "lucide-react";
 import { LotusMark } from "@/components/brand/motifs";
@@ -15,16 +15,16 @@ import { SidebarAccount } from "@/components/layout/sidebar-account";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Checklist", href: "/dashboard/checklist", icon: ListChecks },
-  { label: "Budget", href: "/dashboard/budget", icon: Wallet },
-  { label: "Timeline", href: "/dashboard/timeline", icon: CalendarClock },
-  { label: "Guests", href: "/dashboard/guests", icon: Users },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Overview", href: "/vendor", icon: LayoutDashboard },
+  { label: "My Profile", href: "/vendor/profile", icon: Store },
+  { label: "Packages", href: "/vendor/packages", icon: Package },
+  { label: "Enquiries", href: "/vendor/enquiries", icon: Inbox },
+  { label: "Reviews", href: "/vendor/reviews", icon: Star },
+  { label: "Settings", href: "/vendor/settings", icon: Settings },
 ];
 
-/** Couple's dashboard sidebar — its own chrome (no public header/footer). */
-export function DashboardSidebar() {
+/** Vendor portal sidebar — its own chrome (no public header/footer). */
+export function VendorSidebar() {
   const pathname = usePathname();
   return (
     <aside className="flex w-full shrink-0 flex-col gap-1 border-b border-cream/10 bg-forest-900 px-4 py-4 text-cream lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
@@ -33,7 +33,7 @@ export function DashboardSidebar() {
         <div className="leading-tight">
           <p className="font-serif text-lg">Kalyanam</p>
           <p className="text-[0.6rem] uppercase tracking-[0.22em] text-gold-400">
-            Your Wedding
+            Vendor Portal
           </p>
         </div>
       </div>
@@ -42,8 +42,8 @@ export function DashboardSidebar() {
         {NAV.map((item) => {
           const Icon = item.icon;
           const isActive =
-            item.href === "/dashboard"
-              ? pathname === "/dashboard"
+            item.href === "/vendor"
+              ? pathname === "/vendor"
               : pathname.startsWith(item.href);
           return (
             <Link

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, Shield, LogOut, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Shield, Store, LogOut, ChevronDown } from "lucide-react";
 import { useSession, initialsOf } from "@/components/auth/session";
 import { cn } from "@/lib/utils";
 
@@ -76,9 +76,14 @@ export function AccountMenu({ solid }: { solid: boolean }) {
             </p>
           </div>
           <div className="p-1.5">
-            {user.role !== "admin" && (
+            {user.role === "couple" && (
               <MenuLink href="/dashboard" icon={LayoutDashboard} onClick={() => setOpen(false)}>
                 Wedding dashboard
+              </MenuLink>
+            )}
+            {user.role === "vendor" && (
+              <MenuLink href="/vendor" icon={Store} onClick={() => setOpen(false)}>
+                Vendor portal
               </MenuLink>
             )}
             {user.role === "admin" && (

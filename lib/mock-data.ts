@@ -1078,3 +1078,84 @@ export const guests: Guest[] = [
 
 /** Saved inspiration for the overview strip — reuse the gallery items. */
 export const savedInspirationIds = ["insp-1", "insp-4", "insp-7", "insp-10", "insp-11"];
+
+// ── Vendor Portal (the vendor's own private workspace) ──────────
+// The signed-in vendor "owns" one profile from the `vendors` array below. Mock
+// enquiries (leads) drive the vendor dashboard. Local state only — persistence
+// and real per-vendor accounts arrive with the backend.
+
+/** Which vendor profile the demo vendor account manages. */
+export const myVendorSlug = "the-lighthouse-films";
+
+export type EnquiryStatus = "New" | "Replied" | "Booked" | "Closed";
+
+export type VendorEnquiry = {
+  id: string;
+  couple: string;
+  /** ISO date the enquiry came in */
+  date: string;
+  eventDate: string;
+  city: string;
+  functions: string;
+  budget: string;
+  status: EnquiryStatus;
+  message: string;
+};
+
+export const vendorEnquiries: VendorEnquiry[] = [
+  {
+    id: "enq-1",
+    couple: "Aanya & Vikram",
+    date: "2026-06-20",
+    eventDate: "2026-12-05",
+    city: "Udaipur",
+    functions: "Wedding + Reception",
+    budget: "₹10–12L",
+    status: "Booked",
+    message: "Loved your Udaipur reel — we'd like the Luxe package for our palace wedding.",
+  },
+  {
+    id: "enq-2",
+    couple: "Priya & Arjun",
+    date: "2026-06-24",
+    eventDate: "2027-02-14",
+    city: "Lake Como",
+    functions: "Destination wedding",
+    budget: "₹8–10L",
+    status: "Replied",
+    message: "Do you travel to Italy? Looking for cinematic film + photo for a 2-day event.",
+  },
+  {
+    id: "enq-3",
+    couple: "Neha & Rohan",
+    date: "2026-06-27",
+    eventDate: "2026-11-22",
+    city: "Jaipur",
+    functions: "Sangeet + Wedding",
+    budget: "₹6–8L",
+    status: "New",
+    message: "Please share availability for late November and your Signature package details.",
+  },
+  {
+    id: "enq-4",
+    couple: "Simran & Karan",
+    date: "2026-06-28",
+    eventDate: "2027-01-10",
+    city: "Goa",
+    functions: "Beach wedding",
+    budget: "₹5–6L",
+    status: "New",
+    message: "We're planning a sunset beach ceremony — would love a quote.",
+  },
+  {
+    id: "enq-5",
+    couple: "Isha & Dev",
+    date: "2026-05-30",
+    eventDate: "2026-10-18",
+    city: "Mumbai",
+    functions: "Reception only",
+    budget: "₹3–4L",
+    status: "Closed",
+    message: "Went with another studio for our date — thank you!",
+  },
+];

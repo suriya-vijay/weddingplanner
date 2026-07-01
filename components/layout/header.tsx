@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, LayoutDashboard, Shield, LogOut } from "lucide-react";
+import { Menu, X, LayoutDashboard, Shield, Store, LogOut } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { AccountMenu } from "@/components/layout/account-menu";
@@ -174,9 +174,14 @@ export function Header() {
                     </p>
                   </div>
                 </div>
-                {user.role !== "admin" && (
+                {user.role === "couple" && (
                   <Button href="/dashboard" variant="outline" size="md" onClick={() => setMenuOpen(false)}>
                     <LayoutDashboard className="h-4 w-4" /> Wedding dashboard
+                  </Button>
+                )}
+                {user.role === "vendor" && (
+                  <Button href="/vendor" variant="outline" size="md" onClick={() => setMenuOpen(false)}>
+                    <Store className="h-4 w-4" /> Vendor portal
                   </Button>
                 )}
                 {user.role === "admin" && (

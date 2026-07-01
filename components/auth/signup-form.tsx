@@ -31,7 +31,6 @@ export function SignupForm() {
   const [agree, setAgree] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [notice, setNotice] = useState(false);
 
   function validate() {
     const next: Record<string, string> = {};
@@ -47,18 +46,16 @@ export function SignupForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setNotice(false);
     if (!validate()) return;
     setSubmitting(true);
     setTimeout(() => {
+      // Start a mock session and route into the matching panel.
       if (account === "couple") {
-        // Start a mock couple session and route into the dashboard.
         signIn("couple", name);
         router.push("/dashboard");
       } else {
-        // No vendor portal yet — show a friendly note.
-        setSubmitting(false);
-        setNotice(true);
+        signIn("vendor", name);
+        router.push("/vendor");
       }
     }, 600);
   }
@@ -185,17 +182,9 @@ export function SignupForm() {
           Create Account
         </Button>
 
-        {notice && (
-          <div className="space-y-3 rounded-xl bg-gold-100 px-4 py-3 text-center text-sm text-gold-700">
-            <p>
-              The vendor portal is coming soon — for now, explore the platform as
-              a couple to preview the planning experience.
-            </p>
-            <Button href="/login" variant="primary" size="sm">
-              Continue as a couple (demo)
-            </Button>
-          </div>
-        )}
+        <p className="text-center text-xs text-ink-faint">
+          Demo preview — no real account is created yet.
+        </p>
       </form>
 
       <AuthSwitch text="Already have an account?" linkText="Log in" href="/login" />
