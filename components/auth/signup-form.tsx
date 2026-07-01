@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Heart, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useSession } from "@/components/auth/session";
 import { cn } from "@/lib/utils";
 import {
   AuthField,
@@ -19,6 +21,8 @@ type Account = "couple" | "vendor";
  * label. Lightweight plain-React validation; real auth wired later.
  */
 export function SignupForm() {
+  const { signIn } = useSession();
+  const router = useRouter();
   const [account, setAccount] = useState<Account>("couple");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -47,9 +51,16 @@ export function SignupForm() {
     if (!validate()) return;
     setSubmitting(true);
     setTimeout(() => {
-      setSubmitting(false);
-      setNotice(true);
-    }, 700);
+      if (account === "couple") {
+        // Start a mock couple session and route into the dashboard.
+        signIn("couple", name);
+        router.push("/dashboard");
+      } else {
+        // No vendor portal yet — show a friendly note.
+        setSubmitting(false);
+        setNotice(true);
+      }
+    }, 600);
   }
 
   return (
@@ -85,7 +96,10 @@ export function SignupForm() {
 
       <GoogleButton
         label="Sign up with Google"
-        onClick={() => setNotice(true)}
+        onClick={() => {
+          signIn("couple");
+          router.push("/dashboard");
+        }}
       />
       <AuthDivider label="or sign up with email" />
 
@@ -174,14 +188,12 @@ export function SignupForm() {
         {notice && (
           <div className="space-y-3 rounded-xl bg-gold-100 px-4 py-3 text-center text-sm text-gold-700">
             <p>
-              Accounts aren’t live yet — this is a preview. Sign-up will work
-              once we connect the backend.
+              The vendor portal is coming soon — for now, explore the platform as
+              a couple to preview the planning experience.
             </p>
-            {account === "couple" && (
-              <Button href="/dashboard" variant="primary" size="sm">
-                Preview your wedding dashboard
-              </Button>
-            )}
+            <Button href="/login" variant="primary" size="sm">
+              Continue as a couple (demo)
+            </Button>
           </div>
         )}
       </form>

@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Heart, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useSession, type Role } from "@/components/auth/session";
+import { cn } from "@/lib/utils";
 import {
   AuthField,
   GoogleButton,
@@ -16,12 +19,14 @@ import {
  * real Supabase auth comes later). Lightweight: plain React state, no form libs.
  */
 export function LoginForm() {
+  const { signIn } = useSession();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [role, setRole] = useState<Extract<Role, "couple" | "admin">>("couple");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [submitting, setSubmitting] = useState(false);
-  const [notice, setNotice] = useState(false);
 
   function validate() {
     const next: typeof errors = {};
@@ -35,14 +40,14 @@ export function LoginForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setNotice(false);
     if (!validate()) return;
     setSubmitting(true);
-    // No backend yet — simulate, then show a friendly notice.
+    // No backend yet — simulate a brief sign-in, then start a mock session and
+    // route into the matching panel.
     setTimeout(() => {
-      setSubmitting(false);
-      setNotice(true);
-    }, 700);
+      signIn(role);
+      router.push(role === "admin" ? "/admin" : "/dashboard");
+    }, 500);
   }
 
   return (
@@ -54,8 +59,40 @@ export function LoginForm() {
         </p>
       </div>
 
-      <GoogleButton onClick={() => setNotice(true)} />
+      <GoogleButton
+        onClick={() => {
+          signIn("couple");
+          router.push("/dashboard");
+        }}
+      />
       <AuthDivider label="or sign in with email" />
+
+      {/* Demo-only role picker — pick which panel to enter. Real accounts carry
+          their own role from the backend; this is a preview convenience. */}
+      <div>
+        <p className="mb-2 text-sm font-medium text-ink">Sign in as (demo)</p>
+        <div
+          role="radiogroup"
+          aria-label="Demo role"
+          className="grid grid-cols-2 gap-2 rounded-2xl bg-cream-deep/60 p-1.5"
+        >
+          <RoleOption
+            active={role === "couple"}
+            onClick={() => setRole("couple")}
+            icon={<Heart className="h-4 w-4" />}
+            label="Couple"
+          />
+          <RoleOption
+            active={role === "admin"}
+            onClick={() => setRole("admin")}
+            icon={<Shield className="h-4 w-4" />}
+            label="Admin"
+          />
+        </div>
+        <p className="mt-2 text-xs text-ink-faint">
+          Preview only — no real authentication yet.
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <AuthField label="Email address" htmlFor="email" error={errors.email}>
@@ -106,18 +143,41 @@ export function LoginForm() {
         </AuthField>
 
         <Button type="submit" variant="primary" size="lg" loading={submitting} className="w-full">
-          Sign In
+          {role === "admin" ? "Enter admin panel" : "Sign In"}
         </Button>
-
-        {notice && (
-          <p className="rounded-xl bg-gold-100 px-4 py-3 text-center text-sm text-gold-700">
-            Sign-in isn’t connected yet — this is a preview. Accounts go live when
-            we add the backend.
-          </p>
-        )}
       </form>
 
       <AuthSwitch text="New to Kalyanam?" linkText="Create an account" href="/signup" />
     </div>
+  );
+}
+
+function RoleOption({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={active}
+      onClick={onClick}
+      className={cn(
+        "flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-[var(--dur-fast)]",
+        active
+          ? "bg-ivory text-forest-700 shadow-[var(--shadow-sm)]"
+          : "text-ink-soft hover:text-forest-700",
+      )}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }

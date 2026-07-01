@@ -7,9 +7,9 @@ import {
   Sparkles,
   Store,
   Settings,
-  ArrowLeft,
 } from "lucide-react";
 import { LotusMark } from "@/components/brand/motifs";
+import { SidebarAccount } from "@/components/layout/sidebar-account";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -59,12 +59,7 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <Link
-        href="/"
-        className="mt-auto hidden items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-cream/55 transition-colors hover:text-cream lg:flex"
-      >
-        <ArrowLeft className="h-4 w-4" /> Back to site
-      </Link>
+      <SidebarAccount />
     </aside>
   );
 }

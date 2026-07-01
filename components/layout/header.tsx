@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X, LayoutDashboard, Shield, LogOut } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { AccountMenu } from "@/components/layout/account-menu";
+import { useSession, initialsOf } from "@/components/auth/session";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -22,6 +25,8 @@ const NAV = [
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, signOut } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     // Throttle with requestAnimationFrame: the scroll event can fire 60+×/sec,
@@ -86,17 +91,23 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Button
-            href="/login"
-            variant="ghost"
-            size="sm"
-            className={cn(!solid && "text-cream hover:bg-cream/10")}
-          >
-            Log In
-          </Button>
-          <Button href="/signup" variant="primary" size="sm">
-            Get Started
-          </Button>
+          {user ? (
+            <AccountMenu solid={solid} />
+          ) : (
+            <>
+              <Button
+                href="/login"
+                variant="ghost"
+                size="sm"
+                className={cn(!solid && "text-cream hover:bg-cream/10")}
+              >
+                Log In
+              </Button>
+              <Button href="/signup" variant="primary" size="sm">
+                Get Started
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile trigger */}
@@ -145,12 +156,56 @@ export function Header() {
             </Link>
           ))}
           <div className="mt-6 flex flex-col gap-3">
-            <Button href="/login" variant="outline" size="md">
-              Log In
-            </Button>
-            <Button href="/signup" variant="primary" size="md">
-              Get Started
-            </Button>
+            {user ? (
+              <>
+                <div className="flex items-center gap-3 rounded-xl border border-border px-3 py-3">
+                  <span
+                    aria-hidden
+                    className="grid h-9 w-9 place-items-center rounded-full bg-gold-500 text-xs font-semibold text-forest-900"
+                  >
+                    {initialsOf(user.name)}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-ink">
+                      {user.name}
+                    </p>
+                    <p className="text-xs capitalize text-ink-faint">
+                      {user.role} · demo
+                    </p>
+                  </div>
+                </div>
+                {user.role !== "admin" && (
+                  <Button href="/dashboard" variant="outline" size="md" onClick={() => setMenuOpen(false)}>
+                    <LayoutDashboard className="h-4 w-4" /> Wedding dashboard
+                  </Button>
+                )}
+                {user.role === "admin" && (
+                  <Button href="/admin" variant="outline" size="md" onClick={() => setMenuOpen(false)}>
+                    <Shield className="h-4 w-4" /> Admin panel
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    signOut();
+                    router.push("/");
+                  }}
+                >
+                  <LogOut className="h-4 w-4" /> Sign out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button href="/login" variant="outline" size="md" onClick={() => setMenuOpen(false)}>
+                  Log In
+                </Button>
+                <Button href="/signup" variant="primary" size="md" onClick={() => setMenuOpen(false)}>
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
         </nav>
       </div>

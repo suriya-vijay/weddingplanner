@@ -245,8 +245,13 @@ export default function DashboardOverview() {
                 <Mail className="h-4 w-4 text-gold-600" /> {assignedPlanner.email}
               </p>
             </div>
-            <Button href="#" variant="primary" size="md" className="mt-5 w-full">
-              Message Meera
+            <Button
+              href={`mailto:${assignedPlanner.email}`}
+              variant="primary"
+              size="md"
+              className="mt-5 w-full"
+            >
+              Message {assignedPlanner.name.split(" ")[0]}
             </Button>
           </Panel>
 

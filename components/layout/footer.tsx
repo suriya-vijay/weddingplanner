@@ -26,23 +26,25 @@ function FacebookIcon({ className }: { className?: string }) {
   );
 }
 
-const COLUMNS = [
+type FooterLink = { label: string; href?: string };
+
+const COLUMNS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Platform",
     links: [
       { label: "Inspiration Gallery", href: "/inspiration" },
       { label: "Vendor Marketplace", href: "/vendors" },
-      { label: "Wedding Dashboard", href: "#features" },
-      { label: "AI Assistant", href: "#features" },
+      { label: "Wedding Dashboard", href: "/dashboard" },
+      { label: "AI Assistant" }, // coming soon
     ],
   },
   {
     title: "Planning",
     links: [
-      { label: "Budget Tracker", href: "#features" },
-      { label: "Wedding Timeline", href: "#features" },
-      { label: "Guest List & RSVPs", href: "#features" },
-      { label: "Checklist", href: "#features" },
+      { label: "Budget Tracker", href: "/dashboard/budget" },
+      { label: "Wedding Timeline", href: "/dashboard/timeline" },
+      { label: "Guest List & RSVPs", href: "/dashboard/guests" },
+      { label: "Checklist", href: "/dashboard/checklist" },
     ],
   },
   {
@@ -51,7 +53,7 @@ const COLUMNS = [
       { label: "About Us", href: "#about" },
       { label: "Contact", href: "#contact" },
       { label: "Become a Vendor", href: "/signup" },
-      { label: "Careers", href: "#" },
+      { label: "Careers" }, // coming soon
     ],
   },
 ];
@@ -78,19 +80,28 @@ export function Footer() {
             </p>
             <div className="mt-6 flex gap-3">
               {[
+                { icon: Mail, label: "Email", href: "mailto:hello@kalyanam.co" },
                 { icon: InstagramIcon, label: "Instagram" },
                 { icon: FacebookIcon, label: "Facebook" },
-                { icon: Mail, label: "Email" },
-              ].map(({ icon: Icon, label }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="grid h-10 w-10 place-items-center rounded-full border border-cream/15 text-cream/70 transition-all duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:border-gold-400/50 hover:text-gold-400"
-                >
-                  <Icon className="h-[1.1rem] w-[1.1rem]" />
-                </a>
-              ))}
+              ].map(({ icon: Icon, label, href }) => {
+                const cls =
+                  "grid h-10 w-10 place-items-center rounded-full border border-cream/15 text-cream/70 transition-all duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:border-gold-400/50 hover:text-gold-400";
+                return href ? (
+                  <a key={label} href={href} aria-label={label} className={cls}>
+                    <Icon className="h-[1.1rem] w-[1.1rem]" />
+                  </a>
+                ) : (
+                  <button
+                    key={label}
+                    type="button"
+                    aria-label={`${label} — coming soon`}
+                    title="Coming soon"
+                    className={cls}
+                  >
+                    <Icon className="h-[1.1rem] w-[1.1rem]" />
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -102,12 +113,24 @@ export function Footer() {
               <ul className="mt-5 space-y-3">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-cream/65 transition-colors duration-[var(--dur-fast)] hover:text-cream"
-                    >
-                      {link.label}
-                    </Link>
+                    {link.href ? (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-cream/65 transition-colors duration-[var(--dur-fast)] hover:text-cream"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-sm text-cream/40"
+                        title="Coming soon"
+                      >
+                        {link.label}
+                        <span className="rounded-full bg-cream/10 px-1.5 py-px text-[0.6rem] uppercase tracking-wide text-cream/50">
+                          Soon
+                        </span>
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -118,9 +141,11 @@ export function Footer() {
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-cream/10 pt-8 text-xs text-cream/50 sm:flex-row">
           <p>© {new Date().getFullYear()} Kalyanam &amp; Co. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="#" className="hover:text-cream/80">Privacy</Link>
-            <Link href="#" className="hover:text-cream/80">Terms</Link>
-            <Link href="#" className="hover:text-cream/80">Cookies</Link>
+            {["Privacy", "Terms", "Cookies"].map((label) => (
+              <span key={label} title="Coming soon" className="text-cream/40">
+                {label}
+              </span>
+            ))}
           </div>
         </div>
       </div>
