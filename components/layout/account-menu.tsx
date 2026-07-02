@@ -2,19 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { LayoutDashboard, Shield, Store, LogOut, ChevronDown } from "lucide-react";
 import { useSession, initialsOf } from "@/components/auth/session";
 import { cn } from "@/lib/utils";
 
 /**
- * Desktop account menu — shown in the header when a (mock) user is signed in.
+ * Desktop account menu — shown in the header when a user is signed in.
  * Avatar + name button toggling a small dropdown with role-gated links.
  * Plain React state; no dropdown library, no new motion/blur.
  */
 export function AccountMenu({ solid }: { solid: boolean }) {
   const { user, signOut } = useSession();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -36,8 +34,8 @@ export function AccountMenu({ solid }: { solid: boolean }) {
 
   const handleSignOut = () => {
     setOpen(false);
-    signOut();
-    router.push("/");
+    // signOut() clears the session and redirects home itself.
+    void signOut();
   };
 
   return (

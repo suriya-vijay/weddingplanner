@@ -12,11 +12,11 @@ export default function VendorLayout({
     <div className="flex min-h-dvh flex-col bg-cream lg:flex-row">
       <VendorSidebar />
       <main className="flex-1 overflow-x-hidden px-5 py-7 sm:px-8 lg:px-12">
-        {/* Preview banner — this portal is UI-only until the backend is wired */}
+        {/* You're really signed in as a vendor now; data is still sample data */}
         <div className="mb-6 rounded-xl border border-gold-200 bg-gold-100 px-4 py-3 text-sm text-gold-700">
-          <strong className="font-semibold">Preview mode.</strong> This is a demo
-          of your vendor portal — changes aren’t saved yet. Real sign-in,
-          publishing and enquiries arrive with the backend.
+          <strong className="font-semibold">Sample data.</strong> You’re signed in
+          as a vendor for real — profile edits and enquiries aren’t persisted yet.
+          Live data arrives in the next backend stage.
         </div>
         {children}
       </main>

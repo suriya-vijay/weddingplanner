@@ -11,11 +11,11 @@ export default function AdminLayout({
     <div className="flex min-h-dvh flex-col bg-cream lg:flex-row">
       <AdminSidebar />
       <main className="flex-1 overflow-x-hidden px-5 py-7 sm:px-8 lg:px-12">
-        {/* Preview banner — this admin is UI-only until the backend is wired */}
+        {/* You're really signed in as admin now; data is still sample data */}
         <div className="mb-6 rounded-xl border border-gold-200 bg-gold-100 px-4 py-3 text-sm text-gold-700">
-          <strong className="font-semibold">Preview mode.</strong> This admin area
-          is a design preview — changes aren’t saved yet. Real sign-in and
-          publishing arrive with the backend.
+          <strong className="font-semibold">Sample data.</strong> You’re signed in
+          as an admin for real — content edits aren’t persisted yet. Publishing
+          arrives in the next backend stage.
         </div>
         {children}
       </main>

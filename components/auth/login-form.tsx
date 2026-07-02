@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Heart, Shield, Store } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSession, type Role } from "@/components/auth/session";
-import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import type { Role } from "@/components/auth/session";
 import {
   AuthField,
   GoogleButton,
@@ -14,7 +14,7 @@ import {
   AuthSwitch,
 } from "./auth-shell";
 
-/** Which panel each demo role lands on after sign-in. */
+/** Which panel each role lands on after sign-in. */
 const PANEL_FOR: Record<Role, string> = {
   couple: "/dashboard",
   admin: "/admin",
@@ -22,17 +22,18 @@ const PANEL_FOR: Record<Role, string> = {
 };
 
 /**
- * Login form — UI only this phase (validates, then starts a mock session and
- * routes into the panel for the picked role). Real Supabase auth comes later.
+ * Login form — real Supabase email/password auth. On success, routes to the
+ * panel for the account's role (role comes from the DB profile / user metadata,
+ * so there is no demo role picker anymore).
  */
 export function LoginForm() {
-  const { signIn } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [role, setRole] = useState<Role>("couple");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   function validate() {
@@ -45,16 +46,32 @@ export function LoginForm() {
     return Object.keys(next).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setFormError(null);
     if (!validate()) return;
     setSubmitting(true);
-    // No backend yet — simulate a brief sign-in, then start a mock session and
-    // route into the matching panel.
-    setTimeout(() => {
-      signIn(role);
-      router.push(PANEL_FOR[role]);
-    }, 500);
+
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setSubmitting(false);
+      setFormError(
+        error.message === "Invalid login credentials"
+          ? "That email or password doesn’t look right."
+          : error.message,
+      );
+      return;
+    }
+
+    const role = ((data.user?.user_metadata?.role as string) ?? "couple") as Role;
+    const next = searchParams.get("next");
+    router.push(next || PANEL_FOR[role]);
+    router.refresh();
   }
 
   return (
@@ -67,45 +84,11 @@ export function LoginForm() {
       </div>
 
       <GoogleButton
-        onClick={() => {
-          signIn("couple");
-          router.push("/dashboard");
-        }}
+        onClick={() =>
+          setFormError("Google sign-in is coming soon — please use email for now.")
+        }
       />
       <AuthDivider label="or sign in with email" />
-
-      {/* Demo-only role picker — pick which panel to enter. Real accounts carry
-          their own role from the backend; this is a preview convenience. */}
-      <div>
-        <p className="mb-2 text-sm font-medium text-ink">Sign in as (demo)</p>
-        <div
-          role="radiogroup"
-          aria-label="Demo role"
-          className="grid grid-cols-3 gap-2 rounded-2xl bg-cream-deep/60 p-1.5"
-        >
-          <RoleOption
-            active={role === "couple"}
-            onClick={() => setRole("couple")}
-            icon={<Heart className="h-4 w-4" />}
-            label="Couple"
-          />
-          <RoleOption
-            active={role === "vendor"}
-            onClick={() => setRole("vendor")}
-            icon={<Store className="h-4 w-4" />}
-            label="Vendor"
-          />
-          <RoleOption
-            active={role === "admin"}
-            onClick={() => setRole("admin")}
-            icon={<Shield className="h-4 w-4" />}
-            label="Admin"
-          />
-        </div>
-        <p className="mt-2 text-xs text-ink-faint">
-          Preview only — no real authentication yet.
-        </p>
-      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <AuthField label="Email address" htmlFor="email" error={errors.email}>
@@ -125,12 +108,7 @@ export function LoginForm() {
           htmlFor="password"
           error={errors.password}
           hint={
-            <a
-              href="#"
-              className="text-sm font-medium text-forest-700 hover:text-gold-600"
-            >
-              Forgot password?
-            </a>
+            <span className="text-sm text-ink-faint">Forgot password?</span>
           }
         >
           <div className="relative">
@@ -156,45 +134,17 @@ export function LoginForm() {
         </AuthField>
 
         <Button type="submit" variant="primary" size="lg" loading={submitting} className="w-full">
-          {role === "admin"
-            ? "Enter admin panel"
-            : role === "vendor"
-              ? "Enter vendor portal"
-              : "Sign In"}
+          Sign In
         </Button>
+
+        {formError && (
+          <p role="alert" className="rounded-xl bg-blush-100 px-4 py-3 text-center text-sm text-maroon">
+            {formError}
+          </p>
+        )}
       </form>
 
       <AuthSwitch text="New to Kalyanam?" linkText="Create an account" href="/signup" />
     </div>
-  );
-}
-
-function RoleOption({
-  active,
-  onClick,
-  icon,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={active}
-      onClick={onClick}
-      className={cn(
-        "flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-[var(--dur-fast)]",
-        active
-          ? "bg-ivory text-forest-700 shadow-[var(--shadow-sm)]"
-          : "text-ink-soft hover:text-forest-700",
-      )}
-    >
-      {icon}
-      {label}
-    </button>
   );
 }

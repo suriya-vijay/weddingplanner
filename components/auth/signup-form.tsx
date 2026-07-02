@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Heart, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSession } from "@/components/auth/session";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { signUpAction } from "@/app/signup/actions";
 import {
   AuthField,
   GoogleButton,
@@ -17,11 +18,11 @@ import {
 type Account = "couple" | "vendor";
 
 /**
- * Sign-up form — UI only this phase. Couple / Vendor toggle adapts the name
- * label. Lightweight plain-React validation; real auth wired later.
+ * Sign-up form — real Supabase auth. Creates a pre-confirmed account via a
+ * server action (role from the couple/vendor toggle), then signs in and routes
+ * into the matching panel.
  */
 export function SignupForm() {
-  const { signIn } = useSession();
   const router = useRouter();
   const [account, setAccount] = useState<Account>("couple");
   const [name, setName] = useState("");
@@ -30,6 +31,7 @@ export function SignupForm() {
   const [showPw, setShowPw] = useState(false);
   const [agree, setAgree] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   function validate() {
@@ -44,20 +46,37 @@ export function SignupForm() {
     return Object.keys(next).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setFormError(null);
     if (!validate()) return;
     setSubmitting(true);
-    setTimeout(() => {
-      // Start a mock session and route into the matching panel.
-      if (account === "couple") {
-        signIn("couple", name);
-        router.push("/dashboard");
-      } else {
-        signIn("vendor", name);
-        router.push("/vendor");
-      }
-    }, 600);
+
+    // 1) Create the (pre-confirmed) account server-side.
+    const result = await signUpAction({
+      email,
+      password,
+      role: account,
+      displayName: name,
+    });
+    if (!result.ok) {
+      setSubmitting(false);
+      setFormError(result.error);
+      return;
+    }
+
+    // 2) Sign in on the client so the auth cookie is set, then route by role.
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setSubmitting(false);
+      setFormError("Account created — please sign in.");
+      router.push("/login");
+      return;
+    }
+
+    router.push(account === "couple" ? "/dashboard" : "/vendor");
+    router.refresh();
   }
 
   return (
@@ -93,10 +112,9 @@ export function SignupForm() {
 
       <GoogleButton
         label="Sign up with Google"
-        onClick={() => {
-          signIn("couple");
-          router.push("/dashboard");
-        }}
+        onClick={() =>
+          setFormError("Google sign-up is coming soon — please use email for now.")
+        }
       />
       <AuthDivider label="or sign up with email" />
 
@@ -182,9 +200,11 @@ export function SignupForm() {
           Create Account
         </Button>
 
-        <p className="text-center text-xs text-ink-faint">
-          Demo preview — no real account is created yet.
-        </p>
+        {formError && (
+          <p role="alert" className="rounded-xl bg-blush-100 px-4 py-3 text-center text-sm text-maroon">
+            {formError}
+          </p>
+        )}
       </form>
 
       <AuthSwitch text="Already have an account?" linkText="Log in" href="/login" />

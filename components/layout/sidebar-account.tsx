@@ -1,18 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, LogOut } from "lucide-react";
 import { useSession, initialsOf } from "@/components/auth/session";
 
 /**
- * Footer block for the admin & dashboard sidebars: shows the signed-in (mock)
- * identity, a "Back to site" link, and a Sign out action. If there's no mock
- * session (e.g. arrived by typing the URL), it shows a subtle demo hint instead.
+ * Footer block for the admin/dashboard/vendor sidebars: shows the signed-in
+ * identity, a "Back to site" link, and a Sign out action.
  */
 export function SidebarAccount() {
   const { user, signOut } = useSession();
-  const router = useRouter();
 
   return (
     <div className="mt-auto hidden flex-col gap-1 lg:flex">
@@ -47,10 +44,7 @@ export function SidebarAccount() {
       {user && (
         <button
           type="button"
-          onClick={() => {
-            signOut();
-            router.push("/");
-          }}
+          onClick={() => void signOut()}
           className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-cream/55 transition-colors hover:text-cream"
         >
           <LogOut className="h-4 w-4" /> Sign out

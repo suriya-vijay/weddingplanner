@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Menu, X, LayoutDashboard, Shield, Store, LogOut } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,6 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, signOut } = useSession();
-  const router = useRouter();
 
   useEffect(() => {
     // Throttle with requestAnimationFrame: the scroll event can fire 60+×/sec,
@@ -194,8 +192,8 @@ export function Header() {
                   size="md"
                   onClick={() => {
                     setMenuOpen(false);
-                    signOut();
-                    router.push("/");
+                    // signOut() clears the session and redirects home itself.
+                    void signOut();
                   }}
                 >
                   <LogOut className="h-4 w-4" /> Sign out

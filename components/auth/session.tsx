@@ -1,97 +1,84 @@
 "use client";
 
-import { createContext, useContext, useCallback, useSyncExternalStore } from "react";
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 /**
- * Mock session — a DEMO-ONLY auth layer. There is no real authentication here:
- * we store a fake "signed-in user" in localStorage so the header, sidebars and
- * auth forms can reflect a signed-in state and role-gate links. Real auth +
- * roles arrive with the backend (Supabase). Do not treat any of this as secure.
+ * Session — now backed by real Supabase auth. The public API is unchanged
+ * (`useSession() → { user, signIn?, signOut }`), so header/sidebar/menu
+ * consumers don't need edits. The provider is seeded server-side with
+ * `initialUser` (from the auth cookie) to avoid any hydration mismatch, then
+ * kept in sync via `onAuthStateChange`.
  */
 
 export type Role = "couple" | "admin" | "vendor";
-export type DemoUser = { name: string; role: Role };
+export type SessionUser = { name: string; role: Role };
+/** @deprecated legacy alias from the mock phase */
+export type DemoUser = SessionUser;
 
-const STORAGE_KEY = "kalyanam.demoUser";
-
-/** Default display names per role (mock). */
-const DEFAULT_NAMES: Record<Role, string> = {
-  couple: "Aanya & Vikram",
-  admin: "Kalyanam Admin",
-  vendor: "Vendor Partner",
-};
-
-// ── tiny external store over localStorage ───────────────────────
-// useSyncExternalStore gives us an SSR-safe read (server snapshot = null) with
-// no hydration mismatch and no setState-in-effect.
-
-function read(): DemoUser | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as DemoUser) : null;
-  } catch {
-    return null;
-  }
-}
-
-// Cache the parsed value so getSnapshot returns a stable reference between
-// writes (useSyncExternalStore requires referential stability to avoid loops).
-let cache: DemoUser | null = read();
-
-function write(user: DemoUser | null) {
-  if (typeof window === "undefined") return;
-  try {
-    if (user) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    else window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* ignore quota / privacy-mode errors */
-  }
-  cache = user;
-  listeners.forEach((l) => l());
-}
-
-const listeners = new Set<() => void>();
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  // Sync across tabs.
-  const onStorage = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY) {
-      cache = read();
-      cb();
-    }
-  };
-  window.addEventListener("storage", onStorage);
-  return () => {
-    listeners.delete(cb);
-    window.removeEventListener("storage", onStorage);
-  };
-}
-
-const getSnapshot = () => cache;
-const getServerSnapshot = (): DemoUser | null => null;
-
-// ── context ─────────────────────────────────────────────────────
 type SessionValue = {
-  user: DemoUser | null;
-  signIn: (role: Role, name?: string) => void;
-  signOut: () => void;
+  user: SessionUser | null;
+  signOut: () => Promise<void>;
 };
 
 const SessionContext = createContext<SessionValue | null>(null);
 
-export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const user = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+function toSessionUser(
+  meta: Record<string, unknown> | undefined,
+  email: string | undefined,
+): SessionUser {
+  const role = ((meta?.role as string) ?? "couple") as Role;
+  const name =
+    ((meta?.display_name as string) ?? "").trim() || email || "Member";
+  return { name, role };
+}
 
-  const signIn = useCallback((role: Role, name?: string) => {
-    write({ role, name: name?.trim() || DEFAULT_NAMES[role] });
+export function SessionProvider({
+  children,
+  initialUser = null,
+}: {
+  children: React.ReactNode;
+  initialUser?: SessionUser | null;
+}) {
+  const [user, setUser] = useState<SessionUser | null>(initialUser);
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(
+          toSessionUser(
+            session.user.user_metadata as Record<string, unknown>,
+            session.user.email ?? undefined,
+          ),
+        );
+      } else {
+        setUser(null);
+      }
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
-  const signOut = useCallback(() => write(null), []);
+  const signOut = useCallback(async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    router.push("/");
+    router.refresh();
+  }, [router]);
 
   return (
-    <SessionContext.Provider value={{ user, signIn, signOut }}>
+    <SessionContext.Provider value={{ user, signOut }}>
       {children}
     </SessionContext.Provider>
   );
