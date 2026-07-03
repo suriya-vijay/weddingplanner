@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
 import { Panel, StatTile, ProgressBar } from "@/components/dashboard/ui";
-import { getVendorBySlug, myVendorSlug } from "@/lib/mock-data";
+import { getMyVendor } from "@/lib/db/vendor-portal";
 
 export const metadata: Metadata = {
   title: "Reviews · Vendor Portal",
 };
 
-export default function VendorReviewsPage() {
-  const vendor = getVendorBySlug(myVendorSlug);
+export default async function VendorReviewsPage() {
+  const vendor = await getMyVendor();
   if (!vendor) notFound();
 
   // Rating breakdown from the (mock) review list, padded to feel real.

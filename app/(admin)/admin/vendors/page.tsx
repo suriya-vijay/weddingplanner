@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Store } from "lucide-react";
-import { popularVendors } from "@/lib/mock-data";
+import { getVendors } from "@/lib/db/vendors";
 
 export const metadata: Metadata = { title: "Manage Vendors · Admin" };
 
-export default function AdminVendorsPage() {
+export default async function AdminVendorsPage() {
+  const vendors = await getVendors();
   return (
     <div className="space-y-6">
       <header>
@@ -17,12 +18,12 @@ export default function AdminVendorsPage() {
 
       <div className="overflow-hidden rounded-2xl border border-border bg-ivory shadow-[var(--shadow-sm)]">
         <ul className="divide-y divide-border/60">
-          {popularVendors.map((v) => (
-            <li key={v.name} className="flex items-center gap-3 px-4 py-3">
+          {vendors.map((v) => (
+            <li key={v.slug} className="flex items-center gap-3 px-4 py-3">
               <span
                 aria-hidden
                 className="h-10 w-10 shrink-0 rounded-lg"
-                style={{ background: v.plate }}
+                style={{ background: v.logoPlate }}
               />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-ink">{v.name}</p>

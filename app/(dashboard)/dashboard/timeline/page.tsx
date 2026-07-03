@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Check, Clock } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { cn } from "@/lib/utils";
-import { timelineMilestones, weddingProfile } from "@/lib/mock-data";
+import { getOrCreateWedding } from "@/lib/db/weddings";
+import { getTimeline } from "@/lib/db/timeline";
 
 export const metadata: Metadata = {
   title: "Timeline · Kalyanam & Co.",
 };
 
 function fmt(iso: string) {
+  if (!iso) return "TBD";
   return new Date(iso + "T00:00:00").toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
@@ -16,7 +19,10 @@ function fmt(iso: string) {
   });
 }
 
-export default function TimelinePage() {
+export default async function TimelinePage() {
+  const wedding = await getOrCreateWedding();
+  if (!wedding) notFound();
+  const timelineMilestones = await getTimeline(wedding.id);
   const doneCount = timelineMilestones.filter((m) => m.status === "done").length;
 
   return (
@@ -25,8 +31,8 @@ export default function TimelinePage() {
         <p className="eyebrow text-gold-600">Planning</p>
         <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">Timeline</h1>
         <p className="mt-1 text-ink-soft">
-          {doneCount} of {timelineMilestones.length} milestones complete on the
-          road to {fmt(weddingProfile.date)}.
+          {doneCount} of {timelineMilestones.length} milestones complete
+          {wedding.date ? ` on the road to ${fmt(wedding.date)}` : ""}.
         </p>
       </header>
 

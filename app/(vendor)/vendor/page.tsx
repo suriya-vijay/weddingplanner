@@ -13,11 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Panel, StatTile, ProgressRing } from "@/components/dashboard/ui";
-import {
-  getVendorBySlug,
-  myVendorSlug,
-  vendorEnquiries,
-} from "@/lib/mock-data";
+import { getMyVendor, getMyEnquiries } from "@/lib/db/vendor-portal";
 
 export const metadata: Metadata = {
   title: "Vendor Portal · Kalyanam & Co.",
@@ -30,9 +26,10 @@ const STATUS_TONE: Record<string, string> = {
   Closed: "bg-cream-deep text-ink-soft",
 };
 
-export default function VendorOverview() {
-  const vendor = getVendorBySlug(myVendorSlug);
+export default async function VendorOverview() {
+  const vendor = await getMyVendor();
   if (!vendor) notFound();
+  const vendorEnquiries = await getMyEnquiries(vendor.id);
 
   const openEnquiries = vendorEnquiries.filter(
     (e) => e.status === "New" || e.status === "Replied",

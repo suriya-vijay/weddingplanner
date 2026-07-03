@@ -1,6 +1,7 @@
 "use server";
 
 import { createServiceClient } from "@/lib/supabase/server";
+import { claimVendorForUser } from "@/lib/db/vendor-portal";
 import type { Role } from "@/components/auth/session";
 
 type SignupInput = {
@@ -29,7 +30,7 @@ export async function signUpAction(input: SignupInput): Promise<
     return { ok: false, error: "Password must be at least 8 characters." };
 
   const admin = createServiceClient();
-  const { error } = await admin.auth.admin.createUser({
+  const { data, error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
@@ -42,6 +43,11 @@ export async function signUpAction(input: SignupInput): Promise<
       ? "An account with that email already exists — try logging in."
       : error.message;
     return { ok: false, error: msg };
+  }
+
+  // A new vendor claims a seeded vendor profile so their portal has content.
+  if (role === "vendor" && data.user) {
+    await claimVendorForUser(data.user.id, displayName.trim());
   }
 
   return { ok: true };

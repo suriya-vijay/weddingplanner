@@ -11,31 +11,43 @@ import {
   Mail,
   Check,
 } from "lucide-react";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Panel, StatTile, ProgressBar, ProgressRing } from "@/components/dashboard/ui";
 import { Countdown } from "@/components/dashboard/countdown";
 import { formatINR } from "@/lib/utils";
-import {
-  weddingProfile,
-  assignedPlanner,
-  checklistItems,
-  budgetItems,
-  guests,
-  inspirationItems,
-  savedInspirationIds,
-} from "@/lib/mock-data";
+import { assignedPlanner } from "@/lib/mock-data";
+import { getOrCreateWedding } from "@/lib/db/weddings";
+import { getChecklist } from "@/lib/db/checklist";
+import { getBudgetItems } from "@/lib/db/budget";
+import { getGuests } from "@/lib/db/guests";
+import { getInspiration } from "@/lib/db/inspiration";
 
 export const metadata: Metadata = {
   title: "Your Wedding · Kalyanam & Co.",
 };
 
-export default function DashboardOverview() {
+export default async function DashboardOverview() {
+  const wedding = await getOrCreateWedding();
+  if (!wedding) notFound();
+
+  const [checklistItems, budgetItems, guests, gallery] = await Promise.all([
+    getChecklist(wedding.id),
+    getBudgetItems(wedding.id),
+    getGuests(wedding.id),
+    getInspiration(),
+  ]);
+
   const done = checklistItems.filter((c) => c.done).length;
-  const checklistPct = Math.round((done / checklistItems.length) * 100);
+  const checklistPct = checklistItems.length
+    ? Math.round((done / checklistItems.length) * 100)
+    : 0;
 
   const totalSpent = budgetItems.reduce((s, b) => s + b.spent, 0);
   const totalEstimated = budgetItems.reduce((s, b) => s + b.estimated, 0);
-  const budgetPct = Math.round((totalSpent / weddingProfile.totalBudget) * 100);
+  const budgetPct = wedding.totalBudget
+    ? Math.round((totalSpent / wedding.totalBudget) * 100)
+    : 0;
 
   const headcount = guests.reduce((s, g) => s + g.count, 0);
   const confirmed = guests
@@ -46,14 +58,18 @@ export default function DashboardOverview() {
     .reduce((s, g) => s + g.count, 0);
 
   const nextTasks = checklistItems.filter((c) => !c.done).slice(0, 5);
-  const saved = savedInspirationIds
-    .map((id) => inspirationItems.find((i) => i.id === id))
-    .filter(Boolean) as typeof inspirationItems;
+  // Show a few gallery items as "recommended" (real board-saving lands later).
+  const saved = gallery.slice(0, 5);
 
-  const prettyDate = new Date(weddingProfile.date + "T00:00:00").toLocaleDateString(
-    "en-IN",
-    { day: "numeric", month: "long", year: "numeric" },
-  );
+  const prettyDate = wedding.date
+    ? new Date(wedding.date + "T00:00:00").toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "Date to be set";
+
+  const coupleTitle = wedding.coupleNames || "Your wedding";
 
   return (
     <div className="space-y-8">
@@ -62,20 +78,24 @@ export default function DashboardOverview() {
         <div>
           <p className="eyebrow text-gold-600">Your wedding workspace</p>
           <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">
-            {weddingProfile.coupleNames}
+            {coupleTitle}
           </h1>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-ink-soft">
             <span>{prettyDate}</span>
-            <span className="text-ink-faint">·</span>
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="h-4 w-4 text-gold-600" /> {weddingProfile.city}
-            </span>
+            {wedding.city && (
+              <>
+                <span className="text-ink-faint">·</span>
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-4 w-4 text-gold-600" /> {wedding.city}
+                </span>
+              </>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-5 rounded-2xl border border-border bg-forest-900 px-6 py-4 text-cream shadow-[var(--shadow-md)]">
           <div className="text-center">
             <p className="font-serif text-4xl text-gold-400">
-              <Countdown dateISO={weddingProfile.date} />
+              {wedding.date ? <Countdown dateISO={wedding.date} /> : "—"}
             </p>
             <p className="text-xs uppercase tracking-wider text-cream/70">
               days to go
@@ -83,9 +103,9 @@ export default function DashboardOverview() {
           </div>
           <div className="h-12 w-px bg-cream/15" />
           <div className="text-sm leading-relaxed text-cream/80">
-            {weddingProfile.venue}
+            {wedding.venue || "Venue to be set"}
             <br />
-            {weddingProfile.tradition}
+            {wedding.tradition || "Add your traditions"}
           </div>
         </div>
       </header>
@@ -101,7 +121,7 @@ export default function DashboardOverview() {
         <StatTile
           label="Budget spent"
           value={formatINR(totalSpent)}
-          sub={`of ${formatINR(weddingProfile.totalBudget)} budget`}
+          sub={`of ${formatINR(wedding.totalBudget)} budget`}
           icon={<Wallet className="h-[1.1rem] w-[1.1rem]" />}
         />
         <StatTile
@@ -141,18 +161,18 @@ export default function DashboardOverview() {
                   </div>
                   <ProgressBar value={budgetPct} />
                   <p className="mt-1.5 text-xs text-ink-faint">
-                    {formatINR(weddingProfile.totalBudget - totalSpent)} remaining
+                    {formatINR(wedding.totalBudget - totalSpent)} remaining
                   </p>
                 </div>
                 <div>
                   <div className="mb-1.5 flex items-baseline justify-between text-sm">
                     <span className="text-ink-soft">RSVPs confirmed</span>
                     <span className="font-medium text-ink">
-                      {Math.round((confirmed / headcount) * 100)}%
+                      {headcount ? Math.round((confirmed / headcount) * 100) : 0}%
                     </span>
                   </div>
                   <ProgressBar
-                    value={(confirmed / headcount) * 100}
+                    value={headcount ? (confirmed / headcount) * 100 : 0}
                     tone="forest"
                   />
                   <p className="mt-1.5 text-xs text-ink-faint">

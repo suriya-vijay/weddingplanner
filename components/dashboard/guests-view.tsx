@@ -7,12 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
-  guests as seed,
   type Guest,
   type RsvpStatus,
   type GuestSide,
   type MealPref,
 } from "@/lib/mock-data";
+import {
+  addGuestAction,
+  updateGuestAction,
+  deleteGuestAction,
+} from "@/app/(dashboard)/dashboard/actions";
 
 const RSVP_ORDER: RsvpStatus[] = ["Confirmed", "Pending", "Declined"];
 const RSVP_TONE: Record<RsvpStatus, string> = {
@@ -24,8 +28,8 @@ const RSVP_TONE: Record<RsvpStatus, string> = {
 const SIDES: GuestSide[] = ["Bride", "Groom", "Both"];
 const MEALS: MealPref[] = ["Veg", "Non-veg", "Jain", "Vegan"];
 
-export function GuestsView() {
-  const [rows, setRows] = useState<Guest[]>(seed);
+export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
+  const [rows, setRows] = useState<Guest[]>(initialGuests);
   const [adding, setAdding] = useState(false);
   const [sideFilter, setSideFilter] = useState<GuestSide | "All">("All");
 
@@ -51,21 +55,34 @@ export function GuestsView() {
     [rows, sideFilter],
   );
 
-  const cycleRsvp = (id: string) =>
-    setRows((prev) =>
-      prev.map((g) => {
-        if (g.id !== id) return g;
-        const next =
-          RSVP_ORDER[(RSVP_ORDER.indexOf(g.rsvp) + 1) % RSVP_ORDER.length];
-        return { ...g, rsvp: next };
-      }),
+  const cycleRsvp = (id: string) => {
+    const g = rows.find((r) => r.id === id);
+    if (!g) return;
+    const next =
+      RSVP_ORDER[(RSVP_ORDER.indexOf(g.rsvp) + 1) % RSVP_ORDER.length];
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, rsvp: next } : r)));
+    updateGuestAction(id, { rsvp: next }).catch(() =>
+      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, rsvp: g.rsvp } : r))),
     );
+  };
 
-  const remove = (id: string) =>
+  const remove = (id: string) => {
+    const snapshot = rows;
     setRows((prev) => prev.filter((g) => g.id !== id));
+    deleteGuestAction(id).catch(() => setRows(snapshot));
+  };
 
-  const add = (guest: Omit<Guest, "id">) =>
-    setRows((prev) => [...prev, { ...guest, id: `g${Date.now()}` }]);
+  const add = async (guest: Omit<Guest, "id">) => {
+    // Optimistic temp row, reconciled with the DB id on return.
+    const tempId = `temp-${Date.now()}`;
+    setRows((prev) => [...prev, { ...guest, id: tempId }]);
+    const saved = await addGuestAction(guest);
+    setRows((prev) =>
+      saved
+        ? prev.map((g) => (g.id === tempId ? saved : g))
+        : prev.filter((g) => g.id !== tempId),
+    );
+  };
 
   return (
     <div className="space-y-8">

@@ -4,11 +4,8 @@ import { useMemo, useState } from "react";
 import { Inbox } from "lucide-react";
 import { Panel, StatTile } from "@/components/dashboard/ui";
 import { cn } from "@/lib/utils";
-import {
-  vendorEnquiries as seed,
-  type VendorEnquiry,
-  type EnquiryStatus,
-} from "@/lib/mock-data";
+import { type VendorEnquiry, type EnquiryStatus } from "@/lib/mock-data";
+import { setEnquiryStatusAction } from "@/app/(vendor)/vendor/actions";
 
 const STATUS_ORDER: EnquiryStatus[] = ["New", "Replied", "Booked", "Closed"];
 const STATUS_TONE: Record<EnquiryStatus, string> = {
@@ -19,14 +16,19 @@ const STATUS_TONE: Record<EnquiryStatus, string> = {
 };
 
 function fmt(iso: string) {
+  if (!iso) return "—";
   return new Date(iso + "T00:00:00").toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
   });
 }
 
-export function EnquiriesView() {
-  const [rows, setRows] = useState<VendorEnquiry[]>(seed);
+export function EnquiriesView({
+  initialEnquiries,
+}: {
+  initialEnquiries: VendorEnquiry[];
+}) {
+  const [rows, setRows] = useState<VendorEnquiry[]>(initialEnquiries);
   const [filter, setFilter] = useState<EnquiryStatus | "All">("All");
 
   const counts = useMemo(() => {
@@ -40,15 +42,18 @@ export function EnquiriesView() {
     [rows, filter],
   );
 
-  const cycle = (id: string) =>
-    setRows((prev) =>
-      prev.map((e) => {
-        if (e.id !== id) return e;
-        const next =
-          STATUS_ORDER[(STATUS_ORDER.indexOf(e.status) + 1) % STATUS_ORDER.length];
-        return { ...e, status: next };
-      }),
+  const cycle = (id: string) => {
+    const e = rows.find((r) => r.id === id);
+    if (!e) return;
+    const next =
+      STATUS_ORDER[(STATUS_ORDER.indexOf(e.status) + 1) % STATUS_ORDER.length];
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status: next } : r)));
+    setEnquiryStatusAction(id, next).catch(() =>
+      setRows((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: e.status } : r)),
+      ),
     );
+  };
 
   return (
     <div className="space-y-8">

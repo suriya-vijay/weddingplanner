@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Panel } from "@/components/dashboard/ui";
-import { getVendorBySlug, myVendorSlug } from "@/lib/mock-data";
+import { getMyVendor } from "@/lib/db/vendor-portal";
 
 export const metadata: Metadata = {
   title: "Settings · Vendor Portal",
 };
 
-export default function VendorSettingsPage() {
-  const vendor = getVendorBySlug(myVendorSlug);
+export default async function VendorSettingsPage() {
+  const vendor = await getMyVendor();
   if (!vendor) notFound();
 
   const fields: { label: string; value: string }[] = [

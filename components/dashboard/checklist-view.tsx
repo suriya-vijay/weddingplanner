@@ -4,20 +4,32 @@ import { useMemo, useState } from "react";
 import { Check } from "lucide-react";
 import { Panel, ProgressBar } from "@/components/dashboard/ui";
 import { cn } from "@/lib/utils";
-import {
-  checklistItems as seed,
-  checklistPhases,
-  type ChecklistItem,
-} from "@/lib/mock-data";
+import { checklistPhases, type ChecklistItem } from "@/lib/mock-data";
+import { setChecklistDoneAction } from "@/app/(dashboard)/dashboard/actions";
 
-export function ChecklistView() {
-  const [items, setItems] = useState<ChecklistItem[]>(seed);
+export function ChecklistView({
+  initialItems,
+}: {
+  initialItems: ChecklistItem[];
+}) {
+  const [items, setItems] = useState<ChecklistItem[]>(initialItems);
   const [filter, setFilter] = useState<"all" | "todo" | "done">("all");
 
-  const toggle = (id: string) =>
+  const toggle = (id: string) => {
+    const item = items.find((c) => c.id === id);
+    if (!item) return;
+    const next = !item.done;
+    // Optimistic: flip locally now, persist in the background.
     setItems((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, done: !c.done } : c)),
+      prev.map((c) => (c.id === id ? { ...c, done: next } : c)),
     );
+    setChecklistDoneAction(id, next).catch(() => {
+      // Revert on failure.
+      setItems((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, done: !next } : c)),
+      );
+    });
+  };
 
   const doneCount = items.filter((c) => c.done).length;
   const pct = Math.round((doneCount / items.length) * 100);

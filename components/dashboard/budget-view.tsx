@@ -6,11 +6,11 @@ import { Panel, StatTile, ProgressBar } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn, formatINR } from "@/lib/utils";
+import { type BudgetItem } from "@/lib/mock-data";
 import {
-  budgetItems as seed,
-  weddingProfile,
-  type BudgetItem,
-} from "@/lib/mock-data";
+  addBudgetItemAction,
+  deleteBudgetItemAction,
+} from "@/app/(dashboard)/dashboard/actions";
 
 const STATUS_TONE: Record<BudgetItem["status"], string> = {
   Paid: "bg-forest-100 text-forest-700",
@@ -18,14 +18,22 @@ const STATUS_TONE: Record<BudgetItem["status"], string> = {
   "Not started": "bg-cream-deep text-ink-soft",
 };
 
-export function BudgetView() {
-  const [items, setItems] = useState<BudgetItem[]>(seed);
+export function BudgetView({
+  initialItems,
+  totalBudget,
+}: {
+  initialItems: BudgetItem[];
+  totalBudget: number;
+}) {
+  const [items, setItems] = useState<BudgetItem[]>(initialItems);
   const [adding, setAdding] = useState(false);
 
   const totalEstimated = items.reduce((s, b) => s + b.estimated, 0);
   const totalSpent = items.reduce((s, b) => s + b.spent, 0);
-  const remaining = weddingProfile.totalBudget - totalSpent;
-  const budgetPct = Math.round((totalSpent / weddingProfile.totalBudget) * 100);
+  const remaining = totalBudget - totalSpent;
+  const budgetPct = totalBudget
+    ? Math.round((totalSpent / totalBudget) * 100)
+    : 0;
 
   // category rollup for the bars (React Compiler memoizes this automatically)
   const byCategory = ((): [string, { estimated: number; spent: number }][] => {
@@ -40,11 +48,22 @@ export function BudgetView() {
     return [...map.entries()].sort((a, b) => b[1].estimated - a[1].estimated);
   })();
 
-  const remove = (id: string) =>
+  const remove = (id: string) => {
+    const snapshot = items;
     setItems((prev) => prev.filter((b) => b.id !== id));
+    deleteBudgetItemAction(id).catch(() => setItems(snapshot));
+  };
 
-  const add = (item: Omit<BudgetItem, "id">) =>
-    setItems((prev) => [...prev, { ...item, id: `b${Date.now()}` }]);
+  const add = async (item: Omit<BudgetItem, "id">) => {
+    const tempId = `temp-${Date.now()}`;
+    setItems((prev) => [...prev, { ...item, id: tempId }]);
+    const saved = await addBudgetItemAction(item);
+    setItems((prev) =>
+      saved
+        ? prev.map((b) => (b.id === tempId ? saved : b))
+        : prev.filter((b) => b.id !== tempId),
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -53,13 +72,13 @@ export function BudgetView() {
         <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">Budget</h1>
         <p className="mt-1 text-ink-soft">
           Track every allocation and payment against your{" "}
-          {formatINR(weddingProfile.totalBudget)} budget.
+          {formatINR(totalBudget)} budget.
         </p>
       </header>
 
       {/* Summary tiles */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile label="Total budget" value={formatINR(weddingProfile.totalBudget)} />
+        <StatTile label="Total budget" value={formatINR(totalBudget)} />
         <StatTile label="Committed" value={formatINR(totalEstimated)} sub="planned across vendors" />
         <StatTile label="Spent" value={formatINR(totalSpent)} sub={`${budgetPct}% of budget`} />
         <StatTile
@@ -74,7 +93,7 @@ export function BudgetView() {
         <div className="mb-2 flex items-baseline justify-between text-sm">
           <span className="text-ink-soft">Budget used</span>
           <span className="font-medium text-ink">
-            {formatINR(totalSpent)} / {formatINR(weddingProfile.totalBudget)}
+            {formatINR(totalSpent)} / {formatINR(totalBudget)}
           </span>
         </div>
         <ProgressBar value={budgetPct} />

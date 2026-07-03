@@ -1,34 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Sparkles, Store, Heart, TrendingUp, ArrowUpRight } from "lucide-react";
-import {
-  inspirationItems,
-  popularVendors,
-  vendorCategories,
-} from "@/lib/mock-data";
+import { getInspiration } from "@/lib/db/inspiration";
+import { getVendors } from "@/lib/db/vendors";
 
 export const metadata: Metadata = {
   title: "Admin · Kalyanam & Co.",
 };
 
-const STATS = [
-  {
-    label: "Inspirations",
-    value: inspirationItems.length,
-    icon: Sparkles,
-    sub: "live in the gallery",
-  },
-  {
-    label: "Vendors",
-    value: popularVendors.length,
-    icon: Store,
-    sub: `${vendorCategories.length} categories`,
-  },
-  { label: "Total saves", value: 1284, icon: Heart, sub: "this month" },
-  { label: "Visits", value: "18.2k", icon: TrendingUp, sub: "last 30 days" },
-];
+export default async function AdminDashboard() {
+  const [inspirationItems, vendors] = await Promise.all([
+    getInspiration(),
+    getVendors(),
+  ]);
+  const categories = new Set(vendors.map((v) => v.category)).size;
 
-export default function AdminDashboard() {
+  const STATS = [
+    {
+      label: "Inspirations",
+      value: inspirationItems.length,
+      icon: Sparkles,
+      sub: "live in the gallery",
+    },
+    {
+      label: "Vendors",
+      value: vendors.length,
+      icon: Store,
+      sub: `${categories} categories`,
+    },
+    { label: "Total saves", value: 1284, icon: Heart, sub: "this month" },
+    { label: "Visits", value: "18.2k", icon: TrendingUp, sub: "last 30 days" },
+  ];
+
   return (
     <div className="space-y-8">
       <header>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { VendorProfile } from "@/lib/mock-data";
+import { updateVendorProfileAction } from "@/app/(vendor)/vendor/actions";
 
 /**
  * Vendor "My Profile" — an editable-looking form prefilled from the vendor's
@@ -23,9 +24,23 @@ export function VendorProfileView({ vendor }: { vendor: VendorProfile }) {
   const [website, setWebsite] = useState(vendor.website);
   const [saved, setSaved] = useState(false);
 
-  const onSave = (e: React.FormEvent) => {
+  const [saving, setSaving] = useState(false);
+
+  const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
+    setSaving(true);
+    setSaved(false);
+    const res = await updateVendorProfileAction({
+      name: name.trim(),
+      tagline: tagline.trim(),
+      category: category.trim(),
+      location: location.trim(),
+      about: about.trim(),
+      instagram: instagram.trim(),
+      website: website.trim(),
+    });
+    setSaving(false);
+    setSaved(res.ok);
   };
 
   return (
@@ -37,19 +52,18 @@ export function VendorProfileView({ vendor }: { vendor: VendorProfile }) {
             My profile
           </h1>
           <p className="mt-1 text-ink-soft">
-            This is how couples see your business. Edits here are a preview —
-            saving goes live with the backend.
+            This is how couples see your business. Text details save live; photo
+            upload arrives in the next stage.
           </p>
         </div>
-        <Button type="submit" variant="primary" size="md">
+        <Button type="submit" variant="primary" size="md" loading={saving}>
           <Save className="h-4 w-4" /> Save changes
         </Button>
       </header>
 
       {saved && (
-        <p className="rounded-xl bg-gold-100 px-4 py-3 text-sm text-gold-700">
-          Preview only — your changes aren’t saved yet. Publishing arrives with
-          the backend.
+        <p className="rounded-xl bg-forest-100 px-4 py-3 text-sm text-forest-700">
+          Saved ✓ — your profile is updated.
         </p>
       )}
 

@@ -6,12 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
-  inspirationItems as seed,
   ceremonies,
   traditions,
   locations,
   type InspirationItem,
 } from "@/lib/mock-data";
+import {
+  addInspirationAction,
+  updateInspirationAction,
+  deleteInspirationAction,
+} from "@/app/(admin)/admin/actions";
 
 const BLANK: Omit<InspirationItem, "id"> = {
   title: "",
@@ -30,24 +34,38 @@ const BLANK: Omit<InspirationItem, "id"> = {
  * IN-MEMORY mock state (changes are not persisted; a clear notice says so).
  * Real CRUD + image upload come with the backend. No new animations.
  */
-export function InspirationManager() {
-  const [items, setItems] = useState<InspirationItem[]>(seed);
+export function InspirationManager({
+  initialItems,
+}: {
+  initialItems: InspirationItem[];
+}) {
+  const [items, setItems] = useState<InspirationItem[]>(initialItems);
   const [editing, setEditing] = useState<InspirationItem | null>(null);
   const [creating, setCreating] = useState(false);
 
   function remove(id: string) {
+    const snapshot = items;
     setItems((prev) => prev.filter((i) => i.id !== id));
+    deleteInspirationAction(id).catch(() => setItems(snapshot));
   }
 
-  function save(draft: InspirationItem) {
-    setItems((prev) => {
-      const exists = prev.some((i) => i.id === draft.id);
-      return exists
-        ? prev.map((i) => (i.id === draft.id ? draft : i))
-        : [draft, ...prev];
-    });
+  async function save(draft: InspirationItem) {
+    const isEdit = items.some((i) => i.id === draft.id);
     setEditing(null);
     setCreating(false);
+    const { id: draftId, ...rest } = draft;
+    if (isEdit) {
+      setItems((prev) => prev.map((i) => (i.id === draftId ? draft : i)));
+      await updateInspirationAction(draftId, rest);
+    } else {
+      setItems((prev) => [draft, ...prev]);
+      const created = await addInspirationAction(rest);
+      setItems((prev) =>
+        created
+          ? prev.map((i) => (i.id === draftId ? created : i))
+          : prev.filter((i) => i.id !== draftId),
+      );
+    }
   }
 
   return (

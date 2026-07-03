@@ -6,23 +6,50 @@ import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { VendorPackage } from "@/lib/mock-data";
+import {
+  addPackageAction,
+  updatePackageAction,
+  deletePackageAction,
+} from "@/app/(vendor)/vendor/actions";
 
 type Pkg = VendorPackage & { id: string };
 
-export function PackagesView({ seed }: { seed: VendorPackage[] }) {
-  const [pkgs, setPkgs] = useState<Pkg[]>(
-    seed.map((p, i) => ({ ...p, id: `pkg-${i}` })),
-  );
+export function PackagesView({ seed }: { seed: Pkg[] }) {
+  const [pkgs, setPkgs] = useState<Pkg[]>(seed);
   const [editing, setEditing] = useState<Pkg | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const remove = (id: string) => setPkgs((prev) => prev.filter((p) => p.id !== id));
+  const remove = (id: string) => {
+    const snapshot = pkgs;
+    setPkgs((prev) => prev.filter((p) => p.id !== id));
+    deletePackageAction(id).catch(() => setPkgs(snapshot));
+  };
 
-  const save = (pkg: Pkg) =>
-    setPkgs((prev) => {
-      const exists = prev.some((p) => p.id === pkg.id);
-      return exists ? prev.map((p) => (p.id === pkg.id ? pkg : p)) : [...prev, pkg];
-    });
+  const save = async (pkg: Pkg) => {
+    const isEdit = pkgs.some((p) => p.id === pkg.id);
+    if (isEdit) {
+      setPkgs((prev) => prev.map((p) => (p.id === pkg.id ? pkg : p)));
+      updatePackageAction(pkg.id, {
+        name: pkg.name,
+        price: pkg.price,
+        features: pkg.features,
+      });
+    } else {
+      // Optimistic add, reconcile id from the DB.
+      const tempId = pkg.id;
+      setPkgs((prev) => [...prev, pkg]);
+      const created = await addPackageAction({
+        name: pkg.name,
+        price: pkg.price,
+        features: pkg.features,
+      });
+      setPkgs((prev) =>
+        created
+          ? prev.map((p) => (p.id === tempId ? { ...created } : p))
+          : prev.filter((p) => p.id !== tempId),
+      );
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -31,8 +58,7 @@ export function PackagesView({ seed }: { seed: VendorPackage[] }) {
           <p className="eyebrow text-gold-600">Vendor portal</p>
           <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">Packages</h1>
           <p className="mt-1 text-ink-soft">
-            The offerings couples can enquire about. Preview only — saving comes
-            with the backend.
+            The offerings couples can enquire about. Changes save live.
           </p>
         </div>
         <Button variant="primary" size="md" onClick={() => setCreating(true)}>
