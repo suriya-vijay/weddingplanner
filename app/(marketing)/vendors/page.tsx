@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Marketplace } from "@/components/vendors/marketplace";
 import { DividerOrnament } from "@/components/brand/motifs";
+import { getVendors } from "@/lib/db/vendors";
 
 export const metadata: Metadata = {
   title: "Vendor Marketplace · Kalyanam & Co.",
@@ -8,7 +9,8 @@ export const metadata: Metadata = {
     "Discover trusted luxury wedding vendors — photographers, decorators, caterers, makeup artists and more. Filter by category, location and style.",
 };
 
-export default function VendorsPage() {
+export default async function VendorsPage() {
+  const vendors = await getVendors();
   return (
     <>
       <section className="bg-forest-900 pb-16 pt-36 text-center">
@@ -28,7 +30,7 @@ export default function VendorsPage() {
 
       <section className="section bg-cream">
         <div className="container-luxe">
-          <Marketplace />
+          <Marketplace vendors={vendors} />
         </div>
       </section>
     </>

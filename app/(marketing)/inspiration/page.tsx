@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Gallery } from "@/components/inspiration/gallery";
 import { DividerOrnament } from "@/components/brand/motifs";
+import { getInspiration } from "@/lib/db/inspiration";
 
 export const metadata: Metadata = {
   title: "Inspiration Gallery · Kalyanam & Co.",
@@ -8,7 +9,8 @@ export const metadata: Metadata = {
     "Explore real luxury Indian weddings — browse by ceremony, tradition, colour, budget and location, and save ideas to your mood boards.",
 };
 
-export default function InspirationPage() {
+export default async function InspirationPage() {
+  const items = await getInspiration();
   return (
     <>
       {/* Page header */}
@@ -30,7 +32,7 @@ export default function InspirationPage() {
       {/* Gallery */}
       <section className="section bg-cream">
         <div className="container-luxe">
-          <Gallery />
+          <Gallery items={items} />
         </div>
       </section>
     </>

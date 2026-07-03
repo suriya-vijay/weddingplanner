@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Heart, MapPin, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  inspirationItems,
   ceremonies,
   traditions,
   colorThemes,
@@ -29,19 +28,19 @@ const FILTER_GROUPS: { key: FilterKey; label: string; options: readonly string[]
  * tags + a save-to-board heart (local state only; persistence comes later).
  * NO new animations beyond the existing card hover already in the design system.
  */
-export function Gallery() {
+export function Gallery({ items: allItems }: { items: InspirationItem[] }) {
   const [active, setActive] = useState<Partial<Record<FilterKey, string>>>({});
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [onlySaved, setOnlySaved] = useState(false);
 
   const items = useMemo(() => {
-    return inspirationItems.filter((it) => {
+    return allItems.filter((it) => {
       if (onlySaved && !saved.has(it.id)) return false;
       return (Object.keys(active) as FilterKey[]).every(
         (k) => !active[k] || String(it[k]) === active[k],
       );
     });
-  }, [active, saved, onlySaved]);
+  }, [allItems, active, saved, onlySaved]);
 
   function toggleFilter(key: FilterKey, value: string) {
     setActive((prev) => ({

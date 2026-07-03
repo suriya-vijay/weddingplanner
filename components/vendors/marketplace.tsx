@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Star, MapPin, Search, BadgeCheck, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  vendors,
   marketplaceCategories,
   vendorLocations,
   type VendorProfile,
@@ -13,10 +12,10 @@ import {
 
 /**
  * Vendor Marketplace — browse/filter vendor profiles. Category + location
- * filters + text search, all client-side over mock data. Cards link to
- * /vendors/[slug]. NO new animations (reuses existing card hover pattern).
+ * filters + text search, all client-side. Vendor data is fetched from the DB by
+ * the server page and passed in as a prop. Cards link to /vendors/[slug].
  */
-export function Marketplace() {
+export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
   const [category, setCategory] = useState<string>("All");
   const [location, setLocation] = useState<string>("All");
   const [query, setQuery] = useState("");
@@ -36,7 +35,7 @@ export function Marketplace() {
         return false;
       return true;
     });
-  }, [category, location, query]);
+  }, [vendors, category, location, query]);
 
   const filtersActive = category !== "All" || location !== "All" || query.trim();
 

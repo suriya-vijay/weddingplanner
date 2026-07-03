@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { vendors, getVendorBySlug } from "@/lib/mock-data";
+import { getVendorBySlug } from "@/lib/db/vendors";
 
 /** Instagram glyph (lucide dropped this export). */
 function InstagramIcon({ className }: { className?: string }) {
@@ -25,17 +25,13 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
-export function generateStaticParams() {
-  return vendors.map((v) => ({ slug: v.slug }));
-}
-
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const vendor = getVendorBySlug(slug);
+  const vendor = await getVendorBySlug(slug);
   if (!vendor) return { title: "Vendor · Kalyanam & Co." };
   return {
     title: `${vendor.name} · Kalyanam & Co.`,
@@ -49,7 +45,7 @@ export default async function VendorProfilePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const vendor = getVendorBySlug(slug);
+  const vendor = await getVendorBySlug(slug);
   if (!vendor) notFound();
 
   return (
