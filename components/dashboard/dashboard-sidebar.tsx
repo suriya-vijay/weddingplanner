@@ -8,6 +8,7 @@ import {
   Wallet,
   CalendarClock,
   Users,
+  Sparkles,
   Settings,
 } from "lucide-react";
 import { LotusMark } from "@/components/brand/motifs";
@@ -20,6 +21,7 @@ const NAV = [
   { label: "Budget", href: "/dashboard/budget", icon: Wallet },
   { label: "Timeline", href: "/dashboard/timeline", icon: CalendarClock },
   { label: "Guests", href: "/dashboard/guests", icon: Users },
+  { label: "AI Advisor", href: "/dashboard/advisor", icon: Sparkles },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
