@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Plate, isImageUrl } from "@/components/ui/plate";
 import { getVendorBySlug } from "@/lib/db/vendors";
 
 /** Instagram glyph (lucide dropped this export). */
@@ -52,7 +53,12 @@ export default async function VendorProfilePage({
     <article className="pb-24">
       {/* Cover */}
       <div className="relative h-[38vh] min-h-[18rem] w-full overflow-hidden">
-        <div className="absolute inset-0" style={{ background: vendor.cover }} />
+        <Plate
+          imageUrl={vendor.cover}
+          fallback={vendor.cover}
+          alt={`${vendor.name} cover`}
+          className="absolute inset-0 h-full w-full"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-forest-900/80 via-forest-900/20 to-forest-900/30" />
         <div className="container-luxe relative flex h-full flex-col justify-end pb-8 pt-28">
           <Link
@@ -68,10 +74,11 @@ export default async function VendorProfilePage({
       <div className="container-luxe">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-end gap-5">
-            <span
-              aria-hidden
-              className="-mt-16 h-28 w-28 shrink-0 rounded-3xl border-4 border-cream shadow-[var(--shadow-md)]"
-              style={{ background: vendor.logoPlate }}
+            <Plate
+              imageUrl={vendor.logoPlate}
+              fallback={vendor.logoPlate}
+              alt={`${vendor.name} logo`}
+              className="-mt-16 h-28 w-28 shrink-0 overflow-hidden rounded-3xl border-4 border-cream shadow-[var(--shadow-md)]"
             />
             <div className="pb-1 pt-5">
               <div className="flex items-center gap-2">
@@ -128,11 +135,21 @@ export default async function VendorProfilePage({
                     key={i}
                     className="group aspect-square overflow-hidden rounded-2xl shadow-[var(--shadow-xs)]"
                   >
-                    <div
-                      aria-hidden
-                      className="h-full w-full transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.05]"
-                      style={{ background: plate }}
-                    />
+                    {isImageUrl(plate) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={plate}
+                        alt={`${vendor.name} portfolio ${i + 1}`}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.05]"
+                      />
+                    ) : (
+                      <div
+                        aria-hidden
+                        className="h-full w-full transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.05]"
+                        style={{ background: plate }}
+                      />
+                    )}
                   </div>
                 ))}
               </div>

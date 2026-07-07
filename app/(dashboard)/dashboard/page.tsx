@@ -14,6 +14,7 @@ import {
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Panel, StatTile, ProgressBar, ProgressRing } from "@/components/dashboard/ui";
+import { Plate } from "@/components/ui/plate";
 import { Countdown } from "@/components/dashboard/countdown";
 import { formatINR } from "@/lib/utils";
 import { assignedPlanner } from "@/lib/mock-data";
@@ -224,10 +225,11 @@ export default async function DashboardOverview() {
             <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-5">
               {saved.map((item) => (
                 <div key={item.id} className="group">
-                  <div
-                    aria-hidden
+                  <Plate
+                    imageUrl={item.imageUrl}
+                    fallback={item.plate}
+                    alt={item.title}
                     className="aspect-square w-full rounded-xl shadow-[var(--shadow-xs)]"
-                    style={{ background: item.plate }}
                   />
                   <p className="mt-1.5 truncate text-xs text-ink-soft">
                     {item.title}

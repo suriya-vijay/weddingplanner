@@ -20,6 +20,8 @@ export async function updateVendorProfileAction(patch: {
   about?: string;
   instagram?: string;
   website?: string;
+  cover_url?: string;
+  logo_url?: string;
 }): Promise<{ ok: boolean }> {
   const id = await myVendorId();
   if (!id) return { ok: false };

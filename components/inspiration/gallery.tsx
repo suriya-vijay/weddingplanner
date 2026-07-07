@@ -3,14 +3,17 @@
 import { useMemo, useState } from "react";
 import { Heart, MapPin, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isImageUrl } from "@/components/ui/plate";
 import {
   ceremonies,
   traditions,
   colorThemes,
   budgetTiers,
   locations,
-  type InspirationItem,
 } from "@/lib/mock-data";
+import type { GalleryItem } from "@/lib/db/inspiration";
+
+type InspirationItem = GalleryItem;
 
 type FilterKey = "ceremony" | "tradition" | "color" | "budget" | "location";
 
@@ -156,12 +159,23 @@ function GalleryCard({
 }) {
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-border/70 shadow-[var(--shadow-sm)] transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-1.5 hover:shadow-[var(--shadow-lg)]">
-      {/* Plate (stand-in for photography), aspect-ratio reserves space (no CLS) */}
-      <div
-        aria-hidden
-        className="transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.04]"
-        style={{ background: item.plate, aspectRatio: item.aspect }}
-      />
+      {/* Real image if uploaded, else gradient plate. aspect-ratio reserves space (no CLS) */}
+      {isImageUrl(item.imageUrl) ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          loading="lazy"
+          className="w-full object-cover transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.04]"
+          style={{ aspectRatio: item.aspect }}
+        />
+      ) : (
+        <div
+          aria-hidden
+          className="transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.04]"
+          style={{ background: item.plate, aspectRatio: item.aspect }}
+        />
+      )}
       {/* Scrim */}
       <div
         aria-hidden

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Sparkles, Store, Heart, TrendingUp, ArrowUpRight } from "lucide-react";
+import { Plate } from "@/components/ui/plate";
 import { getInspiration } from "@/lib/db/inspiration";
 import { getVendors } from "@/lib/db/vendors";
 
@@ -80,10 +81,11 @@ export default async function AdminDashboard() {
               key={item.id}
               className="flex items-center gap-3 rounded-xl border border-border/70 p-2.5"
             >
-              <span
-                aria-hidden
+              <Plate
+                imageUrl={item.imageUrl}
+                fallback={item.plate}
+                alt={item.title}
                 className="h-12 w-12 shrink-0 rounded-lg"
-                style={{ background: item.plate }}
               />
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-ink">

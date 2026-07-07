@@ -1,20 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { Image as ImageIcon, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Plate, isImageUrl } from "@/components/ui/plate";
+import { ImageUpload } from "@/components/ui/image-upload";
 import type { VendorProfile } from "@/lib/mock-data";
 import { updateVendorProfileAction } from "@/app/(vendor)/vendor/actions";
 
 /**
- * Vendor "My Profile" — an editable-looking form prefilled from the vendor's
- * public profile. All edits live in local state and are NOT saved (backend
- * later). The cover/logo are gradient plates; image upload is a placeholder.
+ * Vendor "My Profile" — an editable form prefilled from the vendor's public
+ * profile. Text fields persist via updateVendorProfileAction on Save; cover/
+ * logo images upload to Supabase Storage and persist immediately. Cover/logo
+ * fall back to their gradient plate when no image has been uploaded.
  */
-export function VendorProfileView({ vendor }: { vendor: VendorProfile }) {
+export function VendorProfileView({
+  vendor,
+  userId,
+}: {
+  vendor: VendorProfile;
+  userId: string;
+}) {
   const [name, setName] = useState(vendor.name);
   const [tagline, setTagline] = useState(vendor.tagline);
   const [category, setCategory] = useState(vendor.category);
@@ -22,9 +31,17 @@ export function VendorProfileView({ vendor }: { vendor: VendorProfile }) {
   const [about, setAbout] = useState(vendor.about);
   const [instagram, setInstagram] = useState(vendor.instagram);
   const [website, setWebsite] = useState(vendor.website);
+  const [cover, setCover] = useState(vendor.cover);
+  const [logo, setLogo] = useState(vendor.logoPlate);
   const [saved, setSaved] = useState(false);
 
   const [saving, setSaving] = useState(false);
+
+  // Persist a freshly uploaded image URL immediately (independent of the
+  // text-field Save), so a refresh keeps it.
+  async function persistImage(patch: { cover_url?: string; logo_url?: string }) {
+    await updateVendorProfileAction(patch);
+  }
 
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,25 +87,45 @@ export function VendorProfileView({ vendor }: { vendor: VendorProfile }) {
       {/* Cover + logo */}
       <Panel>
         <h2 className="font-serif text-lg text-ink">Cover & logo</h2>
-        <div
-          aria-hidden
+
+        <Plate
+          imageUrl={isImageUrl(cover) ? cover : null}
+          fallback={cover}
+          alt="Cover image"
           className="mt-4 h-40 w-full rounded-2xl"
-          style={{ background: vendor.cover }}
         />
-        <div className="mt-4 flex flex-wrap items-center gap-4">
-          <span
-            aria-hidden
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-xl text-cream/70"
-            style={{ background: vendor.logoPlate }}
-          >
-            <ImageIcon className="h-6 w-6" />
-          </span>
-          <button
-            type="button"
-            className="rounded-xl border border-dashed border-border-strong px-4 py-2.5 text-sm text-ink-soft transition-colors hover:border-gold-400 hover:text-forest-700"
-          >
-            Upload logo &amp; cover (coming soon)
-          </button>
+
+        <div className="mt-5 grid gap-6 sm:grid-cols-2">
+          <div>
+            <p className="mb-2 text-sm font-medium text-ink">Cover image</p>
+            <ImageUpload
+              bucket="vendor-media"
+              folder={userId}
+              label="cover"
+              currentUrl={isImageUrl(cover) ? cover : null}
+              fallback={cover}
+              buttonText="Upload cover"
+              onUploaded={(url) => {
+                setCover(url);
+                persistImage({ cover_url: url });
+              }}
+            />
+          </div>
+          <div>
+            <p className="mb-2 text-sm font-medium text-ink">Logo</p>
+            <ImageUpload
+              bucket="vendor-media"
+              folder={userId}
+              label="logo"
+              currentUrl={isImageUrl(logo) ? logo : null}
+              fallback={logo}
+              buttonText="Upload logo"
+              onUploaded={(url) => {
+                setLogo(url);
+                persistImage({ logo_url: url });
+              }}
+            />
+          </div>
         </div>
       </Panel>
 

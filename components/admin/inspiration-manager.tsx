@@ -1,21 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, X, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Plate } from "@/components/ui/plate";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { cn } from "@/lib/utils";
-import {
-  ceremonies,
-  traditions,
-  locations,
-  type InspirationItem,
-} from "@/lib/mock-data";
+import { ceremonies, traditions, locations } from "@/lib/mock-data";
+import type { GalleryItem } from "@/lib/db/inspiration";
 import {
   addInspirationAction,
   updateInspirationAction,
   deleteInspirationAction,
 } from "@/app/(admin)/admin/actions";
+
+type InspirationItem = GalleryItem;
 
 const BLANK: Omit<InspirationItem, "id"> = {
   title: "",
@@ -26,18 +26,21 @@ const BLANK: Omit<InspirationItem, "id"> = {
   location: "Udaipur",
   vendors: [],
   plate: "linear-gradient(135deg, #1b4332 0%, #2d6a4f 55%, #40916c 100%)",
+  imageUrl: null,
   aspect: 1,
 };
 
 /**
- * Inspiration manager — add / edit / delete gallery items. Operates on
- * IN-MEMORY mock state (changes are not persisted; a clear notice says so).
- * Real CRUD + image upload come with the backend. No new animations.
+ * Inspiration manager — add / edit / delete gallery items. Persists to Supabase
+ * via server actions (admin-gated by RLS); optimistic local updates. Supports
+ * real image upload (Stage 3). No new animations.
  */
 export function InspirationManager({
   initialItems,
+  adminId,
 }: {
   initialItems: InspirationItem[];
+  adminId: string;
 }) {
   const [items, setItems] = useState<InspirationItem[]>(initialItems);
   const [editing, setEditing] = useState<InspirationItem | null>(null);
@@ -111,10 +114,10 @@ export function InspirationManager({
               <tr key={item.id} className="border-b border-border/60 last:border-0">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <span
-                      aria-hidden
+                    <Plate
+                      imageUrl={item.imageUrl}
+                      fallback={item.plate}
                       className="h-10 w-10 shrink-0 rounded-lg"
-                      style={{ background: item.plate }}
                     />
                     <span className="font-medium text-ink">{item.title}</span>
                   </div>
@@ -165,6 +168,7 @@ export function InspirationManager({
         <EditDialog
           item={editing}
           creating={creating}
+          adminId={adminId}
           onClose={() => {
             setEditing(null);
             setCreating(false);
@@ -179,11 +183,13 @@ export function InspirationManager({
 function EditDialog({
   item,
   creating,
+  adminId,
   onClose,
   onSave,
 }: {
   item: InspirationItem;
   creating: boolean;
+  adminId: string;
   onClose: () => void;
   onSave: (i: InspirationItem) => void;
 }) {
@@ -225,22 +231,16 @@ function EditDialog({
             if (draft.title.trim()) onSave(draft);
           }}
         >
-          {/* Image upload placeholder */}
-          <div className="flex items-center gap-4">
-            <span
-              aria-hidden
-              className="grid h-16 w-16 shrink-0 place-items-center rounded-xl text-cream/70"
-              style={{ background: draft.plate }}
-            >
-              <ImageIcon className="h-6 w-6" />
-            </span>
-            <button
-              type="button"
-              className="rounded-xl border border-dashed border-border-strong px-4 py-2.5 text-sm text-ink-soft hover:border-gold-400 hover:text-forest-700"
-            >
-              Upload image (coming soon)
-            </button>
-          </div>
+          {/* Image upload */}
+          <ImageUpload
+            bucket="inspiration"
+            folder={adminId || "inspiration"}
+            label="insp"
+            currentUrl={draft.imageUrl}
+            fallback={draft.plate}
+            buttonText="Upload image"
+            onUploaded={(url) => set("imageUrl", url)}
+          />
 
           <Field label="Title">
             <Input

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { InspirationItem } from "@/lib/mock-data";
+import type { GalleryItem } from "@/lib/db/inspiration";
 
 /**
  * Admin inspiration CRUD. RLS restricts writes to admins; these actions run in
@@ -9,11 +10,11 @@ import type { InspirationItem } from "@/lib/mock-data";
  * id) for creates.
  */
 
-type Draft = Omit<InspirationItem, "id">;
+type Draft = Omit<GalleryItem, "id">;
 
 export async function addInspirationAction(
   draft: Draft,
-): Promise<InspirationItem | null> {
+): Promise<GalleryItem | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("inspiration_items")
@@ -26,9 +27,10 @@ export async function addInspirationAction(
       location: draft.location,
       aspect: draft.aspect,
       plate: draft.plate,
+      image_url: draft.imageUrl,
       vendors: draft.vendors,
     })
-    .select("id, title, ceremony, tradition, color, budget, location, aspect, plate, vendors")
+    .select("id, title, ceremony, tradition, color, budget, location, aspect, plate, image_url, vendors")
     .single();
   if (!data) return null;
   const r = data as Record<string, unknown>;
@@ -42,6 +44,7 @@ export async function addInspirationAction(
     location: r.location as InspirationItem["location"],
     aspect: Number(r.aspect),
     plate: r.plate as string,
+    imageUrl: (r.image_url as string | null) ?? null,
     vendors: (r.vendors as string[]) ?? [],
   };
 }
@@ -62,6 +65,7 @@ export async function updateInspirationAction(
       location: draft.location,
       aspect: draft.aspect,
       plate: draft.plate,
+      image_url: draft.imageUrl,
       vendors: draft.vendors,
     })
     .eq("id", id);

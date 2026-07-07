@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Star, MapPin, Search, BadgeCheck, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isImageUrl } from "@/components/ui/plate";
 import {
   marketplaceCategories,
   vendorLocations,
@@ -134,11 +135,22 @@ function VendorCard({ vendor }: { vendor: VendorProfile }) {
       className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border/70 bg-ivory shadow-[var(--shadow-sm)] transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-2 hover:border-gold-200 hover:shadow-[var(--shadow-lg)]"
     >
       <div className="relative aspect-[16/10] overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.05]"
-          style={{ background: vendor.cover }}
-        />
+        {isImageUrl(vendor.cover) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={vendor.cover}
+            alt=""
+            loading="lazy"
+            aria-hidden
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.05]"
+          />
+        ) : (
+          <div
+            aria-hidden
+            className="absolute inset-0 transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-[1.05]"
+            style={{ background: vendor.cover }}
+          />
+        )}
         <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-forest-700 shadow-[var(--shadow-xs)]">
           <Star className="h-3.5 w-3.5 fill-gold-500 text-gold-500" />
           {vendor.rating.toFixed(1)}
