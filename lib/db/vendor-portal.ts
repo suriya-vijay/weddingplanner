@@ -62,7 +62,14 @@ function toProfile(v: VendorRow): MyVendor {
   };
 }
 
-/** The vendor row owned by the signed-in user (with packages + reviews). */
+/**
+ * The vendor row owned by the signed-in user (with packages + reviews).
+ *
+ * Get-or-claim: if a vendor-role user has no vendor row yet (e.g. an account
+ * created before the signup claim ran), claim one on first visit and re-query
+ * — mirroring how getOrCreateWedding() provisions a couple. This keeps the
+ * whole portal from 404ing when a vendor was never provisioned.
+ */
 export async function getMyVendor(): Promise<MyVendor | null> {
   const supabase = await createClient();
   const {
@@ -70,11 +77,19 @@ export async function getMyVendor(): Promise<MyVendor | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: v } = await supabase
-    .from("vendors")
-    .select("*")
-    .eq("owner_id", user.id)
-    .maybeSingle();
+  const fetchOwned = () =>
+    supabase.from("vendors").select("*").eq("owner_id", user.id).maybeSingle();
+
+  let { data: v } = await fetchOwned();
+
+  // No row yet: a vendor-role user claims a seeded vendor on first visit.
+  if (!v && user.user_metadata?.role === "vendor") {
+    const displayName =
+      (user.user_metadata?.display_name as string | undefined)?.trim() || "";
+    await claimVendorForUser(user.id, displayName);
+    ({ data: v } = await fetchOwned());
+  }
+
   if (!v) return null;
 
   const row = v as VendorRow;
@@ -125,6 +140,24 @@ export async function getMyEnquiries(vendorId: string): Promise<VendorEnquiry[]>
     status: r.status as VendorEnquiry["status"],
     message: r.message,
   }));
+}
+
+/** Packages for the signed-in vendor's business (used by the packages page). */
+export async function getMyPackages(
+  vendorId: string,
+): Promise<{ id: string; name: string; price: string; features: string[] }[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("vendor_packages")
+    .select("id, name, price, features")
+    .eq("vendor_id", vendorId)
+    .order("sort");
+  return (data ?? []) as {
+    id: string;
+    name: string;
+    price: string;
+    features: string[];
+  }[];
 }
 
 /**

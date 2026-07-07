@@ -41,7 +41,11 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const initialUser = await getSessionUser();
   return (
-    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${playfair.variable} ${inter.variable}`}
+    >
       <body className="min-h-dvh antialiased">
         <SessionProvider initialUser={initialUser}>{children}</SessionProvider>
       </body>
