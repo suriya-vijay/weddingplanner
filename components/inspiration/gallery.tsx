@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Heart, MapPin, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isImageUrl } from "@/components/ui/plate";
@@ -182,13 +183,20 @@ function GalleryCard({
         className="absolute inset-0 bg-gradient-to-t from-forest-900/85 via-forest-900/10 to-transparent"
       />
 
+      {/* Click-through to the slide-deck detail (below the heart in z-order) */}
+      <Link
+        href={`/inspiration/${item.id}`}
+        aria-label={`View ${item.title}`}
+        className="absolute inset-0 z-[1]"
+      />
+
       {/* Save heart */}
       <button
         type="button"
         onClick={onSave}
         aria-label={saved ? "Remove from saved" : "Save to mood board"}
         aria-pressed={saved}
-        className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-cream/90 text-forest-700 transition-colors hover:bg-cream cursor-pointer"
+        className="absolute right-3 top-3 z-[2] grid h-10 w-10 place-items-center rounded-full bg-cream/90 text-forest-700 transition-colors hover:bg-cream cursor-pointer"
       >
         <Heart
           className={cn(

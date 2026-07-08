@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MapPin, ArrowUpRight } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { Badge } from "@/components/ui/badge";
@@ -25,13 +26,13 @@ export function FeaturedWeddings() {
             </p>
           </Reveal>
           <Reveal delay={80}>
-            <a
+            <Link
               href="/inspiration"
               className="group inline-flex items-center gap-2 font-medium text-forest-700 transition-colors hover:text-gold-600"
             >
               View the gallery
               <ArrowUpRight className="h-4 w-4 transition-transform duration-[var(--dur-fast)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </a>
+            </Link>
           </Reveal>
         </div>
 

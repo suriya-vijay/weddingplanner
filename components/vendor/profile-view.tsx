@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Save } from "lucide-react";
+import { Save, X, Plus } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Plate, isImageUrl } from "@/components/ui/plate";
 import { ImageUpload } from "@/components/ui/image-upload";
 import type { VendorProfile } from "@/lib/mock-data";
@@ -33,6 +32,10 @@ export function VendorProfileView({
   const [website, setWebsite] = useState(vendor.website);
   const [cover, setCover] = useState(vendor.cover);
   const [logo, setLogo] = useState(vendor.logoPlate);
+  const [styles, setStyles] = useState<string[]>(vendor.styles);
+  const [serviceAreas, setServiceAreas] = useState<string[]>(
+    vendor.serviceAreas,
+  );
   const [saved, setSaved] = useState(false);
 
   const [saving, setSaving] = useState(false);
@@ -55,6 +58,8 @@ export function VendorProfileView({
       about: about.trim(),
       instagram: instagram.trim(),
       website: website.trim(),
+      styles,
+      service_areas: serviceAreas,
     });
     setSaving(false);
     setSaved(res.ok);
@@ -69,8 +74,8 @@ export function VendorProfileView({
             My profile
           </h1>
           <p className="mt-1 text-ink-soft">
-            This is how couples see your business. Text details save live; photo
-            upload arrives in the next stage.
+            This is how couples see your business. Everything here — details,
+            photos, styles and service areas — saves live.
           </p>
         </div>
         <Button type="submit" variant="primary" size="md" loading={saving}>
@@ -165,31 +170,113 @@ export function VendorProfileView({
         />
         <div className="mt-4">
           <p className="text-sm font-medium text-ink">Styles</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {vendor.styles.map((s) => (
-              <Badge key={s} tone="forest">
-                {s}
-              </Badge>
-            ))}
-          </div>
+          <ChipEditor
+            items={styles}
+            onChange={setStyles}
+            placeholder="Add a style (e.g. Regal)…"
+            tone="forest"
+          />
         </div>
       </Panel>
 
       {/* Service areas */}
       <Panel>
         <h2 className="font-serif text-lg text-ink">Service areas</h2>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {vendor.serviceAreas.map((a) => (
-            <span
-              key={a}
-              className="rounded-full border border-border-strong bg-ivory px-3 py-1.5 text-sm text-ink-soft"
-            >
-              {a}
-            </span>
-          ))}
-        </div>
+        <ChipEditor
+          className="mt-3"
+          items={serviceAreas}
+          onChange={setServiceAreas}
+          placeholder="Add a city or region…"
+          tone="plain"
+        />
       </Panel>
     </form>
+  );
+}
+
+/** Editable chip list: shows chips with an × to remove + an input to add. */
+function ChipEditor({
+  items,
+  onChange,
+  placeholder,
+  tone,
+  className,
+}: {
+  items: string[];
+  onChange: (next: string[]) => void;
+  placeholder: string;
+  tone: "forest" | "plain";
+  className?: string;
+}) {
+  const [draft, setDraft] = useState("");
+
+  const add = () => {
+    const v = draft.trim();
+    if (!v || items.some((i) => i.toLowerCase() === v.toLowerCase())) {
+      setDraft("");
+      return;
+    }
+    onChange([...items, v]);
+    setDraft("");
+  };
+
+  const remove = (item: string) => onChange(items.filter((i) => i !== item));
+
+  return (
+    <div className={className}>
+      <div className="flex flex-wrap gap-2">
+        {items.map((item) =>
+          tone === "forest" ? (
+            <span
+              key={item}
+              className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-3 py-1 text-sm text-forest-700"
+            >
+              {item}
+              <button
+                type="button"
+                onClick={() => remove(item)}
+                aria-label={`Remove ${item}`}
+                className="grid h-4 w-4 place-items-center rounded-full text-forest-700/70 hover:bg-forest-700/15 hover:text-forest-700"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ) : (
+            <span
+              key={item}
+              className="inline-flex items-center gap-1 rounded-full border border-border-strong bg-ivory px-3 py-1.5 text-sm text-ink-soft"
+            >
+              {item}
+              <button
+                type="button"
+                onClick={() => remove(item)}
+                aria-label={`Remove ${item}`}
+                className="grid h-4 w-4 place-items-center rounded-full text-ink-faint hover:bg-cream-deep hover:text-ink"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ),
+        )}
+      </div>
+      <div className="mt-3 flex gap-2">
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
+          placeholder={placeholder}
+          className="max-w-xs"
+        />
+        <Button type="button" variant="ghost" size="md" onClick={add}>
+          <Plus className="h-4 w-4" /> Add
+        </Button>
+      </div>
+    </div>
   );
 }
 

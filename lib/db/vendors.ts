@@ -78,10 +78,10 @@ export async function getVendors(): Promise<VendorProfile[]> {
   return (data as VendorRow[]).map((v) => toProfile(v, [], []));
 }
 
-/** One full vendor profile by slug, with its packages + reviews. */
+/** One full vendor profile by slug, with its packages + reviews + DB id. */
 export async function getVendorBySlug(
   slug: string,
-): Promise<VendorProfile | null> {
+): Promise<(VendorProfile & { id: string }) | null> {
   const supabase = await createClient();
   const { data: v } = await supabase
     .from("vendors")
@@ -90,23 +90,27 @@ export async function getVendorBySlug(
     .maybeSingle();
   if (!v) return null;
 
+  const row = v as VendorRow;
   const [{ data: pkgs }, { data: revs }] = await Promise.all([
     supabase
       .from("vendor_packages")
       .select("name, price, features, sort")
-      .eq("vendor_id", (v as VendorRow).id)
+      .eq("vendor_id", row.id)
       .order("sort"),
     supabase
       .from("vendor_reviews")
       .select("author, rating, text, wedding")
-      .eq("vendor_id", (v as VendorRow).id),
+      .eq("vendor_id", row.id),
   ]);
 
-  return toProfile(
-    v as VendorRow,
-    (pkgs ?? []) as VendorPackage[],
-    (revs ?? []) as VendorReview[],
-  );
+  return {
+    id: row.id,
+    ...toProfile(
+      row,
+      (pkgs ?? []) as VendorPackage[],
+      (revs ?? []) as VendorReview[],
+    ),
+  };
 }
 
 /** Slugs for generateStaticParams — but the marketplace is now dynamic, so

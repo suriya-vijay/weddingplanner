@@ -13,7 +13,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plate, isImageUrl } from "@/components/ui/plate";
+import { EnquiryButton } from "@/components/vendors/enquiry-dialog";
 import { getVendorBySlug } from "@/lib/db/vendors";
+import { getSessionUser } from "@/lib/auth/get-session";
 
 /** Instagram glyph (lucide dropped this export). */
 function InstagramIcon({ className }: { className?: string }) {
@@ -48,6 +50,10 @@ export default async function VendorProfilePage({
   const { slug } = await params;
   const vendor = await getVendorBySlug(slug);
   if (!vendor) notFound();
+
+  const session = await getSessionUser();
+  const canEnquire = session?.role === "couple";
+  const loginHref = `/login?next=/vendors/${slug}`;
 
   return (
     <article className="pb-24">
@@ -98,9 +104,12 @@ export default async function VendorProfilePage({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button href="/signup" variant="primary" size="lg">
-              Enquire now
-            </Button>
+            <EnquiryButton
+              vendorId={vendor.id}
+              vendorName={vendor.name}
+              canEnquire={canEnquire}
+              loginHref={loginHref}
+            />
           </div>
         </div>
 
@@ -230,10 +239,19 @@ export default async function VendorProfilePage({
                   {vendor.startingAt}
                 </p>
               </div>
-              <Button href="/signup" variant="primary" size="lg" className="w-full">
-                Enquire now
-              </Button>
-              <Button href="/signup" variant="outline" size="lg" className="w-full">
+              <EnquiryButton
+                vendorId={vendor.id}
+                vendorName={vendor.name}
+                canEnquire={canEnquire}
+                loginHref={loginHref}
+                className="w-full"
+              />
+              <Button
+                href={canEnquire ? "/dashboard" : loginHref}
+                variant="outline"
+                size="lg"
+                className="w-full"
+              >
                 Save vendor
               </Button>
 

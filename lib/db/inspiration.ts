@@ -56,3 +56,16 @@ export async function getInspirationByIds(
     .in("id", ids);
   return ((data ?? []) as InspRow[]).map(toItem);
 }
+
+/** One inspiration item by id (for the slide-deck detail page). */
+export async function getInspirationById(
+  id: string,
+): Promise<GalleryItem | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("inspiration_items")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  return data ? toItem(data as InspRow) : null;
+}
