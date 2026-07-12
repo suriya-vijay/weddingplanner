@@ -9,7 +9,11 @@ type GuestRow = {
   count: number;
   rsvp: string;
   meal: string;
+  email: string | null;
+  phone: string | null;
 };
+
+const COLS = 'id, name, side, "group", count, rsvp, meal, email, phone';
 
 const toGuest = (r: GuestRow): Guest => ({
   id: r.id,
@@ -19,13 +23,15 @@ const toGuest = (r: GuestRow): Guest => ({
   count: r.count,
   rsvp: r.rsvp as Guest["rsvp"],
   meal: r.meal as Guest["meal"],
+  email: r.email ?? "",
+  phone: r.phone ?? "",
 });
 
 export async function getGuests(weddingId: string): Promise<Guest[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("guests")
-    .select("id, name, side, \"group\", count, rsvp, meal")
+    .select(COLS)
     .eq("wedding_id", weddingId)
     .order("created_at");
   return ((data ?? []) as GuestRow[]).map(toGuest);
@@ -46,8 +52,10 @@ export async function addGuest(
       count: g.count,
       rsvp: g.rsvp,
       meal: g.meal,
+      email: g.email ?? "",
+      phone: g.phone ?? "",
     })
-    .select("id, name, side, \"group\", count, rsvp, meal")
+    .select(COLS)
     .single();
   return data ? toGuest(data as GuestRow) : null;
 }

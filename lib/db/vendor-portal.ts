@@ -160,10 +160,25 @@ export async function getMyPackages(
   }[];
 }
 
+/** Build a URL-safe slug from a business name, kept unique with a uid suffix. */
+function slugForVendor(displayName: string, userId: string): string {
+  const base = (displayName || "vendor")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+  return `${base || "vendor"}-${userId.slice(0, 6)}`;
+}
+
 /**
- * Claim an unclaimed seeded vendor for a new vendor account (service-role, runs
- * from the signup action). Prefers "The Lighthouse Films" so the demo vendor
- * has rich content; falls back to any unclaimed vendor, else creates a blank one.
+ * Provision a vendor record for a new vendor account (service-role, runs from
+ * the signup action and self-heals on first portal visit). Claims an unclaimed
+ * seeded row for its plates/placeholders BUT overwrites the identity with the
+ * vendor's OWN business name — so a new vendor sees THEIR name, not a seeded
+ * vendor's. If nothing is free, creates a fresh blank vendor.
+ *
+ * (A full blank-slate onboarding + admin approval flow is a separate milestone;
+ * this ensures the name is correct today.)
  */
 export async function claimVendorForUser(
   userId: string,
@@ -179,36 +194,41 @@ export async function claimVendorForUser(
     .maybeSingle();
   if (owned) return;
 
-  // Prefer the demo flagship, else the first unclaimed vendor.
-  const { data: flagship } = await admin
+  const name = displayName || "My Business";
+  const slug = slugForVendor(displayName, userId);
+
+  // Take any unclaimed seeded row (for its plate placeholders), then rebrand it.
+  const { data: anyFree } = await admin
     .from("vendors")
     .select("id")
-    .eq("slug", "the-lighthouse-films")
     .is("owner_id", null)
+    .limit(1)
     .maybeSingle();
-
-  let targetId = flagship?.id as string | undefined;
-  if (!targetId) {
-    const { data: anyFree } = await admin
-      .from("vendors")
-      .select("id")
-      .is("owner_id", null)
-      .limit(1)
-      .maybeSingle();
-    targetId = anyFree?.id as string | undefined;
-  }
+  const targetId = anyFree?.id as string | undefined;
 
   if (targetId) {
-    await admin.from("vendors").update({ owner_id: userId }).eq("id", targetId);
+    // Rebrand to the new vendor: their name/slug, blank story, fresh stats.
+    await admin
+      .from("vendors")
+      .update({
+        owner_id: userId,
+        name,
+        slug,
+        tagline: "",
+        about: "",
+        rating: 0,
+        reviews: 0,
+        verified: false,
+      })
+      .eq("id", targetId);
     return;
   }
 
-  // Nothing free — create a blank vendor for them.
-  const slug = `vendor-${userId.slice(0, 8)}`;
+  // Nothing free — create a fresh blank vendor for them.
   await admin.from("vendors").insert({
     owner_id: userId,
     slug,
-    name: displayName || "My Business",
-    category: "Photography",
+    name,
+    category: "",
   });
 }

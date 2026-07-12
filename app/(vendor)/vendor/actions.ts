@@ -24,6 +24,9 @@ export async function updateVendorProfileAction(patch: {
   logo_url?: string;
   styles?: string[];
   service_areas?: string[];
+  price_tier?: string;
+  starting_at?: string;
+  availability?: string;
 }): Promise<{ ok: boolean }> {
   const id = await myVendorId();
   if (!id) return { ok: false };

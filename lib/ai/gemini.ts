@@ -57,3 +57,57 @@ export async function streamAdvisorReply(opts: {
   }
   return chunks();
 }
+
+/**
+ * Generate a JSON array of wedding-timeline milestones tuned to the couple's
+ * context. Non-streaming, JSON-mode for reliable parsing. Throws if the key is
+ * missing (caller falls back to a static template).
+ */
+export async function generateTimelineMilestones(
+  context: string,
+): Promise<{ title: string; detail: string; date: string; status: string }[]> {
+  const ai = new GoogleGenAI({ apiKey: apiKey() });
+  const res = await ai.models.generateContent({
+    model: ADVISOR_MODEL,
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text:
+              "Create a wedding-planning timeline of 6–8 milestones for this couple. " +
+              "Return ONLY a JSON array; each item is {\"title\": string, \"detail\": string (one short sentence), \"date\": \"\" }. " +
+              "Order from earliest to latest planning stage. Leave date as an empty string (the couple sets real dates). " +
+              "Make it culturally appropriate for an Indian wedding.\n\n" +
+              context,
+          },
+        ],
+      },
+    ],
+    config: {
+      responseMimeType: "application/json",
+      temperature: 0.6,
+      maxOutputTokens: 1024,
+    },
+  });
+
+  const text = res.text ?? "[]";
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .filter(
+      (m): m is { title: string; detail?: string } =>
+        !!m && typeof (m as { title?: unknown }).title === "string",
+    )
+    .map((m) => ({
+      title: String(m.title),
+      detail: typeof m.detail === "string" ? m.detail : "",
+      date: "",
+      status: "upcoming",
+    }));
+}

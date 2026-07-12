@@ -135,6 +135,7 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
                 <th className="pb-3 pr-4 font-medium">Guest / family</th>
                 <th className="pb-3 pr-4 font-medium">Side</th>
                 <th className="pb-3 pr-4 font-medium">Group</th>
+                <th className="pb-3 pr-4 font-medium">Contact</th>
                 <th className="pb-3 pr-4 text-right font-medium">Count</th>
                 <th className="pb-3 pr-4 font-medium">Meal</th>
                 <th className="pb-3 pr-4 font-medium">RSVP</th>
@@ -147,6 +148,18 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
                   <td className="py-3 pr-4 font-medium">{g.name}</td>
                   <td className="py-3 pr-4 text-ink-soft">{g.side}</td>
                   <td className="py-3 pr-4 text-ink-soft">{g.group}</td>
+                  <td className="py-3 pr-4 text-ink-soft">
+                    {g.email || g.phone ? (
+                      <div className="flex flex-col leading-tight">
+                        {g.email && <span className="text-xs">{g.email}</span>}
+                        {g.phone && (
+                          <span className="text-xs text-ink-faint">{g.phone}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-ink-faint">—</span>
+                    )}
+                  </td>
                   <td className="py-3 pr-4 text-right tabular-nums">{g.count}</td>
                   <td className="py-3 pr-4 text-ink-soft">{g.meal}</td>
                   <td className="py-3 pr-4">
@@ -199,6 +212,8 @@ function AddGuestDialog({
   const [count, setCount] = useState("1");
   const [side, setSide] = useState<GuestSide>("Bride");
   const [meal, setMeal] = useState<MealPref>("Veg");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +224,8 @@ function AddGuestDialog({
       side,
       meal,
       rsvp: "Pending",
+      email: email.trim(),
+      phone: phone.trim(),
     });
     onClose();
   };
@@ -259,6 +276,24 @@ function AddGuestDialog({
               ))}
             </Select>
           </Field>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Email (optional)">
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+              />
+            </Field>
+            <Field label="Phone (optional)">
+              <Input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+91 98765 43210"
+              />
+            </Field>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="ghost" size="md" onClick={onClose}>
               Cancel

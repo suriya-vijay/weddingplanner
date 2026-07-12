@@ -1061,6 +1061,8 @@ export type Guest = {
   count: number;
   rsvp: RsvpStatus;
   meal: MealPref;
+  email?: string;
+  phone?: string;
 };
 
 export const guests: Guest[] = [

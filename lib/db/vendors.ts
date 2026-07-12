@@ -78,6 +78,22 @@ export async function getVendors(): Promise<VendorProfile[]> {
   return (data as VendorRow[]).map((v) => toProfile(v, [], []));
 }
 
+/** All vendors WITH their DB id — for the admin manager (approve/delete). */
+export async function getVendorsForAdmin(): Promise<
+  (VendorProfile & { id: string })[]
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("vendors")
+    .select("*")
+    .order("name");
+  if (error || !data) return [];
+  return (data as VendorRow[]).map((v) => ({
+    id: v.id,
+    ...toProfile(v, [], []),
+  }));
+}
+
 /** One full vendor profile by slug, with its packages + reviews + DB id. */
 export async function getVendorBySlug(
   slug: string,

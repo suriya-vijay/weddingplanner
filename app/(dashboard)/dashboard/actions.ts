@@ -5,7 +5,15 @@ import { getOrCreateWedding, updateWedding } from "@/lib/db/weddings";
 import * as guestsDb from "@/lib/db/guests";
 import * as budgetDb from "@/lib/db/budget";
 import * as checklistDb from "@/lib/db/checklist";
-import type { Guest, BudgetItem } from "@/lib/mock-data";
+import * as timelineDb from "@/lib/db/timeline";
+import { buildAdvisorSystemPrompt } from "@/lib/ai/system-prompt";
+import { generateTimelineMilestones } from "@/lib/ai/gemini";
+import type {
+  Guest,
+  BudgetItem,
+  ChecklistItem,
+  TimelineMilestone,
+} from "@/lib/mock-data";
 
 /**
  * Dashboard mutations. Each resolves the caller's own wedding (RLS-scoped) so a
@@ -64,6 +72,80 @@ export async function setChecklistDoneAction(
   done: boolean,
 ): Promise<void> {
   await checklistDb.setChecklistDone(id, done);
+}
+
+export async function addChecklistItemAction(
+  item: Pick<ChecklistItem, "task" | "phase" | "category">,
+): Promise<ChecklistItem | null> {
+  const weddingId = await myWeddingId();
+  if (!weddingId) return null;
+  return checklistDb.addChecklistItem(weddingId, item);
+}
+
+export async function deleteChecklistItemAction(id: string): Promise<void> {
+  await checklistDb.deleteChecklistItem(id);
+}
+
+// ── Timeline ────────────────────────────────────────────────────
+export async function addTimelineAction(
+  m: Omit<TimelineMilestone, "id">,
+): Promise<TimelineMilestone | null> {
+  const weddingId = await myWeddingId();
+  if (!weddingId) return null;
+  return timelineDb.addTimelineMilestone(weddingId, m);
+}
+
+export async function updateTimelineAction(
+  id: string,
+  patch: Partial<Omit<TimelineMilestone, "id">>,
+): Promise<void> {
+  await timelineDb.updateTimelineMilestone(id, patch);
+}
+
+export async function deleteTimelineAction(id: string): Promise<void> {
+  await timelineDb.deleteTimelineMilestone(id);
+}
+
+/**
+ * AI: generate a starter timeline tuned to the couple's wedding and insert the
+ * milestones (editable afterward). Degrades gracefully if the AI key/quota is
+ * unavailable — returns { ok:false } and the UI keeps the existing list.
+ */
+export async function suggestTimelineAction(): Promise<{
+  ok: boolean;
+  milestones?: TimelineMilestone[];
+  error?: string;
+}> {
+  const weddingId = await myWeddingId();
+  if (!weddingId) return { ok: false, error: "No wedding found." };
+
+  const context = await buildAdvisorSystemPrompt();
+  if (!context) return { ok: false, error: "No wedding context." };
+
+  let generated;
+  try {
+    generated = await generateTimelineMilestones(context);
+  } catch (err) {
+    const msg =
+      err instanceof Error && /GEMINI_API_KEY/.test(err.message)
+        ? "The AI timeline isn't configured (missing GEMINI_API_KEY)."
+        : "The AI timeline is unavailable right now.";
+    return { ok: false, error: msg };
+  }
+  if (!generated.length)
+    return { ok: false, error: "The AI didn't return any milestones." };
+
+  const milestones = await timelineDb.addTimelineMilestones(
+    weddingId,
+    generated.map((m) => ({
+      title: m.title,
+      detail: m.detail,
+      date: m.date,
+      status: "upcoming" as const,
+    })),
+  );
+  revalidatePath("/dashboard/timeline");
+  return { ok: true, milestones };
 }
 
 // ── Wedding profile (settings) ──────────────────────────────────

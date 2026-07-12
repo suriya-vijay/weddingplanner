@@ -34,3 +34,33 @@ export async function setChecklistDone(
   const supabase = await createClient();
   await supabase.from("checklist_items").update({ done }).eq("id", id);
 }
+
+export async function addChecklistItem(
+  weddingId: string,
+  item: Pick<ChecklistItem, "task" | "phase" | "category">,
+): Promise<ChecklistItem | null> {
+  const supabase = await createClient();
+  // Place after existing items.
+  const { count } = await supabase
+    .from("checklist_items")
+    .select("id", { count: "exact", head: true })
+    .eq("wedding_id", weddingId);
+  const { data } = await supabase
+    .from("checklist_items")
+    .insert({
+      wedding_id: weddingId,
+      task: item.task,
+      phase: item.phase,
+      category: item.category,
+      done: false,
+      sort: count ?? 0,
+    })
+    .select("id, task, phase, category, done")
+    .single();
+  return data ? toItem(data as ChecklistRow) : null;
+}
+
+export async function deleteChecklistItem(id: string): Promise<void> {
+  const supabase = await createClient();
+  await supabase.from("checklist_items").delete().eq("id", id);
+}

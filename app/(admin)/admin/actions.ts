@@ -75,3 +75,28 @@ export async function deleteInspirationAction(id: string): Promise<void> {
   const supabase = await createClient();
   await supabase.from("inspiration_items").delete().eq("id", id);
 }
+
+/**
+ * Admin vendor moderation. RLS `vendors_admin` grants admins full write; these
+ * run in the admin's session. Approve = toggle `verified`; delete removes a
+ * vendor (e.g. spam / inappropriate). Public marketplace reflects both.
+ */
+export async function setVendorVerifiedAction(
+  id: string,
+  verified: boolean,
+): Promise<{ ok: boolean }> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("vendors")
+    .update({ verified })
+    .eq("id", id);
+  return { ok: !error };
+}
+
+export async function deleteVendorAction(
+  id: string,
+): Promise<{ ok: boolean }> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("vendors").delete().eq("id", id);
+  return { ok: !error };
+}
