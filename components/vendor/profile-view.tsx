@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plate, isImageUrl } from "@/components/ui/plate";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { Combobox } from "@/components/ui/combobox";
+import { INDIAN_CITIES } from "@/lib/data/indian-cities";
 import type { VendorProfile } from "@/lib/mock-data";
 import { updateVendorProfileAction } from "@/app/(vendor)/vendor/actions";
 
@@ -148,7 +150,12 @@ export function VendorProfileView({
             <Input value={tagline} onChange={(e) => setTagline(e.target.value)} />
           </Field>
           <Field label="Base location">
-            <Input value={location} onChange={(e) => setLocation(e.target.value)} />
+            <Combobox
+              value={location}
+              onChange={setLocation}
+              options={INDIAN_CITIES}
+              placeholder="e.g. Jaipur, Rajasthan"
+            />
           </Field>
           <Field label="Instagram">
             <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} />
@@ -188,6 +195,7 @@ export function VendorProfileView({
           onChange={setServiceAreas}
           placeholder="Add a city or region…"
           tone="plain"
+          options={INDIAN_CITIES}
         />
       </Panel>
     </form>
@@ -201,12 +209,14 @@ function ChipEditor({
   placeholder,
   tone,
   className,
+  options,
 }: {
   items: string[];
   onChange: (next: string[]) => void;
   placeholder: string;
   tone: "forest" | "plain";
   className?: string;
+  options?: readonly string[];
 }) {
   const [draft, setDraft] = useState("");
 
@@ -260,18 +270,28 @@ function ChipEditor({
         )}
       </div>
       <div className="mt-3 flex gap-2">
-        <Input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              add();
-            }
-          }}
-          placeholder={placeholder}
-          className="max-w-xs"
-        />
+        {options ? (
+          <Combobox
+            value={draft}
+            onChange={setDraft}
+            options={options}
+            placeholder={placeholder}
+            className="max-w-xs flex-1"
+          />
+        ) : (
+          <Input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                add();
+              }
+            }}
+            placeholder={placeholder}
+            className="max-w-xs"
+          />
+        )}
         <Button type="button" variant="ghost" size="md" onClick={add}>
           <Plus className="h-4 w-4" /> Add
         </Button>

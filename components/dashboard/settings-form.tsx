@@ -5,6 +5,8 @@ import { Save } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Combobox } from "@/components/ui/combobox";
+import { INDIAN_CITIES } from "@/lib/data/indian-cities";
 import { updateWeddingAction } from "@/app/(dashboard)/dashboard/actions";
 import type { Wedding } from "@/lib/db/weddings";
 
@@ -62,7 +64,12 @@ export function SettingsForm({ wedding }: { wedding: Wedding }) {
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </Field>
           <Field label="City">
-            <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Udaipur, Rajasthan" />
+            <Combobox
+              value={city}
+              onChange={setCity}
+              options={INDIAN_CITIES}
+              placeholder="e.g. Udaipur, Rajasthan"
+            />
           </Field>
           <Field label="Venue">
             <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. The Grand Udaipur" />
