@@ -100,3 +100,19 @@ export async function deleteVendorAction(
   const { error } = await supabase.from("vendors").delete().eq("id", id);
   return { ok: !error };
 }
+
+/**
+ * Approve / reject a vendor for the public marketplace (status gate, 0008).
+ * Approving also sets the verified badge; rejecting hides it (kept, not deleted,
+ * so it can be reconsidered). Deletion is the separate hard-remove above.
+ */
+export async function setVendorStatusAction(
+  id: string,
+  status: "pending" | "approved" | "rejected",
+): Promise<{ ok: boolean }> {
+  const supabase = await createClient();
+  const patch: { status: string; verified?: boolean } = { status };
+  if (status === "approved") patch.verified = true;
+  const { error } = await supabase.from("vendors").update(patch).eq("id", id);
+  return { ok: !error };
+}

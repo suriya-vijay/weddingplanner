@@ -67,7 +67,11 @@ function toProfile(
   };
 }
 
-/** All vendors for the marketplace grid (no packages/reviews needed there). */
+/**
+ * All vendors (unfiltered) for the marketplace grid. NOTE: this is also used by
+ * the admin dashboard stat count + inspiration detail page, so it stays
+ * unfiltered — PUBLIC surfaces use getPublicVendors() below.
+ */
 export async function getVendors(): Promise<VendorProfile[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -78,9 +82,30 @@ export async function getVendors(): Promise<VendorProfile[]> {
   return (data as VendorRow[]).map((v) => toProfile(v, [], []));
 }
 
-/** All vendors WITH their DB id — for the admin manager (approve/delete). */
+/** A vendor row's status ('approved' when the column doesn't exist yet). */
+function isApproved(v: { status?: string }): boolean {
+  return (v.status ?? "approved") === "approved";
+}
+
+/**
+ * PUBLIC marketplace read — only APPROVED vendors. Falls back to unfiltered if
+ * the `status` column isn't there yet (pre-0008), so the page never breaks.
+ */
+export async function getPublicVendors(): Promise<VendorProfile[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("vendors")
+    .select("*")
+    .order("name");
+  if (error || !data) return [];
+  return (data as (VendorRow & { status?: string })[])
+    .filter(isApproved)
+    .map((v) => toProfile(v, [], []));
+}
+
+/** All vendors WITH id + status — for the admin manager (approve/reject/delete). */
 export async function getVendorsForAdmin(): Promise<
-  (VendorProfile & { id: string })[]
+  (VendorProfile & { id: string; status: string })[]
 > {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -88,13 +113,18 @@ export async function getVendorsForAdmin(): Promise<
     .select("*")
     .order("name");
   if (error || !data) return [];
-  return (data as VendorRow[]).map((v) => ({
+  return (data as (VendorRow & { status?: string })[]).map((v) => ({
     id: v.id,
+    status: v.status ?? "approved",
     ...toProfile(v, [], []),
   }));
 }
 
-/** One full vendor profile by slug, with its packages + reviews + DB id. */
+/**
+ * One full vendor profile by slug (PUBLIC detail page), with packages +
+ * reviews + DB id. Returns null for non-approved vendors → 404. (The vendor's
+ * own portal uses getMyVendor(), which is unaffected.)
+ */
 export async function getVendorBySlug(
   slug: string,
 ): Promise<(VendorProfile & { id: string }) | null> {
@@ -105,6 +135,7 @@ export async function getVendorBySlug(
     .eq("slug", slug)
     .maybeSingle();
   if (!v) return null;
+  if (!isApproved(v as { status?: string })) return null;
 
   const row = v as VendorRow;
   const [{ data: pkgs }, { data: revs }] = await Promise.all([

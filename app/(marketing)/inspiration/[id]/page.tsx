@@ -7,7 +7,7 @@ import { Plate } from "@/components/ui/plate";
 import { Reveal } from "@/components/ui/reveal";
 import { DividerOrnament } from "@/components/brand/motifs";
 import { getInspirationById } from "@/lib/db/inspiration";
-import { getVendors } from "@/lib/db/vendors";
+import { getPublicVendors } from "@/lib/db/vendors";
 
 export async function generateMetadata({
   params,
@@ -39,7 +39,7 @@ export default async function InspirationDetailPage({
   if (!item) notFound();
 
   // Map tagged vendor NAMES → their marketplace slugs (best-effort).
-  const vendors = await getVendors();
+  const vendors = await getPublicVendors();
   const byName = new Map(vendors.map((v) => [v.name.toLowerCase(), v.slug]));
   const taggedVendors = item.vendors.map((name) => ({
     name,

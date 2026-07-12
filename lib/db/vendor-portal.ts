@@ -208,27 +208,31 @@ export async function claimVendorForUser(
 
   if (targetId) {
     // Rebrand to the new vendor: their name/slug, blank story, fresh stats.
-    await admin
+    // status:'pending' → hidden from the public marketplace until an admin
+    // approves (0008). Best-effort on the status field so a pre-0008 DB still
+    // claims successfully.
+    const base = {
+      owner_id: userId,
+      name,
+      slug,
+      tagline: "",
+      about: "",
+      rating: 0,
+      reviews: 0,
+      verified: false,
+    };
+    const { error } = await admin
       .from("vendors")
-      .update({
-        owner_id: userId,
-        name,
-        slug,
-        tagline: "",
-        about: "",
-        rating: 0,
-        reviews: 0,
-        verified: false,
-      })
+      .update({ ...base, status: "pending" })
       .eq("id", targetId);
+    if (error) await admin.from("vendors").update(base).eq("id", targetId);
     return;
   }
 
   // Nothing free — create a fresh blank vendor for them.
-  await admin.from("vendors").insert({
-    owner_id: userId,
-    slug,
-    name,
-    category: "",
-  });
+  const insert = { owner_id: userId, slug, name, category: "" };
+  const { error } = await admin
+    .from("vendors")
+    .insert({ ...insert, status: "pending" });
+  if (error) await admin.from("vendors").insert(insert);
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Marketplace } from "@/components/vendors/marketplace";
 import { DividerOrnament } from "@/components/brand/motifs";
-import { getVendors } from "@/lib/db/vendors";
+import { getPublicVendors } from "@/lib/db/vendors";
 
 export const metadata: Metadata = {
   title: "Vendor Marketplace · Kalyanam & Co.",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function VendorsPage() {
-  const vendors = await getVendors();
+  const vendors = await getPublicVendors();
   return (
     <>
       <section className="bg-forest-900 pb-16 pt-36 text-center">
