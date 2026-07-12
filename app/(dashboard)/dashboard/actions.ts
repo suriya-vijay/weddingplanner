@@ -6,6 +6,7 @@ import * as guestsDb from "@/lib/db/guests";
 import * as budgetDb from "@/lib/db/budget";
 import * as checklistDb from "@/lib/db/checklist";
 import * as timelineDb from "@/lib/db/timeline";
+import { saveVenueLayout, type VenueData } from "@/lib/db/venue";
 import { sendEnquiryMessage, type EnquiryMessage } from "@/lib/db/enquiry-chat";
 import { buildAdvisorSystemPrompt } from "@/lib/ai/system-prompt";
 import { generateTimelineMilestones } from "@/lib/ai/gemini";
@@ -147,6 +148,15 @@ export async function suggestTimelineAction(): Promise<{
   );
   revalidatePath("/dashboard/timeline");
   return { ok: true, milestones };
+}
+
+// ── Venue layout ────────────────────────────────────────────────
+export async function saveVenueAction(
+  data: VenueData,
+): Promise<{ ok: boolean }> {
+  const weddingId = await myWeddingId();
+  if (!weddingId) return { ok: false };
+  return saveVenueLayout(weddingId, data);
 }
 
 // ── Enquiry chat (couple side) ──────────────────────────────────
