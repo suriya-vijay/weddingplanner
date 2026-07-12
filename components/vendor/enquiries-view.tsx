@@ -4,8 +4,13 @@ import { useMemo, useState } from "react";
 import { Inbox } from "lucide-react";
 import { Panel, StatTile } from "@/components/dashboard/ui";
 import { cn } from "@/lib/utils";
+import { EnquiryThread } from "@/components/enquiry/enquiry-thread";
 import { type VendorEnquiry, type EnquiryStatus } from "@/lib/mock-data";
-import { setEnquiryStatusAction } from "@/app/(vendor)/vendor/actions";
+import type { EnquiryMessage } from "@/lib/db/enquiry-chat";
+import {
+  setEnquiryStatusAction,
+  sendVendorMessageAction,
+} from "@/app/(vendor)/vendor/actions";
 
 const STATUS_ORDER: EnquiryStatus[] = ["New", "Replied", "Booked", "Closed"];
 const STATUS_TONE: Record<EnquiryStatus, string> = {
@@ -25,11 +30,14 @@ function fmt(iso: string) {
 
 export function EnquiriesView({
   initialEnquiries,
+  threads,
 }: {
   initialEnquiries: VendorEnquiry[];
+  threads: Record<string, EnquiryMessage[]>;
 }) {
   const [rows, setRows] = useState<VendorEnquiry[]>(initialEnquiries);
   const [filter, setFilter] = useState<EnquiryStatus | "All">("All");
+  const [openThread, setOpenThread] = useState<string | null>(null);
 
   const counts = useMemo(() => {
     const c = { New: 0, Replied: 0, Booked: 0, Closed: 0 };
@@ -118,6 +126,27 @@ export function EnquiriesView({
               >
                 {e.status}
               </button>
+            </div>
+
+            <div className="mt-3 border-t border-border/60 pt-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenThread(openThread === e.id ? null : e.id)
+                }
+                className="text-sm font-medium text-forest-700 hover:text-gold-600"
+              >
+                {openThread === e.id ? "Hide conversation" : "Reply / conversation"}
+              </button>
+              {openThread === e.id && (
+                <div className="mt-3">
+                  <EnquiryThread
+                    me="vendor"
+                    initialMessages={threads[e.id] ?? []}
+                    onSend={(body) => sendVendorMessageAction(e.id, body)}
+                  />
+                </div>
+              )}
             </div>
           </Panel>
         ))}

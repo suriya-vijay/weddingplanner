@@ -6,6 +6,7 @@ import * as guestsDb from "@/lib/db/guests";
 import * as budgetDb from "@/lib/db/budget";
 import * as checklistDb from "@/lib/db/checklist";
 import * as timelineDb from "@/lib/db/timeline";
+import { sendEnquiryMessage, type EnquiryMessage } from "@/lib/db/enquiry-chat";
 import { buildAdvisorSystemPrompt } from "@/lib/ai/system-prompt";
 import { generateTimelineMilestones } from "@/lib/ai/gemini";
 import type {
@@ -146,6 +147,16 @@ export async function suggestTimelineAction(): Promise<{
   );
   revalidatePath("/dashboard/timeline");
   return { ok: true, milestones };
+}
+
+// ── Enquiry chat (couple side) ──────────────────────────────────
+export async function sendCoupleMessageAction(
+  enquiryId: string,
+  body: string,
+): Promise<EnquiryMessage | null> {
+  const text = body.trim();
+  if (!text) return null;
+  return sendEnquiryMessage(enquiryId, "couple", text);
 }
 
 // ── Wedding profile (settings) ──────────────────────────────────

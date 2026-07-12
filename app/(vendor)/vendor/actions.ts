@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getMyVendor } from "@/lib/db/vendor-portal";
+import {
+  sendEnquiryMessage,
+  type EnquiryMessage,
+} from "@/lib/db/enquiry-chat";
 import type { VendorPackage, EnquiryStatus } from "@/lib/mock-data";
 
 /** Resolve the signed-in vendor's own vendor id (RLS-scoped). */
@@ -74,4 +78,14 @@ export async function setEnquiryStatusAction(
 ): Promise<void> {
   const supabase = await createClient();
   await supabase.from("vendor_enquiries").update({ status }).eq("id", id);
+}
+
+/** Vendor posts a reply in an enquiry thread (RLS scopes to the vendor owner). */
+export async function sendVendorMessageAction(
+  enquiryId: string,
+  body: string,
+): Promise<EnquiryMessage | null> {
+  const text = body.trim();
+  if (!text) return null;
+  return sendEnquiryMessage(enquiryId, "vendor", text);
 }

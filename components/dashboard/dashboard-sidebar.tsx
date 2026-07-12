@@ -8,6 +8,7 @@ import {
   Wallet,
   CalendarClock,
   Users,
+  MessageCircle,
   Sparkles,
   Settings,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const NAV = [
   { label: "Budget", href: "/dashboard/budget", icon: Wallet },
   { label: "Timeline", href: "/dashboard/timeline", icon: CalendarClock },
   { label: "Guests", href: "/dashboard/guests", icon: Users },
+  { label: "Messages", href: "/dashboard/enquiries", icon: MessageCircle },
   { label: "AI Advisor", href: "/dashboard/advisor", icon: Sparkles },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
