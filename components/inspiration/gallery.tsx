@@ -2,28 +2,20 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Heart, MapPin, X } from "lucide-react";
+import { Heart, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isImageUrl } from "@/components/ui/plate";
-import {
-  ceremonies,
-  traditions,
-  colorThemes,
-  budgetTiers,
-  locations,
-} from "@/lib/mock-data";
+import { ceremonies, traditions, colorThemes } from "@/lib/mock-data";
 import type { GalleryItem } from "@/lib/db/inspiration";
 
 type InspirationItem = GalleryItem;
 
-type FilterKey = "ceremony" | "tradition" | "color" | "budget" | "location";
+type FilterKey = "ceremony" | "tradition" | "color";
 
 const FILTER_GROUPS: { key: FilterKey; label: string; options: readonly string[] }[] = [
   { key: "ceremony", label: "Ceremony", options: ceremonies },
   { key: "tradition", label: "Tradition", options: traditions },
   { key: "color", label: "Colour", options: colorThemes },
-  { key: "budget", label: "Budget", options: budgetTiers },
-  { key: "location", label: "Location", options: locations },
 ];
 
 /**
@@ -206,25 +198,12 @@ function GalleryCard({
         />
       </button>
 
-      {/* Caption + vendor tags */}
+      {/* Caption */}
       <div className="absolute inset-x-0 bottom-0 p-5">
         <span className="text-xs font-medium uppercase tracking-wider text-gold-400">
-          {item.tradition} · {item.budget}
+          {item.tradition} · {item.color}
         </span>
         <h3 className="mt-1 font-serif text-xl text-cream">{item.title}</h3>
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-cream/75">
-          <MapPin className="h-3.5 w-3.5" /> {item.location}
-        </p>
-        <div className="mt-3 flex flex-wrap gap-1.5 opacity-0 transition-opacity duration-[var(--dur-base)] group-hover:opacity-100">
-          {item.vendors.map((v) => (
-            <span
-              key={v}
-              className="rounded-full bg-forest-900/35 px-2.5 py-1 text-xs text-cream"
-            >
-              {v}
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   );

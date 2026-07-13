@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin, Palette, Sparkles, Store } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Palette, Sparkles } from "lucide-react";
 import { Plate } from "@/components/ui/plate";
 import { Reveal } from "@/components/ui/reveal";
 import { DividerOrnament } from "@/components/brand/motifs";
 import { getInspirationById } from "@/lib/db/inspiration";
-import { getPublicVendors } from "@/lib/db/vendors";
 
 export async function generateMetadata({
   params,
@@ -19,15 +17,14 @@ export async function generateMetadata({
   if (!item) return { title: "Inspiration · Kalyanam & Co." };
   return {
     title: `${item.title} · Inspiration · Kalyanam & Co.`,
-    description: `${item.tradition} ${item.ceremony} in ${item.location} — ${item.color}.`,
+    description: `${item.tradition} ${item.ceremony} — ${item.color}.`,
   };
 }
 
 /**
- * Inspiration "slide deck" detail. A curated, click-through spread of what this
- * theme could look like — hero + facts + palette + tagged vendors. Images are
- * the item's uploaded photo or its gradient plate (real photography lands as
- * admins upload it). No AI image generation yet.
+ * Inspiration detail — a curated visual spread of a theme (hero image, a few
+ * real attributes, and the palette). Purely inspirational: no invented vendors,
+ * locations, or budgets.
  */
 export default async function InspirationDetailPage({
   params,
@@ -38,21 +35,11 @@ export default async function InspirationDetailPage({
   const item = await getInspirationById(id);
   if (!item) notFound();
 
-  // Map tagged vendor NAMES → their marketplace slugs (best-effort).
-  const vendors = await getPublicVendors();
-  const byName = new Map(vendors.map((v) => [v.name.toLowerCase(), v.slug]));
-  const taggedVendors = item.vendors.map((name) => ({
-    name,
-    slug: byName.get(name.toLowerCase()) ?? null,
-  }));
-
   const facts = [
     { label: "Ceremony", value: item.ceremony },
     { label: "Tradition", value: item.tradition },
     { label: "Palette", value: item.color },
-    { label: "Budget", value: item.budget },
-    { label: "Location", value: item.location },
-  ];
+  ].filter((f) => f.value);
 
   return (
     <article className="pb-24">
@@ -78,29 +65,28 @@ export default async function InspirationDetailPage({
           <h1 className="mt-2 font-serif text-4xl text-cream sm:text-5xl">
             {item.title}
           </h1>
-          <p className="mt-2 flex items-center gap-1.5 text-cream/80">
-            <MapPin className="h-4 w-4" /> {item.location}
-          </p>
         </div>
       </div>
 
       <div className="container-luxe">
         {/* Facts slide */}
-        <Reveal>
-          <section className="mt-10 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {facts.map((f) => (
-              <div
-                key={f.label}
-                className="rounded-2xl border border-border bg-ivory p-4 text-center shadow-[var(--shadow-xs)]"
-              >
-                <p className="text-xs uppercase tracking-wider text-ink-faint">
-                  {f.label}
-                </p>
-                <p className="mt-1 font-serif text-lg text-ink">{f.value}</p>
-              </div>
-            ))}
-          </section>
-        </Reveal>
+        {facts.length > 0 && (
+          <Reveal>
+            <section className="mt-10 grid gap-4 sm:grid-cols-3">
+              {facts.map((f) => (
+                <div
+                  key={f.label}
+                  className="rounded-2xl border border-border bg-ivory p-4 text-center shadow-[var(--shadow-xs)]"
+                >
+                  <p className="text-xs uppercase tracking-wider text-ink-faint">
+                    {f.label}
+                  </p>
+                  <p className="mt-1 font-serif text-lg text-ink">{f.value}</p>
+                </div>
+              ))}
+            </section>
+          </Reveal>
+        )}
 
         <DividerOrnament className="my-14" />
 
@@ -113,13 +99,13 @@ export default async function InspirationDetailPage({
               </h2>
               <p className="mt-4 text-lg leading-relaxed text-ink-soft">
                 Picture <strong className="text-ink">{item.title}</strong> — a{" "}
-                {item.tradition.toLowerCase()} {item.ceremony.toLowerCase()} in{" "}
-                {item.location}, dressed in {item.color.toLowerCase()} tones. It&apos;s
-                a {item.budget} celebration designed to feel unmistakably yours:
-                the light, the florals, the rituals, all in harmony.
+                {item.tradition.toLowerCase()} {item.ceremony.toLowerCase()},
+                dressed in {item.color.toLowerCase()} tones and designed to feel
+                unmistakably yours: the light, the florals, the rituals, all in
+                harmony.
               </p>
               <p className="mt-4 text-lg leading-relaxed text-ink-soft">
-                Save it to a mood board, then hire the very team behind the look.
+                Save it to a mood board to shape your own celebration.
               </p>
             </section>
           </Reveal>
@@ -138,37 +124,6 @@ export default async function InspirationDetailPage({
             </section>
           </Reveal>
         </div>
-
-        {/* Vendors slide */}
-        {taggedVendors.length > 0 && (
-          <>
-            <DividerOrnament className="my-14" />
-            <Reveal>
-              <section>
-                <h2 className="flex items-center gap-2 font-serif text-2xl text-ink">
-                  <Store className="h-5 w-5 text-gold-600" /> The team behind it
-                </h2>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {taggedVendors.map((v) =>
-                    v.slug ? (
-                      <Link
-                        key={v.name}
-                        href={`/vendors/${v.slug}`}
-                        className="rounded-full border border-border-strong bg-ivory px-4 py-2 text-sm text-forest-700 transition-colors hover:border-gold-400 hover:text-gold-600"
-                      >
-                        {v.name}
-                      </Link>
-                    ) : (
-                      <Badge key={v.name} tone="forest">
-                        {v.name}
-                      </Badge>
-                    ),
-                  )}
-                </div>
-              </section>
-            </Reveal>
-          </>
-        )}
 
         <div className="mt-16 flex flex-wrap gap-4">
           <Link
