@@ -155,20 +155,59 @@ export function VenueCanvas({
   const renameShape = (id: string, label: string) =>
     setShapes((prev) => prev.map((s) => (s.id === id ? { ...s, label } : s)));
 
+  const setCapacity = (id: string, seatsVal: number) =>
+    setShapes((prev) =>
+      prev.map((s) =>
+        s.id === id ? { ...s, seats: Math.max(1, seatsVal) } : s,
+      ),
+    );
+
+  // Head-count sum for a table (a party of 3 counts as 3 seats).
+  const headcountAt = useCallback(
+    (tableId: string) =>
+      (seats[tableId] ?? []).reduce(
+        (n, gid) => n + (guests.find((g) => g.id === gid)?.count ?? 1),
+        0,
+      ),
+    [seats, guests],
+  );
+
   // Seating: which guests are seated anywhere.
   const seatedIds = new Set(Object.values(seats).flat());
   const unseated = guests.filter((g) => !seatedIds.has(g.id));
 
-  const seatGuest = useCallback((tableId: string, guestId: string) => {
-    setSeats((prev) => {
-      const next: Record<string, string[]> = {};
-      // Remove from any table first (one seat per guest).
-      for (const [tid, ids] of Object.entries(prev))
-        next[tid] = ids.filter((x) => x !== guestId);
-      next[tableId] = [...(next[tableId] ?? []), guestId];
-      return next;
-    });
-  }, []);
+  // Brief "table full" hint (tableId), auto-clears.
+  const [fullHint, setFullHint] = useState<string | null>(null);
+
+  const seatGuest = useCallback(
+    (tableId: string, guestId: string) => {
+      const table = shapes.find((s) => s.id === tableId);
+      const guest = guests.find((g) => g.id === guestId);
+      if (!table || !guest) return;
+      const cap = table.seats ?? 8;
+      const already = (seats[tableId] ?? []).includes(guestId);
+      // Current head count minus this guest if they're already here (a no-op move).
+      const current =
+        (seats[tableId] ?? []).reduce(
+          (n, gid) => n + (guests.find((g) => g.id === gid)?.count ?? 1),
+          0,
+        ) - (already ? guest.count : 0);
+      if (current + guest.count > cap) {
+        setFullHint(tableId);
+        setTimeout(() => setFullHint(null), 1800);
+        return; // reject: would exceed capacity
+      }
+      setSeats((prev) => {
+        const next: Record<string, string[]> = {};
+        // Remove from any table first (one seat per guest).
+        for (const [tid, ids] of Object.entries(prev))
+          next[tid] = ids.filter((x) => x !== guestId);
+        next[tableId] = [...(next[tableId] ?? []), guestId];
+        return next;
+      });
+    },
+    [shapes, guests, seats],
+  );
 
   const unseatGuest = (guestId: string) =>
     setSeats((prev) => {
@@ -244,7 +283,8 @@ export function VenueCanvas({
           )}
           {shapes.map((s) => {
             const isTable = s.type === "table";
-            const seated = seats[s.id]?.length ?? 0;
+            const seated = isTable ? headcountAt(s.id) : 0;
+            const isFull = fullHint === s.id;
             return (
               <div
                 key={s.id}
@@ -266,10 +306,11 @@ export function VenueCanvas({
                   isTable && "rounded-full",
                   SHAPE_TONE[s.type],
                   selected === s.id && "ring-2 ring-gold-500 ring-offset-1",
+                  isFull && "ring-2 ring-destructive ring-offset-1",
                 )}
               >
                 <span className="pointer-events-none px-1 leading-tight">
-                  {s.label}
+                  {isFull ? "Table full" : s.label}
                   {isTable && (
                     <span className="mt-0.5 block text-[0.65rem] opacity-80">
                       {seated}/{s.seats ?? 8}
@@ -293,9 +334,24 @@ export function VenueCanvas({
               />
               {selectedShape.type === "table" && (
                 <div className="mt-3">
-                  <p className="text-xs text-ink-faint">
-                    Seated: {seats[selectedShape.id]?.length ?? 0}/
-                    {selectedShape.seats ?? 8}
+                  <label className="flex items-center justify-between gap-2 text-xs text-ink-soft">
+                    <span>Seats at this table</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={selectedShape.seats ?? 8}
+                      onChange={(e) =>
+                        setCapacity(
+                          selectedShape.id,
+                          Number(e.target.value) || 1,
+                        )
+                      }
+                      className="h-8 w-16 rounded-md border border-border-strong bg-ivory px-2 text-sm text-ink focus:border-gold-400 focus:outline-2 focus:outline-offset-1 focus:outline-gold-500"
+                    />
+                  </label>
+                  <p className="mt-2 text-xs text-ink-faint">
+                    Seated: {headcountAt(selectedShape.id)}/
+                    {selectedShape.seats ?? 8} people
                   </p>
                   <ul className="mt-2 space-y-1">
                     {(seats[selectedShape.id] ?? []).map((gid) => {
