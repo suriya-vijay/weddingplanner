@@ -56,8 +56,8 @@ export function FeaturedWeddings() {
 
 function WeddingCard({ wedding }: { wedding: FeaturedWedding }) {
   return (
-    <a
-      href="#"
+    <Link
+      href="/inspiration"
       className={cn(
         "group relative block h-full min-h-[16rem] overflow-hidden rounded-3xl shadow-[var(--shadow-md)] ring-1 ring-forest-900/5 transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-2 hover:shadow-[var(--shadow-lg)]",
         wedding.large && "min-h-[22rem]",
@@ -91,19 +91,7 @@ function WeddingCard({ wedding }: { wedding: FeaturedWedding }) {
           <MapPin className="h-4 w-4" aria-hidden />
           {wedding.location}
         </p>
-
-        {/* Vendor tags reveal on hover (UX Bible §2) */}
-        <div className="mt-4 flex flex-wrap gap-2 opacity-0 transition-opacity duration-[var(--dur-base)] group-hover:opacity-100">
-          {wedding.vendors.map((v) => (
-            <span
-              key={v}
-              className="rounded-full bg-forest-900/35 px-3 py-1 text-xs text-cream"
-            >
-              {v}
-            </span>
-          ))}
-        </div>
       </div>
-    </a>
+    </Link>
   );
 }

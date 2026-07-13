@@ -260,18 +260,30 @@ export default async function VendorProfilePage({
                   <MapPin className="h-4 w-4 text-gold-600" /> Serves:{" "}
                   {vendor.serviceAreas.join(", ")}
                 </p>
-                <a
-                  href="#"
-                  className="flex items-center gap-2 text-forest-700 hover:text-gold-600"
-                >
-                  <InstagramIcon className="h-4 w-4" /> {vendor.instagram}
-                </a>
-                <a
-                  href="#"
-                  className="flex items-center gap-2 text-forest-700 hover:text-gold-600"
-                >
-                  <Globe className="h-4 w-4" /> {vendor.website}
-                </a>
+                {vendor.instagram && (
+                  <a
+                    href={`https://instagram.com/${vendor.instagram.replace(/^@/, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-forest-700 hover:text-gold-600"
+                  >
+                    <InstagramIcon className="h-4 w-4" /> {vendor.instagram}
+                  </a>
+                )}
+                {vendor.website && (
+                  <a
+                    href={
+                      vendor.website.startsWith("http")
+                        ? vendor.website
+                        : `https://${vendor.website}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-forest-700 hover:text-gold-600"
+                  >
+                    <Globe className="h-4 w-4" /> {vendor.website}
+                  </a>
+                )}
               </div>
             </div>
           </aside>

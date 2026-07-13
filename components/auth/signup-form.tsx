@@ -179,14 +179,8 @@ export function SignupForm() {
             />
             <span>
               I agree to the{" "}
-              <a href="#" className="text-forest-700 underline-offset-2 hover:underline">
-                Terms
-              </a>{" "}
-              and{" "}
-              <a href="#" className="text-forest-700 underline-offset-2 hover:underline">
-                Privacy Policy
-              </a>
-              .
+              <span className="text-forest-700">Terms</span> and{" "}
+              <span className="text-forest-700">Privacy Policy</span>.
             </span>
           </label>
           {errors.agree && (
