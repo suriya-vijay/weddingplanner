@@ -47,7 +47,7 @@ function toProfile(v: VendorRow): MyVendor {
     rating: Number(v.rating),
     reviews: v.reviews,
     startingAt: v.starting_at,
-    priceTier: (v.price_tier as VendorProfile["priceTier"]) || "₹₹",
+    priceTier: (v.price_tier as VendorProfile["priceTier"]) || "$$",
     verified: v.verified,
     styles: v.styles ?? [],
     about: v.about,

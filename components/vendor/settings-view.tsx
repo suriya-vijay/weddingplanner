@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import type { VendorProfile } from "@/lib/mock-data";
 import { updateVendorProfileAction } from "@/app/(vendor)/vendor/actions";
 
-const PRICE_TIERS = ["₹", "₹₹", "₹₹₹", "₹₹₹₹"];
+const PRICE_TIERS = ["$", "$$", "$$$", "$$$$"];
 
 /**
  * Vendor Settings — the "business terms" (price tier, starting price,
@@ -86,7 +86,7 @@ export function VendorSettingsView({ vendor }: { vendor: VendorProfile }) {
             <Input
               value={startingAt}
               onChange={(e) => setStartingAt(e.target.value)}
-              placeholder="e.g. ₹45,000"
+              placeholder="e.g. $45,000"
             />
           </label>
           <label className="block space-y-1.5 sm:col-span-2">

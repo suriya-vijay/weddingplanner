@@ -241,7 +241,7 @@ function AddItemDialog({
             <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Description" />
           </Field>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Estimated (₹)">
+            <Field label="Estimated ($)">
               <Input
                 type="number"
                 inputMode="numeric"
@@ -250,7 +250,7 @@ function AddItemDialog({
                 placeholder="0"
               />
             </Field>
-            <Field label="Spent (₹)">
+            <Field label="Spent ($)">
               <Input
                 type="number"
                 inputMode="numeric"

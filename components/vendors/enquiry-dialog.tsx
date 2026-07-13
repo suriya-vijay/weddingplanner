@@ -155,7 +155,7 @@ function EnquiryDialog({
                 <Input
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
-                  placeholder="e.g. ₹5–8 lakh"
+                  placeholder="e.g. $5,000–8,000"
                 />
               </Field>
             </div>

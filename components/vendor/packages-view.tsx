@@ -143,7 +143,7 @@ function PackageDialog({
     onSave({
       id: initial?.id ?? `pkg-${Date.now()}`,
       name: name.trim() || "New package",
-      price: price.trim() || "₹—",
+      price: price.trim() || "$—",
       features: features
         .split("\n")
         .map((f) => f.trim())
@@ -174,7 +174,7 @@ function PackageDialog({
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-ink">Price</span>
-            <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. ₹6,50,000" />
+            <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. $6,50,000" />
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-ink">

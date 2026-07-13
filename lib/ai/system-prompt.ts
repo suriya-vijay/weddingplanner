@@ -27,21 +27,21 @@ export async function buildAdvisorSystemPrompt(): Promise<string | null> {
   const doneTasks = checklist.filter((c) => c.done).length;
   const openTasks = checklist.filter((c) => !c.done);
 
-  const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+  const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
   return [
     "You are the Kalyanam & Co. Wedding Advisor — a warm, knowledgeable planning",
     "assistant for Indian weddings. Be concise, practical, and encouraging. Give",
     "specific, culturally-aware advice (ceremonies, vendors, budgets, timelines).",
     "Use the couple's real details below; don't invent facts not given. Amounts",
-    "are in Indian Rupees. If asked something outside wedding planning, gently",
+    "are in US dollars. If asked something outside wedding planning, gently",
     "steer back.",
     "",
     "── This couple's wedding ──",
     describeWedding(wedding),
     `Guests: ${headcount} expected across ${guests.length} parties (${confirmed} confirmed).`,
     budget.length
-      ? `Budget: ${inr(totalSpent)} spent of ${inr(totalEstimated)} planned across ${budget.length} categories.`
+      ? `Budget: ${usd(totalSpent)} spent of ${usd(totalEstimated)} planned across ${budget.length} categories.`
       : "Budget: not set up yet.",
     `Checklist: ${doneTasks}/${checklist.length} tasks done.`,
     openTasks.length

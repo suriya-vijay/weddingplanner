@@ -22,7 +22,7 @@ const BLANK: Omit<InspirationItem, "id"> = {
   ceremony: "Mandap",
   tradition: "North Indian",
   color: "Forest & Gold",
-  budget: "₹₹₹",
+  budget: "$$$",
   location: "Udaipur",
   vendors: [],
   plate: "linear-gradient(135deg, #1b4332 0%, #2d6a4f 55%, #40916c 100%)",
@@ -278,7 +278,7 @@ function EditDialog({
             <Field label="Budget">
               <Select
                 value={draft.budget}
-                options={["₹", "₹₹", "₹₹₹", "₹₹₹₹"]}
+                options={["$", "$$", "$$$", "$$$$"]}
                 onChange={(v) => set("budget", v as InspirationItem["budget"])}
               />
             </Field>

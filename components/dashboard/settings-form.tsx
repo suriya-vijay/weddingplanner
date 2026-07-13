@@ -80,7 +80,7 @@ export function SettingsForm({ wedding }: { wedding: Wedding }) {
           <Field label="Guest estimate">
             <Input type="number" inputMode="numeric" value={guestEstimate} onChange={(e) => setGuestEstimate(e.target.value)} placeholder="e.g. 420" />
           </Field>
-          <Field label="Total budget (₹)">
+          <Field label="Total budget ($)">
             <Input type="number" inputMode="numeric" value={totalBudget} onChange={(e) => setTotalBudget(e.target.value)} placeholder="e.g. 8000000" />
           </Field>
         </div>

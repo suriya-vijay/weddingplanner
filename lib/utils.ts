@@ -5,10 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Compact Indian-rupee formatter, e.g. 1800000 → "₹18,00,000". */
-export function formatINR(amount: number): string {
-  return "₹" + amount.toLocaleString("en-IN");
+/** US-dollar formatter, e.g. 1800000 → "$1,800,000". */
+export function formatUSD(amount: number): string {
+  return "$" + amount.toLocaleString("en-US");
 }
+
+/** @deprecated use formatUSD — kept as an alias to avoid churn. */
+export const formatINR = formatUSD;
 
 /** Whole days from `today` (server-stable if you pass a fixed reference). */
 export function daysBetween(fromISO: string, toISO: string): number {

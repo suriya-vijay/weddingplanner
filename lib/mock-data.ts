@@ -91,7 +91,7 @@ export const popularVendors: Vendor[] = [
     location: "Mumbai",
     rating: 4.9,
     reviews: 218,
-    startingAt: "₹3,50,000",
+    startingAt: "$3,50,000",
     plate: plates.forest,
   },
   {
@@ -100,7 +100,7 @@ export const popularVendors: Vendor[] = [
     location: "Delhi NCR",
     rating: 4.8,
     reviews: 164,
-    startingAt: "₹6,00,000",
+    startingAt: "$6,00,000",
     plate: plates.gold,
   },
   {
@@ -109,7 +109,7 @@ export const popularVendors: Vendor[] = [
     location: "Jaipur",
     rating: 5.0,
     reviews: 97,
-    startingAt: "₹45,000",
+    startingAt: "$45,000",
     plate: plates.blush,
   },
   {
@@ -118,7 +118,7 @@ export const popularVendors: Vendor[] = [
     location: "Hyderabad",
     rating: 4.7,
     reviews: 301,
-    startingAt: "₹1,800 / plate",
+    startingAt: "$1,800 / plate",
     plate: plates.champagne,
   },
 ];
@@ -305,7 +305,7 @@ export const colorThemes = [
   "Champagne",
 ] as const;
 
-export const budgetTiers = ["₹", "₹₹", "₹₹₹", "₹₹₹₹"] as const;
+export const budgetTiers = ["$", "$$", "$$$", "$$$$"] as const;
 
 export const locations = [
   "Udaipur",
@@ -346,7 +346,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Mandap",
     tradition: "North Indian",
     color: "Forest & Gold",
-    budget: "₹₹₹₹",
+    budget: "$$$$",
     location: "Udaipur",
     vendors: ["Mandap Studio", "The Lighthouse Films"],
     plate: galleryPlates.dusk,
@@ -358,7 +358,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Mehendi",
     tradition: "Marwari",
     color: "Marigold",
-    budget: "₹₹",
+    budget: "$$",
     location: "Jaipur",
     vendors: ["House of Mehendi", "Gulaal Decor"],
     plate: galleryPlates.marigold,
@@ -370,7 +370,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Reception",
     tradition: "Punjabi · Sikh",
     color: "Blush & Ivory",
-    budget: "₹₹₹",
+    budget: "$$$",
     location: "Goa",
     vendors: ["Seaside Frames", "Petal & Pearl", "DJ Aurelius"],
     plate: galleryPlates.blush,
@@ -382,7 +382,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Pheras",
     tradition: "North Indian",
     color: "Royal Maroon",
-    budget: "₹₹₹₹",
+    budget: "$$$$",
     location: "Udaipur",
     vendors: ["Saffron Catering", "Mandap Studio"],
     plate: galleryPlates.maroon,
@@ -394,7 +394,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Sangeet",
     tradition: "Gujarati",
     color: "Peacock",
-    budget: "₹₹₹",
+    budget: "$$$",
     location: "Mumbai",
     vendors: ["DJ Aurelius", "Bloom & Co."],
     plate: galleryPlates.peacock,
@@ -406,7 +406,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Haldi",
     tradition: "South Indian",
     color: "Marigold",
-    budget: "₹",
+    budget: "$",
     location: "Kerala",
     vendors: ["House of Mehendi"],
     plate: galleryPlates.gold,
@@ -418,7 +418,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Reception",
     tradition: "Tamil",
     color: "Champagne",
-    budget: "₹₹₹₹",
+    budget: "$$$$",
     location: "Lake Como",
     vendors: ["Bloom & Co.", "The Lighthouse Films"],
     plate: galleryPlates.champagne,
@@ -430,7 +430,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Baraat",
     tradition: "Punjabi · Sikh",
     color: "Forest & Gold",
-    budget: "₹₹₹",
+    budget: "$$$",
     location: "Jaipur",
     vendors: ["Gulaal Decor", "DJ Aurelius"],
     plate: galleryPlates.emerald,
@@ -442,7 +442,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Pheras",
     tradition: "Bengali",
     color: "Blush & Ivory",
-    budget: "₹₹",
+    budget: "$$",
     location: "Mumbai",
     vendors: ["Anita Makeovers", "Seaside Frames"],
     plate: galleryPlates.ivory,
@@ -454,7 +454,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Mandap",
     tradition: "South Indian",
     color: "Forest & Gold",
-    budget: "₹₹₹₹",
+    budget: "$$$$",
     location: "Kerala",
     vendors: ["Mandap Studio", "Saffron Catering"],
     plate: galleryPlates.forest,
@@ -466,7 +466,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Sangeet",
     tradition: "Marwari",
     color: "Royal Maroon",
-    budget: "₹₹₹",
+    budget: "$$$",
     location: "Udaipur",
     vendors: ["DJ Aurelius", "Gulaal Decor"],
     plate: galleryPlates.rose,
@@ -478,7 +478,7 @@ export const inspirationItems: InspirationItem[] = [
     ceremony: "Reception",
     tradition: "Gujarati",
     color: "Champagne",
-    budget: "₹₹₹",
+    budget: "$$$",
     location: "Goa",
     vendors: ["Petal & Pearl", "Saffron Catering"],
     plate: galleryPlates.champagne,
@@ -512,7 +512,7 @@ export type VendorProfile = {
   rating: number;
   reviews: number;
   startingAt: string;
-  priceTier: "₹" | "₹₹" | "₹₹₹" | "₹₹₹₹";
+  priceTier: "$" | "$$" | "$$$" | "$$$$";
   verified: boolean;
   styles: string[];
   about: string;
@@ -593,16 +593,16 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Mumbai", "Goa", "Udaipur", "Destination"],
     rating: 4.9,
     reviews: 218,
-    startingAt: "₹3,50,000",
-    priceTier: "₹₹₹₹",
+    startingAt: "$3,50,000",
+    priceTier: "$$$$",
     verified: true,
     styles: ["Cinematic", "Editorial", "Candid"],
     about:
       "An award-winning studio crafting cinematic wedding films and editorial portraiture for luxury Indian celebrations across the globe. We tell your story with restraint, warmth and an eye for light.",
     packages: [
-      { name: "Essential", price: "₹3,50,000", features: ["1-day coverage", "2 photographers", "Online gallery"] },
-      { name: "Signature", price: "₹6,50,000", features: ["2-day coverage", "Film + photo", "Highlight reel", "Album"] },
-      { name: "Luxe", price: "₹12,00,000", features: ["Full multi-day", "Cinematic film", "Drone", "Fine-art album"] },
+      { name: "Essential", price: "$3,50,000", features: ["1-day coverage", "2 photographers", "Online gallery"] },
+      { name: "Signature", price: "$6,50,000", features: ["2-day coverage", "Film + photo", "Highlight reel", "Album"] },
+      { name: "Luxe", price: "$12,00,000", features: ["Full multi-day", "Cinematic film", "Drone", "Fine-art album"] },
     ],
     cover: gp.dusk,
     logoPlate: gp.forest,
@@ -621,15 +621,15 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Delhi NCR", "Jaipur", "Udaipur"],
     rating: 4.8,
     reviews: 164,
-    startingAt: "₹6,00,000",
-    priceTier: "₹₹₹₹",
+    startingAt: "$6,00,000",
+    priceTier: "$$$$",
     verified: true,
     styles: ["Regal", "Floral", "Contemporary"],
     about:
       "We design and build bespoke mandaps and immersive floral sets that turn venues into worlds. From heritage palaces to modern ballrooms, every structure is custom to your story.",
     packages: [
-      { name: "Ceremony", price: "₹6,00,000", features: ["Custom mandap", "Stage & aisle", "Floral install"] },
-      { name: "Full Event", price: "₹14,00,000", features: ["All functions", "Lighting design", "Seating & lounge"] },
+      { name: "Ceremony", price: "$6,00,000", features: ["Custom mandap", "Stage & aisle", "Floral install"] },
+      { name: "Full Event", price: "$14,00,000", features: ["All functions", "Lighting design", "Seating & lounge"] },
     ],
     cover: gp.gold,
     logoPlate: gp.maroon,
@@ -648,15 +648,15 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Jaipur", "Udaipur", "Delhi NCR"],
     rating: 5.0,
     reviews: 97,
-    startingAt: "₹45,000",
-    priceTier: "₹₹",
+    startingAt: "$45,000",
+    priceTier: "$$",
     verified: true,
     styles: ["Rajasthani", "Arabic", "Minimal"],
     about:
       "Heritage bridal mehendi with a modern sensibility — intricate, personal and photographed beautifully. Our artists travel with your celebration.",
     packages: [
-      { name: "Bridal", price: "₹45,000", features: ["Full bridal mehendi", "Trial session"] },
-      { name: "Bridal + Family", price: "₹90,000", features: ["Bridal", "Up to 10 guests", "On-site team"] },
+      { name: "Bridal", price: "$45,000", features: ["Full bridal mehendi", "Trial session"] },
+      { name: "Bridal + Family", price: "$90,000", features: ["Bridal", "Up to 10 guests", "On-site team"] },
     ],
     cover: gp.blush,
     logoPlate: gp.rose,
@@ -675,15 +675,15 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Hyderabad", "Mumbai", "Goa"],
     rating: 4.7,
     reviews: 301,
-    startingAt: "₹1,800 / plate",
-    priceTier: "₹₹₹",
+    startingAt: "$1,800 / plate",
+    priceTier: "$$$",
     verified: true,
     styles: ["Multi-cuisine", "Live counters", "Regional"],
     about:
       "From Awadhi to Chettinad, we bring regional Indian fine-dining to weddings of every scale, with live counters, plated services and impeccable hospitality.",
     packages: [
-      { name: "Classic", price: "₹1,800 / plate", features: ["3 cuisines", "Live counters", "Dessert bar"] },
-      { name: "Grand", price: "₹3,200 / plate", features: ["6 cuisines", "Plated + buffet", "Mixology"] },
+      { name: "Classic", price: "$1,800 / plate", features: ["3 cuisines", "Live counters", "Dessert bar"] },
+      { name: "Grand", price: "$3,200 / plate", features: ["6 cuisines", "Plated + buffet", "Mixology"] },
     ],
     cover: gp.champagne,
     logoPlate: gp.gold,
@@ -702,14 +702,14 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Jaipur", "Udaipur"],
     rating: 4.8,
     reviews: 142,
-    startingAt: "₹4,50,000",
-    priceTier: "₹₹₹",
+    startingAt: "$4,50,000",
+    priceTier: "$$$",
     verified: false,
     styles: ["Vibrant", "Traditional", "Boho"],
     about:
       "We love colour. Gulaal creates joyful, richly textured sets that celebrate Indian tradition with a fresh, editorial eye.",
     packages: [
-      { name: "Function", price: "₹4,50,000", features: ["Single function decor", "Florals", "Lighting"] },
+      { name: "Function", price: "$4,50,000", features: ["Single function decor", "Florals", "Lighting"] },
     ],
     cover: gp.rose,
     logoPlate: gp.maroon,
@@ -728,15 +728,15 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Mumbai", "Goa", "Destination"],
     rating: 4.9,
     reviews: 188,
-    startingAt: "₹1,20,000",
-    priceTier: "₹₹",
+    startingAt: "$1,20,000",
+    priceTier: "$$",
     verified: true,
     styles: ["Bollywood", "House", "Fusion"],
     about:
       "High-energy sangeets and refined reception sound. Aurelius reads the room and keeps the dancefloor full from first beat to last.",
     packages: [
-      { name: "Sangeet", price: "₹1,20,000", features: ["4-hour set", "Sound + lighting"] },
-      { name: "Full Weekend", price: "₹3,50,000", features: ["All functions", "MC", "Premium rig"] },
+      { name: "Sangeet", price: "$1,20,000", features: ["4-hour set", "Sound + lighting"] },
+      { name: "Full Weekend", price: "$3,50,000", features: ["All functions", "MC", "Premium rig"] },
     ],
     cover: gp.peacock,
     logoPlate: gp.forest,
@@ -755,15 +755,15 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Delhi NCR", "Jaipur", "Udaipur"],
     rating: 4.9,
     reviews: 210,
-    startingAt: "₹65,000",
-    priceTier: "₹₹₹",
+    startingAt: "$65,000",
+    priceTier: "$$$",
     verified: true,
     styles: ["Luminous", "Classic", "HD"],
     about:
       "Skin-first bridal makeup that photographs beautifully and lasts through every function. Trials, on-site team and family looks included.",
     packages: [
-      { name: "Bridal", price: "₹65,000", features: ["Bridal makeup + hair", "Trial"] },
-      { name: "Bridal + Party", price: "₹1,40,000", features: ["Bridal", "Up to 6 family", "On-site"] },
+      { name: "Bridal", price: "$65,000", features: ["Bridal makeup + hair", "Trial"] },
+      { name: "Bridal + Party", price: "$1,40,000", features: ["Bridal", "Up to 6 family", "On-site"] },
     ],
     cover: gp.blush,
     logoPlate: gp.rose,
@@ -782,14 +782,14 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Goa", "Kerala", "Destination"],
     rating: 4.8,
     reviews: 121,
-    startingAt: "₹2,80,000",
-    priceTier: "₹₹₹",
+    startingAt: "$2,80,000",
+    priceTier: "$$$",
     verified: false,
     styles: ["Candid", "Travel", "Documentary"],
     about:
       "Golden-hour specialists for beach and destination weddings. Relaxed, documentary coverage that feels like your celebration.",
     packages: [
-      { name: "Destination", price: "₹2,80,000", features: ["2-day coverage", "Travel included", "Gallery"] },
+      { name: "Destination", price: "$2,80,000", features: ["2-day coverage", "Travel included", "Gallery"] },
     ],
     cover: gp.champagne,
     logoPlate: gp.peacock,
@@ -808,15 +808,15 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Goa", "Mumbai"],
     rating: 4.9,
     reviews: 88,
-    startingAt: "₹2,00,000",
-    priceTier: "₹₹₹",
+    startingAt: "$2,00,000",
+    priceTier: "$$$",
     verified: true,
     styles: ["Fine-art", "Garden", "Modern"],
     about:
       "Seasonal, fine-art florals and tablescapes designed to feel effortless and abundant. We source the freshest blooms for every celebration.",
     packages: [
-      { name: "Ceremony Florals", price: "₹2,00,000", features: ["Aisle + mandap florals", "Bouquets"] },
-      { name: "Full Floral", price: "₹5,50,000", features: ["All functions", "Tablescapes", "Installations"] },
+      { name: "Ceremony Florals", price: "$2,00,000", features: ["Aisle + mandap florals", "Bouquets"] },
+      { name: "Full Floral", price: "$5,50,000", features: ["All functions", "Tablescapes", "Installations"] },
     ],
     cover: gp.blush,
     logoPlate: gp.forest,
@@ -835,14 +835,14 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Mumbai", "Lake Como", "Destination"],
     rating: 4.7,
     reviews: 76,
-    startingAt: "₹2,40,000",
-    priceTier: "₹₹₹",
+    startingAt: "$2,40,000",
+    priceTier: "$$$",
     verified: false,
     styles: ["Lush", "European", "Romantic"],
     about:
       "Romantic, European-inflected floral design for destination weddings — from Mumbai ballrooms to lakeside Italian villas.",
     packages: [
-      { name: "Destination Florals", price: "₹2,40,000", features: ["Travel floral team", "Ceremony + reception"] },
+      { name: "Destination Florals", price: "$2,40,000", features: ["Travel floral team", "Ceremony + reception"] },
     ],
     cover: gp.rose,
     logoPlate: gp.blush,
@@ -861,14 +861,14 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Udaipur"],
     rating: 4.9,
     reviews: 64,
-    startingAt: "₹18,00,000",
-    priceTier: "₹₹₹₹",
+    startingAt: "$18,00,000",
+    priceTier: "$$$$",
     verified: true,
     styles: ["Palace", "Lakeside", "Heritage"],
     about:
       "A heritage lakeside palace offering breathtaking backdrops, world-class hospitality and full-service celebration planning for up to 800 guests.",
     packages: [
-      { name: "Weekend Takeover", price: "₹18,00,000", features: ["Full venue", "120 rooms", "In-house catering"] },
+      { name: "Weekend Takeover", price: "$18,00,000", features: ["Full venue", "120 rooms", "In-house catering"] },
     ],
     cover: gp.dusk,
     logoPlate: gp.gold,
@@ -887,15 +887,15 @@ export const vendors: VendorProfile[] = [
     serviceAreas: ["Hyderabad", "Mumbai", "Delhi NCR"],
     rating: 4.8,
     reviews: 54,
-    startingAt: "₹90,000",
-    priceTier: "₹₹",
+    startingAt: "$90,000",
+    priceTier: "$$",
     verified: false,
     styles: ["Classical", "Fusion", "Sufi"],
     about:
       "Live classical, Sufi and fusion ensembles that bring soul to your ceremonies — from serene pheras to joyful baraats.",
     packages: [
-      { name: "Ceremony", price: "₹90,000", features: ["3-piece ensemble", "2-hour set"] },
-      { name: "Full Day", price: "₹2,20,000", features: ["Ensemble + vocals", "All functions"] },
+      { name: "Ceremony", price: "$90,000", features: ["3-piece ensemble", "2-hour set"] },
+      { name: "Full Day", price: "$2,20,000", features: ["Ensemble + vocals", "All functions"] },
     ],
     cover: gp.peacock,
     logoPlate: gp.maroon,
@@ -927,7 +927,7 @@ export type WeddingProfile = {
   tradition: string;
   guestEstimate: number;
   totalBudget: number;
-  currency: "₹";
+  currency: "$";
 };
 
 export const weddingProfile: WeddingProfile = {
@@ -940,7 +940,7 @@ export const weddingProfile: WeddingProfile = {
   tradition: "North Indian · Hindu",
   guestEstimate: 420,
   totalBudget: 8000000,
-  currency: "₹",
+  currency: "$",
 };
 
 /** Assigned human planner (a core PRD promise). */
@@ -1008,9 +1008,9 @@ export type BudgetItem = {
   id: string;
   category: string;
   label: string;
-  /** planned allocation, in ₹ */
+  /** planned allocation, in $ */
   estimated: number;
-  /** actually spent so far, in ₹ */
+  /** actually spent so far, in $ */
   spent: number;
   status: "Paid" | "Deposit paid" | "Not started";
 };
@@ -1112,7 +1112,7 @@ export const vendorEnquiries: VendorEnquiry[] = [
     eventDate: "2026-12-05",
     city: "Udaipur",
     functions: "Wedding + Reception",
-    budget: "₹10–12L",
+    budget: "$10–12L",
     status: "Booked",
     message: "Loved your Udaipur reel — we'd like the Luxe package for our palace wedding.",
   },
@@ -1123,7 +1123,7 @@ export const vendorEnquiries: VendorEnquiry[] = [
     eventDate: "2027-02-14",
     city: "Lake Como",
     functions: "Destination wedding",
-    budget: "₹8–10L",
+    budget: "$8–10L",
     status: "Replied",
     message: "Do you travel to Italy? Looking for cinematic film + photo for a 2-day event.",
   },
@@ -1134,7 +1134,7 @@ export const vendorEnquiries: VendorEnquiry[] = [
     eventDate: "2026-11-22",
     city: "Jaipur",
     functions: "Sangeet + Wedding",
-    budget: "₹6–8L",
+    budget: "$6–8L",
     status: "New",
     message: "Please share availability for late November and your Signature package details.",
   },
@@ -1145,7 +1145,7 @@ export const vendorEnquiries: VendorEnquiry[] = [
     eventDate: "2027-01-10",
     city: "Goa",
     functions: "Beach wedding",
-    budget: "₹5–6L",
+    budget: "$5–6L",
     status: "New",
     message: "We're planning a sunset beach ceremony — would love a quote.",
   },
@@ -1156,7 +1156,7 @@ export const vendorEnquiries: VendorEnquiry[] = [
     eventDate: "2026-10-18",
     city: "Mumbai",
     functions: "Reception only",
-    budget: "₹3–4L",
+    budget: "$3–4L",
     status: "Closed",
     message: "Went with another studio for our date — thank you!",
   },
