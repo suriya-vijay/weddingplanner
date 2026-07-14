@@ -103,9 +103,9 @@ export async function getPublicVendors(): Promise<VendorProfile[]> {
     .map((v) => toProfile(v, [], []));
 }
 
-/** All vendors WITH id + status — for the admin manager (approve/reject/delete). */
+/** All vendors WITH id + status + reason — for the admin manager (approve/reject/delete). */
 export async function getVendorsForAdmin(): Promise<
-  (VendorProfile & { id: string; status: string })[]
+  (VendorProfile & { id: string; status: string; rejectionReason: string })[]
 > {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -113,9 +113,12 @@ export async function getVendorsForAdmin(): Promise<
     .select("*")
     .order("name");
   if (error || !data) return [];
-  return (data as (VendorRow & { status?: string })[]).map((v) => ({
+  return (
+    data as (VendorRow & { status?: string; rejection_reason?: string })[]
+  ).map((v) => ({
     id: v.id,
     status: v.status ?? "approved",
+    rejectionReason: v.rejection_reason ?? "",
     ...toProfile(v, [], []),
   }));
 }

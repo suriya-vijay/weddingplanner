@@ -103,16 +103,35 @@ export async function deleteVendorAction(
 
 /**
  * Approve / reject a vendor for the public marketplace (status gate, 0008).
- * Approving also sets the verified badge; rejecting hides it (kept, not deleted,
- * so it can be reconsidered). Deletion is the separate hard-remove above.
+ * Approving sets the verified badge and clears any prior reason; rejecting
+ * hides the vendor and records the admin's reason (0009) so the vendor sees it
+ * in their portal and can fix + resubmit. Best-effort on rejection_reason so a
+ * pre-0009 DB still moderates. Deletion is the separate hard-remove above.
  */
 export async function setVendorStatusAction(
   id: string,
   status: "pending" | "approved" | "rejected",
+  reason = "",
 ): Promise<{ ok: boolean }> {
   const supabase = await createClient();
-  const patch: { status: string; verified?: boolean } = { status };
+  const patch: {
+    status: string;
+    verified?: boolean;
+    rejection_reason?: string;
+  } = { status, rejection_reason: status === "rejected" ? reason.trim() : "" };
   if (status === "approved") patch.verified = true;
+
   const { error } = await supabase.from("vendors").update(patch).eq("id", id);
-  return { ok: !error };
+  if (error) {
+    // Pre-0009 DB (no rejection_reason column): retry without it so status
+    // moderation still works.
+    const { rejection_reason: _omit, ...rest } = patch;
+    void _omit;
+    const { error: e2 } = await supabase
+      .from("vendors")
+      .update(rest)
+      .eq("id", id);
+    return { ok: !e2 };
+  }
+  return { ok: true };
 }

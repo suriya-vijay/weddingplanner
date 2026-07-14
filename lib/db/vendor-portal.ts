@@ -31,13 +31,21 @@ type VendorRow = {
   cover_url: string | null;
   logo_url: string | null;
   gallery_urls: string[] | null;
+  status?: string;
+  rejection_reason?: string;
 };
 
-export type MyVendor = VendorProfile & { id: string };
+export type MyVendor = VendorProfile & {
+  id: string;
+  status: string;
+  rejectionReason: string;
+};
 
 function toProfile(v: VendorRow): MyVendor {
   return {
     id: v.id,
+    status: v.status ?? "approved",
+    rejectionReason: v.rejection_reason ?? "",
     slug: v.slug,
     name: v.name,
     category: v.category,
@@ -207,19 +215,36 @@ export async function claimVendorForUser(
   const targetId = anyFree?.id as string | undefined;
 
   if (targetId) {
-    // Rebrand to the new vendor: their name/slug, blank story, fresh stats.
-    // status:'pending' → hidden from the public marketplace until an admin
-    // approves (0008). Best-effort on the status field so a pre-0008 DB still
-    // claims successfully.
+    // Rebrand to the new vendor: their name/slug + a TRULY blank profile. We
+    // must wipe EVERY seeded field (category/location/styles/images/etc.), not
+    // just the name — otherwise the vendor inherits the seeded row's Decor/
+    // Jaipur/styles/gallery. status:'pending' → hidden from the public
+    // marketplace until an admin approves (0008). Best-effort on the status
+    // field so a pre-0008 DB still claims successfully.
     const base = {
       owner_id: userId,
       name,
       slug,
       tagline: "",
       about: "",
+      category: "",
+      location: "",
+      instagram: "",
+      website: "",
+      availability: "",
+      starting_at: "",
+      price_tier: "$$",
       rating: 0,
       reviews: 0,
       verified: false,
+      styles: [] as string[],
+      service_areas: [] as string[],
+      gallery_plates: [] as string[],
+      gallery_urls: [] as string[],
+      cover_plate: "",
+      logo_plate: "",
+      cover_url: null as string | null,
+      logo_url: null as string | null,
     };
     const { error } = await admin
       .from("vendors")

@@ -53,6 +53,29 @@ export default async function VendorOverview() {
 
   return (
     <div className="space-y-8">
+      {vendor.status === "pending" && (
+        <div className="rounded-2xl border border-gold-300 bg-gold-100 px-5 py-4 text-gold-700">
+          <p className="font-medium">Your profile is under review</p>
+          <p className="mt-0.5 text-sm">
+            It&rsquo;ll go live on the marketplace once an admin approves it.
+          </p>
+        </div>
+      )}
+      {vendor.status === "rejected" && (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-5 py-4 text-destructive">
+          <p className="font-medium">Your profile wasn&rsquo;t approved</p>
+          <p className="mt-0.5 text-sm">
+            {vendor.rejectionReason
+              ? `Reason: ${vendor.rejectionReason}`
+              : "No reason was provided."}{" "}
+            <Link href="/vendor/profile" className="font-medium underline">
+              Update your profile
+            </Link>{" "}
+            and it&rsquo;ll be re-reviewed.
+          </p>
+        </div>
+      )}
+
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow text-gold-600">Vendor portal</p>

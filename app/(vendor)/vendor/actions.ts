@@ -15,6 +15,12 @@ async function myVendorId(): Promise<string | null> {
   return v?.id ?? null;
 }
 
+/** Resolve the signed-in vendor's row (id + status) in one fetch. */
+async function myVendor(): Promise<{ id: string; status: string } | null> {
+  const v = await getMyVendor();
+  return v ? { id: v.id, status: v.status } : null;
+}
+
 // ── Profile ─────────────────────────────────────────────────────
 export async function updateVendorProfileAction(patch: {
   name?: string;
@@ -32,10 +38,25 @@ export async function updateVendorProfileAction(patch: {
   starting_at?: string;
   availability?: string;
 }): Promise<{ ok: boolean }> {
-  const id = await myVendorId();
-  if (!id) return { ok: false };
+  const me = await myVendor();
+  if (!me) return { ok: false };
   const supabase = await createClient();
-  await supabase.from("vendors").update(patch).eq("id", id);
+
+  // A rejected vendor editing their profile resubmits it for review: flip
+  // back to 'pending' and clear the reason. Best-effort so a pre-0009/0008 DB
+  // still saves the profile edits.
+  const resubmit =
+    me.status === "rejected"
+      ? { status: "pending", rejection_reason: "" }
+      : {};
+
+  const { error } = await supabase
+    .from("vendors")
+    .update({ ...patch, ...resubmit })
+    .eq("id", me.id);
+  if (error && Object.keys(resubmit).length) {
+    await supabase.from("vendors").update(patch).eq("id", me.id);
+  }
   revalidatePath("/vendor", "layout");
   return { ok: true };
 }
