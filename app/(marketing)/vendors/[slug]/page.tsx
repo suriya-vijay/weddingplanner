@@ -48,10 +48,14 @@ export default async function VendorProfilePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const vendor = await getVendorBySlug(slug);
+  const session = await getSessionUser();
+  // Count a real view — but not when the vendor previews their own profile
+  // (or an admin browses it). Couples/anon visitors are genuine views.
+  const vendor = await getVendorBySlug(slug, {
+    countView: session?.role !== "vendor" && session?.role !== "admin",
+  });
   if (!vendor) notFound();
 
-  const session = await getSessionUser();
   const canEnquire = session?.role === "couple";
   const loginHref = `/login?next=/vendors/${slug}`;
 

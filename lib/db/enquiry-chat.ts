@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateWedding } from "@/lib/db/weddings";
+import { countUnread } from "@/lib/db/vendor-portal";
 
 /**
  * Enquiry chat: a message thread per vendor enquiry. RLS (0006) lets only the
@@ -65,6 +66,53 @@ export async function sendEnquiryMessage(
         createdAt: (data as { created_at: string }).created_at,
       }
     : null;
+}
+
+/**
+ * Count of the couple's enquiries with an UNREAD vendor reply — for the couple
+ * sidebar "Messages" badge. Unread = a vendor message newer than the couple's
+ * last_seen. (A brand-new enquiry the couple sent themselves is NOT unread.)
+ * Resilient: returns 0 if 0011 columns are absent.
+ */
+export async function getCoupleUnreadCount(): Promise<number> {
+  const supabase = await createClient();
+  const wedding = await getOrCreateWedding();
+  if (!wedding) return 0;
+
+  const { data: enquiries, error } = await supabase
+    .from("vendor_enquiries")
+    .select("id, created_at, couple_last_seen_at")
+    .eq("from_wedding_id", wedding.id);
+  if (error || !enquiries?.length) return 0;
+
+  const ids = enquiries.map((e: { id: string }) => e.id);
+  const { data: msgs } = await supabase
+    .from("enquiry_messages")
+    .select("enquiry_id, sender, created_at")
+    .in("enquiry_id", ids)
+    .eq("sender", "vendor");
+
+  return countUnread(
+    enquiries as Parameters<typeof countUnread>[0],
+    (msgs ?? []) as Parameters<typeof countUnread>[1],
+    "couple_last_seen_at",
+    false, // the couple's own enquiry isn't "unread" to them
+  );
+}
+
+/** Stamp all of the couple's enquiries as seen (clears the badge). Best-effort. */
+export async function markCoupleEnquiriesSeen(): Promise<void> {
+  const supabase = await createClient();
+  const wedding = await getOrCreateWedding();
+  if (!wedding) return;
+  try {
+    await supabase
+      .from("vendor_enquiries")
+      .update({ couple_last_seen_at: new Date().toISOString() })
+      .eq("from_wedding_id", wedding.id);
+  } catch {
+    // pre-0011 DB: column absent — no-op.
+  }
 }
 
 /** The signed-in couple's own enquiries (with the vendor's name/slug). */

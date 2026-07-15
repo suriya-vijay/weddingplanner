@@ -33,12 +33,14 @@ type VendorRow = {
   gallery_urls: string[] | null;
   status?: string;
   rejection_reason?: string;
+  profile_views?: number;
 };
 
 export type MyVendor = VendorProfile & {
   id: string;
   status: string;
   rejectionReason: string;
+  profileViews: number;
 };
 
 function toProfile(v: VendorRow): MyVendor {
@@ -46,6 +48,7 @@ function toProfile(v: VendorRow): MyVendor {
     id: v.id,
     status: v.status ?? "approved",
     rejectionReason: v.rejection_reason ?? "",
+    profileViews: v.profile_views ?? 0,
     slug: v.slug,
     name: v.name,
     category: v.category,
@@ -148,6 +151,82 @@ export async function getMyEnquiries(vendorId: string): Promise<VendorEnquiry[]>
     status: r.status as VendorEnquiry["status"],
     message: r.message,
   }));
+}
+
+/**
+ * Count of the vendor's enquiries that are UNREAD by the vendor — for the
+ * sidebar notification badge. Unread = a couple message newer than the vendor's
+ * last_seen, OR a brand-new enquiry (no vendor view yet) created after it.
+ * Resilient: if the 0011 columns are absent, returns 0 (no badge, no crash).
+ */
+export async function getVendorUnreadCount(vendorId: string): Promise<number> {
+  const supabase = await createClient();
+  const { data: enquiries, error } = await supabase
+    .from("vendor_enquiries")
+    .select("id, created_at, vendor_last_seen_at")
+    .eq("vendor_id", vendorId);
+  if (error || !enquiries?.length) return 0;
+
+  const ids = enquiries.map((e: { id: string }) => e.id);
+  const { data: msgs } = await supabase
+    .from("enquiry_messages")
+    .select("enquiry_id, sender, created_at")
+    .in("enquiry_id", ids)
+    .eq("sender", "couple");
+
+  return countUnread(
+    enquiries as SeenRow[],
+    (msgs ?? []) as MsgRow[],
+    "vendor_last_seen_at",
+    true, // a brand-new enquiry counts as unread for the vendor
+  );
+}
+
+/** Stamp all of this vendor's enquiries as seen (clears the badge). Best-effort. */
+export async function markVendorEnquiriesSeen(vendorId: string): Promise<void> {
+  const supabase = await createClient();
+  try {
+    await supabase
+      .from("vendor_enquiries")
+      .update({ vendor_last_seen_at: new Date().toISOString() })
+      .eq("vendor_id", vendorId);
+  } catch {
+    // pre-0011 DB: column absent — no-op.
+  }
+}
+
+type SeenRow = {
+  id: string;
+  created_at: string;
+  vendor_last_seen_at?: string | null;
+  couple_last_seen_at?: string | null;
+};
+type MsgRow = { enquiry_id: string; created_at: string };
+
+/**
+ * Shared unread tally: count enquiries where a message from the other party
+ * (or, if `newEnquiryCounts`, the enquiry itself) is newer than my last_seen.
+ */
+export function countUnread(
+  enquiries: SeenRow[],
+  otherMessages: MsgRow[],
+  seenKey: "vendor_last_seen_at" | "couple_last_seen_at",
+  newEnquiryCounts: boolean,
+): number {
+  const latestMsg = new Map<string, number>();
+  for (const m of otherMessages) {
+    const t = new Date(m.created_at).getTime();
+    const prev = latestMsg.get(m.enquiry_id) ?? 0;
+    if (t > prev) latestMsg.set(m.enquiry_id, t);
+  }
+  let count = 0;
+  for (const e of enquiries) {
+    const seen = e[seenKey] ? new Date(e[seenKey] as string).getTime() : 0;
+    const msgAt = latestMsg.get(e.id) ?? 0;
+    const enquiryAt = newEnquiryCounts ? new Date(e.created_at).getTime() : 0;
+    if (Math.max(msgAt, enquiryAt) > seen) count += 1;
+  }
+  return count;
 }
 
 /** Packages for the signed-in vendor's business (used by the packages page). */

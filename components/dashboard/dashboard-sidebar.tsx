@@ -30,7 +30,11 @@ const NAV = [
 ];
 
 /** Couple's dashboard sidebar — its own chrome (no public header/footer). */
-export function DashboardSidebar() {
+export function DashboardSidebar({
+  unreadEnquiries = 0,
+}: {
+  unreadEnquiries?: number;
+}) {
   const pathname = usePathname();
   return (
     <aside className="flex w-full shrink-0 flex-col gap-1 border-b border-cream/10 bg-forest-900 px-4 py-4 text-cream lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
@@ -64,6 +68,11 @@ export function DashboardSidebar() {
             >
               <Icon className="h-[1.15rem] w-[1.15rem]" />
               <span>{item.label}</span>
+              {item.href === "/dashboard/enquiries" && unreadEnquiries > 0 && (
+                <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-gold-500 px-1.5 text-xs font-semibold text-forest-900">
+                  {unreadEnquiries > 9 ? "9+" : unreadEnquiries}
+                </span>
+              )}
             </Link>
           );
         })}

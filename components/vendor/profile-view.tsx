@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Plate, isImageUrl } from "@/components/ui/plate";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Combobox } from "@/components/ui/combobox";
-import { INDIAN_CITIES } from "@/lib/data/indian-cities";
+import { US_CITIES } from "@/lib/data/us-cities";
 import type { VendorProfile } from "@/lib/mock-data";
 import { updateVendorProfileAction } from "@/app/(vendor)/vendor/actions";
 
@@ -153,8 +153,8 @@ export function VendorProfileView({
             <Combobox
               value={location}
               onChange={setLocation}
-              options={INDIAN_CITIES}
-              placeholder="e.g. Jaipur, Rajasthan"
+              options={US_CITIES}
+              placeholder="e.g. Fremont, CA"
             />
           </Field>
           <Field label="Instagram">
@@ -195,7 +195,7 @@ export function VendorProfileView({
           onChange={setServiceAreas}
           placeholder="Add a city or region…"
           tone="plain"
-          options={INDIAN_CITIES}
+          options={US_CITIES}
         />
       </Panel>
     </form>

@@ -6,7 +6,7 @@ import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
-import { INDIAN_CITIES } from "@/lib/data/indian-cities";
+import { US_CITIES } from "@/lib/data/us-cities";
 import { updateWeddingAction } from "@/app/(dashboard)/dashboard/actions";
 import type { Wedding } from "@/lib/db/weddings";
 
@@ -67,12 +67,12 @@ export function SettingsForm({ wedding }: { wedding: Wedding }) {
             <Combobox
               value={city}
               onChange={setCity}
-              options={INDIAN_CITIES}
-              placeholder="e.g. Udaipur, Rajasthan"
+              options={US_CITIES}
+              placeholder="e.g. Jersey City, NJ"
             />
           </Field>
           <Field label="Venue">
-            <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. The Grand Udaipur" />
+            <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. The Grand Ballroom" />
           </Field>
           <Field label="Tradition">
             <Input value={tradition} onChange={(e) => setTradition(e.target.value)} placeholder="e.g. North Indian · Hindu" />

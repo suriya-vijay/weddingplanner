@@ -104,8 +104,8 @@ export default async function VendorOverview() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile
           label="Profile views"
-          value="2,480"
-          sub="last 30 days"
+          value={vendor.profileViews.toLocaleString("en-US")}
+          sub="all time"
           icon={<Eye className="h-[1.1rem] w-[1.1rem]" />}
         />
         <StatTile

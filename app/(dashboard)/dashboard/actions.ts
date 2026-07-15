@@ -7,7 +7,11 @@ import * as budgetDb from "@/lib/db/budget";
 import * as checklistDb from "@/lib/db/checklist";
 import * as timelineDb from "@/lib/db/timeline";
 import { saveVenueLayout, type VenueData } from "@/lib/db/venue";
-import { sendEnquiryMessage, type EnquiryMessage } from "@/lib/db/enquiry-chat";
+import {
+  sendEnquiryMessage,
+  markCoupleEnquiriesSeen,
+  type EnquiryMessage,
+} from "@/lib/db/enquiry-chat";
 import { buildAdvisorSystemPrompt } from "@/lib/ai/system-prompt";
 import { generateTimelineMilestones } from "@/lib/ai/gemini";
 import type {
@@ -167,6 +171,12 @@ export async function sendCoupleMessageAction(
   const text = body.trim();
   if (!text) return null;
   return sendEnquiryMessage(enquiryId, "couple", text);
+}
+
+/** Mark all the couple's enquiries as seen (clears the sidebar badge). */
+export async function markCoupleEnquiriesSeenAction(): Promise<void> {
+  await markCoupleEnquiriesSeen();
+  revalidatePath("/dashboard", "layout");
 }
 
 // ── Wedding profile (settings) ──────────────────────────────────

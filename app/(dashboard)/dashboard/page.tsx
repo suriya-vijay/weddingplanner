@@ -63,7 +63,7 @@ export default async function DashboardOverview() {
   const saved = gallery.slice(0, 5);
 
   const prettyDate = wedding.date
-    ? new Date(wedding.date + "T00:00:00").toLocaleDateString("en-IN", {
+    ? new Date(wedding.date + "T00:00:00").toLocaleDateString("en-US", {
         day: "numeric",
         month: "long",
         year: "numeric",

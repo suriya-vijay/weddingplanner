@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MessageCircle, ChevronDown, ExternalLink } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { cn } from "@/lib/utils";
 import { EnquiryThread } from "@/components/enquiry/enquiry-thread";
 import type { CoupleEnquiry, EnquiryMessage } from "@/lib/db/enquiry-chat";
-import { sendCoupleMessageAction } from "@/app/(dashboard)/dashboard/actions";
+import {
+  sendCoupleMessageAction,
+  markCoupleEnquiriesSeenAction,
+} from "@/app/(dashboard)/dashboard/actions";
 
 const STATUS_TONE: Record<string, string> = {
   New: "bg-gold-100 text-gold-700",
@@ -26,6 +30,13 @@ export function CoupleEnquiries({
   const [open, setOpen] = useState<string | null>(
     enquiries.length ? enquiries[0].id : null,
   );
+  const router = useRouter();
+
+  // Landing here = the couple has seen their replies → clear the badge.
+  useEffect(() => {
+    markCoupleEnquiriesSeenAction().then(() => router.refresh());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="space-y-8">

@@ -16,7 +16,7 @@ import {
 
 function fmt(iso: string) {
   if (!iso) return "TBD";
-  return new Date(iso + "T00:00:00").toLocaleDateString("en-IN", {
+  return new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",

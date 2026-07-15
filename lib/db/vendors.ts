@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type {
   VendorProfile,
   VendorPackage,
@@ -34,6 +34,7 @@ type VendorRow = {
   cover_url: string | null;
   logo_url: string | null;
   gallery_urls: string[] | null;
+  profile_views?: number;
 };
 
 function toProfile(
@@ -130,6 +131,7 @@ export async function getVendorsForAdmin(): Promise<
  */
 export async function getVendorBySlug(
   slug: string,
+  opts: { countView?: boolean } = {},
 ): Promise<(VendorProfile & { id: string }) | null> {
   const supabase = await createClient();
   const { data: v } = await supabase
@@ -141,6 +143,21 @@ export async function getVendorBySlug(
   if (!isApproved(v as { status?: string })) return null;
 
   const row = v as VendorRow;
+
+  // Count a real profile view (only from the page render, never metadata).
+  // Anon visitors can't UPDATE vendors under RLS → use the service client.
+  // Best-effort: a pre-0010 DB (no profile_views column) just no-ops.
+  if (opts.countView) {
+    try {
+      const admin = createServiceClient();
+      await admin
+        .from("vendors")
+        .update({ profile_views: (row.profile_views ?? 0) + 1 })
+        .eq("id", row.id);
+    } catch {
+      // ignore — view counting must never break the public page
+    }
+  }
   const [{ data: pkgs }, { data: revs }] = await Promise.all([
     supabase
       .from("vendor_packages")

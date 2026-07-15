@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getMyVendor } from "@/lib/db/vendor-portal";
+import { getMyVendor, markVendorEnquiriesSeen } from "@/lib/db/vendor-portal";
 import {
   sendEnquiryMessage,
   type EnquiryMessage,
@@ -99,6 +99,14 @@ export async function setEnquiryStatusAction(
 ): Promise<void> {
   const supabase = await createClient();
   await supabase.from("vendor_enquiries").update({ status }).eq("id", id);
+}
+
+/** Mark all the vendor's enquiries as seen (clears the sidebar badge). */
+export async function markVendorEnquiriesSeenAction(): Promise<void> {
+  const id = await myVendorId();
+  if (!id) return;
+  await markVendorEnquiriesSeen(id);
+  revalidatePath("/vendor", "layout");
 }
 
 /** Vendor posts a reply in an enquiry thread (RLS scopes to the vendor owner). */

@@ -5,7 +5,7 @@ import { X, Send, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
-import { INDIAN_CITIES } from "@/lib/data/indian-cities";
+import { US_CITIES } from "@/lib/data/us-cities";
 import { sendEnquiryAction } from "@/app/(marketing)/vendors/actions";
 
 /**
@@ -140,8 +140,8 @@ function EnquiryDialog({
                 <Combobox
                   value={city}
                   onChange={setCity}
-                  options={INDIAN_CITIES}
-                  placeholder="e.g. Udaipur"
+                  options={US_CITIES}
+                  placeholder="e.g. Edison, NJ"
                 />
               </Field>
               <Field label="Functions">

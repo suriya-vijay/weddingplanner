@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Inbox } from "lucide-react";
 import { Panel, StatTile } from "@/components/dashboard/ui";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ import type { EnquiryMessage } from "@/lib/db/enquiry-chat";
 import {
   setEnquiryStatusAction,
   sendVendorMessageAction,
+  markVendorEnquiriesSeenAction,
 } from "@/app/(vendor)/vendor/actions";
 
 const STATUS_ORDER: EnquiryStatus[] = ["New", "Replied", "Booked", "Closed"];
@@ -22,7 +24,7 @@ const STATUS_TONE: Record<EnquiryStatus, string> = {
 
 function fmt(iso: string) {
   if (!iso) return "—";
-  return new Date(iso + "T00:00:00").toLocaleDateString("en-IN", {
+  return new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
   });
@@ -38,6 +40,13 @@ export function EnquiriesView({
   const [rows, setRows] = useState<VendorEnquiry[]>(initialEnquiries);
   const [filter, setFilter] = useState<EnquiryStatus | "All">("All");
   const [openThread, setOpenThread] = useState<string | null>(null);
+  const router = useRouter();
+
+  // Landing here = the vendor has seen their enquiries → clear the badge.
+  useEffect(() => {
+    markVendorEnquiriesSeenAction().then(() => router.refresh());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const counts = useMemo(() => {
     const c = { New: 0, Replied: 0, Booked: 0, Closed: 0 };
