@@ -5,6 +5,7 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { sendContactMessageAction } from "@/app/(marketing)/contact/actions";
 
 const INTERESTS = [
   "I'm planning a wedding",
@@ -14,9 +15,9 @@ const INTERESTS = [
 ] as const;
 
 /**
- * Contact form — UI only this phase. Plain-React validation (mirrors the auth
- * forms); on submit shows a friendly "not sent yet" notice. Real email delivery
- * arrives with the backend.
+ * Contact form. Plain-React validation (mirrors the auth forms); on submit the
+ * message is stored via a server action and appears in the admin inbox at
+ * /admin/messages. There is no outbound email yet — the admin reads it there.
  */
 export function ContactForm() {
   const [name, setName] = useState("");
@@ -26,6 +27,7 @@ export function ContactForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   function validate() {
     const next: Record<string, string> = {};
@@ -38,15 +40,28 @@ export function ContactForm() {
     return Object.keys(next).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSent(false);
+    setFailed(false);
     if (!validate()) return;
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    const res = await sendContactMessageAction({
+      name,
+      email,
+      interest,
+      message,
+    });
+    setSubmitting(false);
+    if (res.ok) {
       setSent(true);
-    }, 700);
+      // Clear so a second message doesn't resend the first.
+      setName("");
+      setEmail("");
+      setMessage("");
+    } else {
+      setFailed(true);
+    }
   }
 
   return (
@@ -104,9 +119,19 @@ export function ContactForm() {
       </Button>
 
       {sent && (
-        <p className="rounded-xl bg-gold-100 px-4 py-3 text-center text-sm text-gold-700">
-          Thank you — we’ve got your note. (Preview only: messages aren’t
-          delivered yet; email goes live with the backend.)
+        <p className="rounded-xl bg-forest-100 px-4 py-3 text-center text-sm text-forest-700">
+          Thank you — your message is with us. We&rsquo;ll get back to you at
+          the email you gave.
+        </p>
+      )}
+      {failed && (
+        <p className="rounded-xl bg-destructive/10 px-4 py-3 text-center text-sm text-destructive">
+          Something went wrong sending that. Please try again, or email us
+          directly at{" "}
+          <a href="mailto:hello@kalyanam.co" className="font-medium underline">
+            hello@kalyanam.co
+          </a>
+          .
         </p>
       )}
     </form>

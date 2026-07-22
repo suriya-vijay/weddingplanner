@@ -64,11 +64,15 @@ export async function updateSession(request: NextRequest) {
       url.searchParams.set("next", path);
       return NextResponse.redirect(url);
     }
+    // Deny by default. This used to read `if (role && role !== gate.role)`,
+    // which FAILED OPEN: a signed-in user with no role in their metadata (e.g.
+    // an account created outside signUpAction) matched nothing and was allowed
+    // straight into /admin.
     const role = (user.app_metadata?.role ??
       user.user_metadata?.role) as string | undefined;
-    if (role && role !== gate.role) {
+    if (role !== gate.role) {
       const url = request.nextUrl.clone();
-      url.pathname = HOME_FOR[role] ?? "/";
+      url.pathname = (role && HOME_FOR[role]) || "/";
       return NextResponse.redirect(url);
     }
   }

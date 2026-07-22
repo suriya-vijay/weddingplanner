@@ -135,7 +135,7 @@ export async function getVendorsForAdmin(): Promise<
 export async function getVendorBySlug(
   slug: string,
   opts: { countView?: boolean } = {},
-): Promise<(VendorProfile & { id: string }) | null> {
+): Promise<(VendorProfile & { id: string; status: string }) | null> {
   const supabase = await createClient();
   const { data: v } = await supabase
     .from("vendors")
@@ -143,7 +143,23 @@ export async function getVendorBySlug(
     .eq("slug", slug)
     .maybeSingle();
   if (!v) return null;
-  if (!isApproved(v as { status?: string })) return null;
+
+  // Non-approved listings are hidden from the public — EXCEPT from their own
+  // owner (and admins). The portal shows a "View public profile" button, and
+  // it used to 404 during the exact window a vendor is polishing their listing
+  // for review. They can preview; nobody else can.
+  if (!isApproved(v as { status?: string })) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const ownerId = (v as { owner_id?: string | null }).owner_id;
+    const role = (user?.app_metadata?.role ?? user?.user_metadata?.role) as
+      | string
+      | undefined;
+    const mayPreview =
+      !!user && (user.id === ownerId || role === "admin");
+    if (!mayPreview) return null;
+  }
 
   const row = v as VendorRow;
 
@@ -190,7 +206,11 @@ export async function getVendorBySlug(
           reviewList.length) * 10,
       ) / 10
     : 0;
-  return { id: row.id, ...profile };
+  return {
+    id: row.id,
+    status: (row as VendorRow & { status?: string }).status ?? "approved",
+    ...profile,
+  };
 }
 
 /** Slugs for generateStaticParams — but the marketplace is now dynamic, so

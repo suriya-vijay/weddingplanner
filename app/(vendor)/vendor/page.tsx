@@ -119,10 +119,11 @@ export default async function VendorOverview() {
             sub={`${vendorEnquiries.length} total leads`}
             icon={<Inbox className="h-[1.1rem] w-[1.1rem]" />}
           />
+          {/* Reviews can't be left yet, so this would always read 0.0. */}
           <StatTile
             label="Average rating"
-            value={vendor.rating.toFixed(1)}
-            sub={`${vendor.reviews} reviews`}
+            value={vendor.reviews > 0 ? vendor.rating.toFixed(1) : "—"}
+            sub={vendor.reviews > 0 ? `${vendor.reviews} reviews` : "no reviews yet"}
             icon={<Star className="h-[1.1rem] w-[1.1rem]" />}
           />
           <StatTile
@@ -186,7 +187,9 @@ export default async function VendorOverview() {
             </ProgressRing>
           </div>
           <p className="text-sm text-ink-soft">
-            A complete profile ranks higher and earns more enquiries.
+            {/* The marketplace is ordered alphabetically — claiming a fuller
+                profile "ranks higher" was untrue. */}
+            A complete profile gives couples more reason to enquire.
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {vendor.styles.map((s) => (

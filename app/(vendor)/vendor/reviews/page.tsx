@@ -33,8 +33,8 @@ export default async function VendorReviewsPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatTile
           label="Average rating"
-          value={vendor.rating.toFixed(1)}
-          sub="across all reviews"
+          value={vendor.reviews > 0 ? vendor.rating.toFixed(1) : "—"}
+          sub={vendor.reviews > 0 ? "across all reviews" : "no reviews yet"}
           icon={<Star className="h-[1.1rem] w-[1.1rem]" />}
         />
         <StatTile label="Total reviews" value={vendor.reviews} sub="lifetime" />

@@ -61,6 +61,16 @@ export default async function VendorProfilePage({
 
   return (
     <article className="pb-24">
+      {/* Only the owner/admin can reach a non-approved listing (see
+          getVendorBySlug) — tell them it isn't public yet. */}
+      {vendor.status !== "approved" && (
+        <div className="bg-gold-100 px-5 py-3 text-center text-sm text-gold-700">
+          <strong>Preview</strong> — this listing isn&rsquo;t public yet
+          {vendor.status === "pending"
+            ? ", it's awaiting admin approval."
+            : ". It was not approved; update your profile to resubmit."}
+        </div>
+      )}
       {/* Cover */}
       <div className="relative h-[38vh] min-h-[18rem] w-full overflow-hidden">
         <Plate
@@ -119,11 +129,17 @@ export default async function VendorProfilePage({
 
         {/* Meta strip */}
         <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 border-y border-border py-5 text-sm">
-          <span className="inline-flex items-center gap-1.5 text-ink">
-            <Star className="h-4 w-4 fill-gold-500 text-gold-500" />
-            <strong>{vendor.rating.toFixed(1)}</strong>
-            <span className="text-ink-soft">({vendor.reviews} reviews)</span>
-          </span>
+          {vendor.reviews > 0 ? (
+            <span className="inline-flex items-center gap-1.5 text-ink">
+              <Star className="h-4 w-4 fill-gold-500 text-gold-500" />
+              <strong>{vendor.rating.toFixed(1)}</strong>
+              <span className="text-ink-soft">({vendor.reviews} reviews)</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-ink-soft">
+              <Star className="h-4 w-4 text-gold-500" /> New to Kalyanam
+            </span>
+          )}
           <span className="inline-flex items-center gap-1.5 text-ink-soft">
             <MapPin className="h-4 w-4 text-gold-600" /> {vendor.location}
           </span>

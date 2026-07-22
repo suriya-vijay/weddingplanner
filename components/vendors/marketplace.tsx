@@ -180,9 +180,17 @@ function VendorCard({ vendor }: { vendor: VendorProfile }) {
             style={{ background: vendor.cover }}
           />
         )}
+        {/* No couple can leave a review yet, so every vendor would read
+            "0.0" — an empty rating looks worse than no rating. */}
         <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-forest-700 shadow-[var(--shadow-xs)]">
-          <Star className="h-3.5 w-3.5 fill-gold-500 text-gold-500" />
-          {vendor.rating.toFixed(1)}
+          {vendor.reviews > 0 ? (
+            <>
+              <Star className="h-3.5 w-3.5 fill-gold-500 text-gold-500" />
+              {vendor.rating.toFixed(1)}
+            </>
+          ) : (
+            "New to Kalyanam"
+          )}
         </span>
         {vendor.verified && (
           <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-forest-700/90 px-2.5 py-1 text-xs font-medium text-cream">

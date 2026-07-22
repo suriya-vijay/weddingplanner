@@ -84,8 +84,17 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
           style={{ background: vendor.plate }}
         />
         <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-forest-700 shadow-[var(--shadow-xs)]">
-          <Star className="h-3.5 w-3.5 fill-gold-500 text-gold-500" aria-hidden />
-          {vendor.rating.toFixed(1)}
+          {vendor.reviews > 0 ? (
+            <>
+              <Star
+                className="h-3.5 w-3.5 fill-gold-500 text-gold-500"
+                aria-hidden
+              />
+              {vendor.rating.toFixed(1)}
+            </>
+          ) : (
+            "New to Kalyanam"
+          )}
         </span>
       </div>
 
