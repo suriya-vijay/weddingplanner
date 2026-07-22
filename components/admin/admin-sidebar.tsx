@@ -7,6 +7,9 @@ import {
   Sparkles,
   Store,
   Settings,
+  Users,
+  Inbox,
+  Mail,
 } from "lucide-react";
 import { LotusMark } from "@/components/brand/motifs";
 import { SidebarAccount } from "@/components/layout/sidebar-account";
@@ -16,6 +19,9 @@ const NAV = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Inspiration", href: "/admin/inspiration", icon: Sparkles },
   { label: "Vendors", href: "/admin/vendors", icon: Store },
+  { label: "People", href: "/admin/people", icon: Users },
+  { label: "Enquiries", href: "/admin/enquiries", icon: Inbox },
+  { label: "Messages", href: "/admin/messages", icon: Mail },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

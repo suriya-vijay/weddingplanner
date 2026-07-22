@@ -1,6 +1,9 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/auth/get-session";
+import { logModeration } from "@/lib/db/admin-moderation";
+import { setContactHandled } from "@/lib/db/contact";
 import type { InspirationItem } from "@/lib/mock-data";
 import type { GalleryItem } from "@/lib/db/inspiration";
 
@@ -97,6 +100,14 @@ export async function deleteVendorAction(
   id: string,
 ): Promise<{ ok: boolean }> {
   const supabase = await createClient();
+  // Log BEFORE deleting: the log row FKs to vendors with on-delete cascade,
+  // so an entry written afterwards would be removed with the vendor.
+  const actor = await getSessionUser();
+  await logModeration({
+    vendorId: id,
+    actorName: actor?.name ?? "admin",
+    action: "deleted",
+  });
   const { error } = await supabase.from("vendors").delete().eq("id", id);
   return { ok: !error };
 }
@@ -131,7 +142,53 @@ export async function setVendorStatusAction(
       .from("vendors")
       .update(rest)
       .eq("id", id);
-    return { ok: !e2 };
+    if (e2) return { ok: false };
   }
+
+  // Append to the audit trail. `rejection_reason` is overwritten on approve
+  // and cleared when the vendor resubmits, so without this the reason — and
+  // any record of who acted — is lost.
+  const actor = await getSessionUser();
+  await logModeration({
+    vendorId: id,
+    actorName: actor?.name ?? "admin",
+    action: status,
+    reason,
+  });
   return { ok: true };
+}
+
+/** Edit a vendor's details in place. Moderation shouldn't be all-or-nothing:
+ *  the only other tool is a hard delete that cascades away their packages,
+ *  reviews and enquiries. */
+export async function updateVendorAsAdminAction(
+  id: string,
+  patch: {
+    name?: string;
+    category?: string;
+    location?: string;
+    tagline?: string;
+    cover_url?: string | null;
+  },
+): Promise<{ ok: boolean }> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("vendors").update(patch).eq("id", id);
+  if (error) return { ok: false };
+  const actor = await getSessionUser();
+  await logModeration({
+    vendorId: id,
+    actorName: actor?.name ?? "admin",
+    action: "edited",
+    reason: Object.keys(patch).join(", "),
+  });
+  return { ok: true };
+}
+
+/** Mark a contact-form submission handled (or put it back in the queue). */
+export async function setContactHandledAction(
+  id: string,
+  handled: boolean,
+): Promise<{ ok: boolean }> {
+  const ok = await setContactHandled(id, handled);
+  return { ok };
 }
