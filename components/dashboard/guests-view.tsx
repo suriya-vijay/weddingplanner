@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Trash2, X, Users, Check, Clock } from "lucide-react";
+import { Plus, Trash2, X, Users, Check, Clock, Pencil } from "lucide-react";
 import { Panel, StatTile } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -32,7 +32,16 @@ const MEALS: MealPref[] = ["Veg", "Non-veg", "Jain", "Vegan"];
 export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
   const [rows, setRows] = useState<Guest[]>(initialGuests);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Guest | null>(null);
   const [sideFilter, setSideFilter] = useState<GuestSide | "All">("All");
+
+  /** Correct a guest in place (misspelled name, wrong party size, etc.). */
+  const saveEdit = (id: string, patch: Omit<Guest, "id">) => {
+    const snapshot = rows;
+    setEditing(null);
+    setRows((prev) => prev.map((g) => (g.id === id ? { ...patch, id } : g)));
+    updateGuestAction(id, patch).catch(() => setRows(snapshot));
+  };
 
   const totals = useMemo(() => {
     const invited = rows.reduce((s, g) => s + g.count, 0);
@@ -200,14 +209,24 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
                     </button>
                   </td>
                   <td className="py-3 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setEditing(g)}
+                      aria-label={`Edit ${g.name}`}
+                      className="grid h-8 w-8 place-items-center rounded-lg text-ink-faint transition-colors hover:bg-forest-700/[0.06] hover:text-forest-700"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
                     <button
                       type="button"
                       onClick={() => remove(g.id)}
                       aria-label={`Remove ${g.name}`}
-                      className="text-ink-faint transition-colors hover:text-destructive"
+                      className="grid h-8 w-8 place-items-center rounded-lg text-ink-faint transition-colors hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -224,24 +243,36 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
       </Panel>
 
       {adding && <AddGuestDialog onClose={() => setAdding(false)} onAdd={add} />}
+      {editing && (
+        <AddGuestDialog
+          key={editing.id}
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onAdd={(patch) => saveEdit(editing.id, patch)}
+        />
+      )}
     </div>
   );
 }
 
+/** One dialog for add AND edit — pass `initial` to correct an existing guest. */
 function AddGuestDialog({
   onClose,
   onAdd,
+  initial,
 }: {
   onClose: () => void;
   onAdd: (guest: Omit<Guest, "id">) => void;
+  initial?: Guest;
 }) {
-  const [name, setName] = useState("");
-  const [group, setGroup] = useState("");
-  const [count, setCount] = useState("1");
-  const [side, setSide] = useState<GuestSide>("Bride");
-  const [meal, setMeal] = useState<MealPref>("Veg");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const isEdit = !!initial;
+  const [name, setName] = useState(initial?.name ?? "");
+  const [group, setGroup] = useState(initial?.group ?? "");
+  const [count, setCount] = useState(initial ? String(initial.count) : "1");
+  const [side, setSide] = useState<GuestSide>(initial?.side ?? "Bride");
+  const [meal, setMeal] = useState<MealPref>(initial?.meal ?? "Veg");
+  const [email, setEmail] = useState(initial?.email ?? "");
+  const [phone, setPhone] = useState(initial?.phone ?? "");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -251,7 +282,9 @@ function AddGuestDialog({
       count: Math.max(1, Number(count) || 1),
       side,
       meal,
-      rsvp: "Pending",
+      // Keep the RSVP already recorded when editing — correcting a typo in
+      // someone's name must not silently reset them to Pending.
+      rsvp: initial?.rsvp ?? "Pending",
       email: email.trim(),
       phone: phone.trim(),
     });
@@ -262,7 +295,9 @@ function AddGuestDialog({
     <div className="fixed inset-0 z-50 grid place-items-center bg-forest-900/45 px-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-cream p-6 shadow-[var(--shadow-lg)]">
         <div className="flex items-center justify-between">
-          <h3 className="font-serif text-xl text-ink">Add guest</h3>
+          <h3 className="font-serif text-xl text-ink">
+            {isEdit ? "Edit guest" : "Add guest"}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -327,7 +362,7 @@ function AddGuestDialog({
               Cancel
             </Button>
             <Button type="submit" variant="primary" size="md">
-              Add guest
+              {isEdit ? "Save changes" : "Add guest"}
             </Button>
           </div>
         </form>

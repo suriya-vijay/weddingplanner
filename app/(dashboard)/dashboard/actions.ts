@@ -88,6 +88,14 @@ export async function addChecklistItemAction(
   return checklistDb.addChecklistItem(weddingId, item);
 }
 
+/** Edit a task in place (typo fix, phase change, recategorize). */
+export async function updateChecklistItemAction(
+  id: string,
+  patch: Partial<Pick<ChecklistItem, "task" | "phase" | "category">>,
+): Promise<void> {
+  await checklistDb.updateChecklistItem(id, patch);
+}
+
 export async function deleteChecklistItemAction(id: string): Promise<void> {
   await checklistDb.deleteChecklistItem(id);
 }

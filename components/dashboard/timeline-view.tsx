@@ -10,6 +10,7 @@ import {
   Sparkles,
   ChevronUp,
   ChevronDown,
+  Pencil,
 } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
@@ -43,8 +44,21 @@ export function TimelineView({
 }) {
   const [items, setItems] = useState<TimelineMilestone[]>(initialItems);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<TimelineMilestone | null>(null);
   const [suggesting, setSuggesting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+
+  /** Fix a milestone's title/detail/date in place. */
+  function saveEdit(id: string, patch: Omit<TimelineMilestone, "id">) {
+    const snapshot = items;
+    setEditing(null);
+    setItems((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+    updateTimelineAction(id, {
+      title: patch.title,
+      detail: patch.detail,
+      date: patch.date,
+    }).catch(() => setItems(snapshot));
+  }
 
   const doneCount = items.filter((m) => m.status === "done").length;
 
@@ -237,6 +251,14 @@ export function TimelineView({
                       )}
                       <button
                         type="button"
+                        onClick={() => setEditing(m)}
+                        aria-label={`Edit ${m.title}`}
+                        className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-soft opacity-0 transition-opacity hover:bg-forest-700/[0.06] hover:text-forest-700 group-hover:opacity-100"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => remove(m.id)}
                         aria-label={`Delete ${m.title}`}
                         className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-soft opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
@@ -263,20 +285,32 @@ export function TimelineView({
       {adding && (
         <AddMilestoneDialog onClose={() => setAdding(false)} onAdd={add} />
       )}
+      {editing && (
+        <AddMilestoneDialog
+          key={editing.id}
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onAdd={(patch) => saveEdit(editing.id, patch)}
+        />
+      )}
     </div>
   );
 }
 
+/** One dialog for add AND edit — pass `initial` to fix a title/detail typo. */
 function AddMilestoneDialog({
   onClose,
   onAdd,
+  initial,
 }: {
   onClose: () => void;
   onAdd: (m: Omit<TimelineMilestone, "id">) => void;
+  initial?: TimelineMilestone;
 }) {
-  const [title, setTitle] = useState("");
-  const [detail, setDetail] = useState("");
-  const [date, setDate] = useState("");
+  const isEdit = !!initial;
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [detail, setDetail] = useState(initial?.detail ?? "");
+  const [date, setDate] = useState(initial?.date ?? "");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -284,11 +318,13 @@ function AddMilestoneDialog({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Add milestone"
+        aria-label={isEdit ? "Edit milestone" : "Add milestone"}
         className="relative w-full max-w-md rounded-3xl bg-ivory p-6 shadow-[var(--shadow-lg)] sm:p-8"
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-serif text-xl text-ink">Add milestone</h3>
+          <h3 className="font-serif text-xl text-ink">
+            {isEdit ? "Edit milestone" : "Add milestone"}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -337,7 +373,7 @@ function AddMilestoneDialog({
               Cancel
             </Button>
             <Button variant="primary" size="md" type="submit">
-              Add milestone
+              {isEdit ? "Save changes" : "Add milestone"}
             </Button>
           </div>
         </form>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X, Wallet } from "lucide-react";
+import { Plus, Trash2, X, Wallet, Pencil } from "lucide-react";
 import { Panel, StatTile, ProgressBar } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -10,6 +10,7 @@ import { cn, formatINR } from "@/lib/utils";
 import { type BudgetItem } from "@/lib/mock-data";
 import {
   addBudgetItemAction,
+  updateBudgetItemAction,
   deleteBudgetItemAction,
 } from "@/app/(dashboard)/dashboard/actions";
 
@@ -28,6 +29,15 @@ export function BudgetView({
 }) {
   const [items, setItems] = useState<BudgetItem[]>(initialItems);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<BudgetItem | null>(null);
+
+  /** Correct an item in place. `updateBudgetItem` existed but was never wired. */
+  const saveEdit = (id: string, patch: Omit<BudgetItem, "id">) => {
+    const snapshot = items;
+    setEditing(null);
+    setItems((prev) => prev.map((b) => (b.id === id ? { ...patch, id } : b)));
+    updateBudgetItemAction(id, patch).catch(() => setItems(snapshot));
+  };
 
   const totalEstimated = items.reduce((s, b) => s + b.estimated, 0);
   const totalSpent = items.reduce((s, b) => s + b.spent, 0);
@@ -193,14 +203,24 @@ export function BudgetView({
                     </span>
                   </td>
                   <td className="py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => remove(b.id)}
-                      aria-label={`Remove ${b.label}`}
-                      className="text-ink-faint transition-colors hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setEditing(b)}
+                        aria-label={`Edit ${b.label}`}
+                        className="grid h-8 w-8 place-items-center rounded-lg text-ink-faint transition-colors hover:bg-forest-700/[0.06] hover:text-forest-700"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => remove(b.id)}
+                        aria-label={`Remove ${b.label}`}
+                        className="grid h-8 w-8 place-items-center rounded-lg text-ink-faint transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -211,21 +231,41 @@ export function BudgetView({
       </Panel>
 
       {adding && <AddItemDialog onClose={() => setAdding(false)} onAdd={add} />}
+      {editing && (
+        <AddItemDialog
+          key={editing.id}
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onAdd={(patch) => saveEdit(editing.id, patch)}
+        />
+      )}
     </div>
   );
 }
 
+/**
+ * One dialog for add AND edit — pass `initial` to edit. Amounts are the most
+ * likely thing to get typed wrong, so they must be correctable in place.
+ */
 function AddItemDialog({
   onClose,
   onAdd,
+  initial,
 }: {
   onClose: () => void;
   onAdd: (item: Omit<BudgetItem, "id">) => void;
+  initial?: BudgetItem;
 }) {
-  const [category, setCategory] = useState("");
-  const [label, setLabel] = useState("");
-  const [estimated, setEstimated] = useState("");
-  const [spent, setSpent] = useState("");
+  const isEdit = !!initial;
+  const [category, setCategory] = useState(initial?.category ?? "");
+  const [label, setLabel] = useState(initial?.label ?? "");
+  const [estimated, setEstimated] = useState(
+    initial ? String(initial.estimated) : "",
+  );
+  const [spent, setSpent] = useState(initial ? String(initial.spent) : "");
+  const [status, setStatus] = useState<BudgetItem["status"]>(
+    initial?.status ?? "Not started",
+  );
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,7 +274,13 @@ function AddItemDialog({
       label: label.trim() || "Untitled item",
       estimated: Number(estimated) || 0,
       spent: Number(spent) || 0,
-      status: Number(spent) > 0 ? "Deposit paid" : "Not started",
+      // On add, infer from whether anything's been paid; on edit, respect the
+      // couple's explicit choice.
+      status: isEdit
+        ? status
+        : Number(spent) > 0
+          ? "Deposit paid"
+          : "Not started",
     });
     onClose();
   };
@@ -243,7 +289,9 @@ function AddItemDialog({
     <div className="fixed inset-0 z-50 grid place-items-center bg-forest-900/45 px-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-cream p-6 shadow-[var(--shadow-lg)]">
         <div className="flex items-center justify-between">
-          <h3 className="font-serif text-xl text-ink">Add budget item</h3>
+          <h3 className="font-serif text-xl text-ink">
+            {isEdit ? "Edit budget item" : "Add budget item"}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -280,12 +328,29 @@ function AddItemDialog({
               />
             </Field>
           </div>
+          {isEdit && (
+            <Field label="Status">
+              <select
+                value={status}
+                onChange={(e) =>
+                  setStatus(e.target.value as BudgetItem["status"])
+                }
+                className="h-12 w-full rounded-xl border border-border-strong bg-ivory px-4 text-[0.95rem] text-ink transition-colors duration-[var(--dur-fast)] focus:border-gold-400 focus:outline-2 focus:outline-offset-2 focus:outline-gold-500"
+              >
+                {(["Not started", "Deposit paid", "Paid"] as const).map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="ghost" size="md" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" size="md">
-              Add item
+              {isEdit ? "Save changes" : "Add item"}
             </Button>
           </div>
         </form>

@@ -60,6 +60,18 @@ export async function addChecklistItem(
   return data ? toItem(data as ChecklistRow) : null;
 }
 
+/**
+ * Edit an existing task (fix a typo, move it to another phase, recategorize).
+ * Previously the only way to correct a task was to delete and retype it.
+ */
+export async function updateChecklistItem(
+  id: string,
+  patch: Partial<Pick<ChecklistItem, "task" | "phase" | "category" | "done">>,
+): Promise<void> {
+  const supabase = await createClient();
+  await supabase.from("checklist_items").update(patch).eq("id", id);
+}
+
 export async function deleteChecklistItem(id: string): Promise<void> {
   const supabase = await createClient();
   await supabase.from("checklist_items").delete().eq("id", id);

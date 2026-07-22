@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Plus, Trash2, X, ListChecks } from "lucide-react";
+import { Check, Plus, Trash2, X, ListChecks, Pencil } from "lucide-react";
 import { Panel, ProgressBar } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -15,6 +15,7 @@ import {
 import {
   setChecklistDoneAction,
   addChecklistItemAction,
+  updateChecklistItemAction,
   deleteChecklistItemAction,
 } from "@/app/(dashboard)/dashboard/actions";
 
@@ -26,6 +27,18 @@ export function ChecklistView({
   const [items, setItems] = useState<ChecklistItem[]>(initialItems);
   const [filter, setFilter] = useState<"all" | "todo" | "done">("all");
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<ChecklistItem | null>(null);
+
+  /** Save an edit (typo fix / phase change). Optimistic, reverts on failure. */
+  const saveEdit = (
+    id: string,
+    patch: Pick<ChecklistItem, "task" | "phase" | "category">,
+  ) => {
+    const snapshot = items;
+    setEditing(null);
+    setItems((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+    updateChecklistItemAction(id, patch).catch(() => setItems(snapshot));
+  };
 
   const toggle = (id: string) => {
     const item = items.find((c) => c.id === id);
@@ -175,6 +188,14 @@ export function ChecklistView({
                     </span>
                     <button
                       type="button"
+                      onClick={() => setEditing(c)}
+                      aria-label={`Edit ${c.task}`}
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-soft opacity-0 transition-opacity hover:bg-forest-700/[0.06] hover:text-forest-700 group-hover:opacity-100"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => remove(c.id)}
                       aria-label={`Delete ${c.task}`}
                       className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-soft opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
@@ -206,6 +227,14 @@ export function ChecklistView({
       {adding && (
         <AddTaskDialog onClose={() => setAdding(false)} onAdd={add} />
       )}
+      {editing && (
+        <AddTaskDialog
+          key={editing.id}
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onAdd={(patch) => saveEdit(editing.id, patch)}
+        />
+      )}
     </div>
   );
 }
@@ -222,16 +251,26 @@ const CATEGORIES = [
   "Personal",
 ];
 
+/**
+ * One dialog for both adding and editing — pass `initial` to edit. Keeps the
+ * two flows from drifting apart, and means a typo is a two-click fix rather
+ * than delete-and-retype.
+ */
 function AddTaskDialog({
   onClose,
   onAdd,
+  initial,
 }: {
   onClose: () => void;
   onAdd: (m: Pick<ChecklistItem, "task" | "phase" | "category">) => void;
+  initial?: Pick<ChecklistItem, "task" | "phase" | "category">;
 }) {
-  const [task, setTask] = useState("");
-  const [phase, setPhase] = useState<ChecklistPhase>(checklistPhases[0]);
-  const [category, setCategory] = useState("Personal");
+  const isEdit = !!initial;
+  const [task, setTask] = useState(initial?.task ?? "");
+  const [phase, setPhase] = useState<ChecklistPhase>(
+    initial?.phase ?? checklistPhases[0],
+  );
+  const [category, setCategory] = useState(initial?.category ?? "Personal");
 
   const selectClass =
     "h-12 w-full rounded-xl border border-border-strong bg-ivory px-3 text-[0.95rem] text-ink focus:border-gold-400 focus:outline-2 focus:outline-offset-2 focus:outline-gold-500";
@@ -242,11 +281,13 @@ function AddTaskDialog({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Add task"
+        aria-label={isEdit ? "Edit task" : "Add task"}
         className="relative w-full max-w-md rounded-3xl bg-ivory p-6 shadow-[var(--shadow-lg)] sm:p-8"
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-serif text-xl text-ink">Add task</h3>
+          <h3 className="font-serif text-xl text-ink">
+            {isEdit ? "Edit task" : "Add task"}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -307,7 +348,7 @@ function AddTaskDialog({
               Cancel
             </Button>
             <Button variant="primary" size="md" type="submit">
-              Add task
+              {isEdit ? "Save changes" : "Add task"}
             </Button>
           </div>
         </form>
