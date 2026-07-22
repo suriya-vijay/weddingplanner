@@ -204,9 +204,9 @@ export const features: Feature[] = [
   },
   {
     icon: UserCheck,
-    title: "Your Wedding Planner",
+    title: "Vetted Vendors",
     description:
-      "A dedicated human planner assigned to your wedding — and on the day itself, the one orchestrating every moment.",
+      "Every vendor is reviewed before they're listed, so the people you find here are people you can trust with your day.",
   },
 ];
 
@@ -221,7 +221,7 @@ export type Testimonial = {
 export const testimonials: Testimonial[] = [
   {
     quote:
-      "Kalyanam turned three cities and four ceremonies into something we could actually enjoy. It felt like having a luxury planner in our pocket — and a real one on the day.",
+      "Kalyanam turned three cities and four ceremonies into something we could actually enjoy. Every list, every vendor, every payment — finally in one place.",
     name: "Aanya Mehra",
     role: "Bride · Udaipur",
     initials: "AM",
@@ -250,14 +250,14 @@ export const faqs = [
       "All of them. The platform adapts to North and South Indian, Hindu, Sikh, Muslim, Christian, Jain and interfaith celebrations — and lets every wedding feel completely personalised to your family's customs.",
   },
   {
-    question: "Do I really get a human wedding planner?",
+    question: "Do you plan the wedding for me?",
     answer:
-      "Yes. Every couple is assigned a dedicated planner who guides you through the journey. On the wedding day itself, your planner is responsible for coordinating the execution so you can simply be present.",
+      "Kalyanam gives you the tools and the vendors — checklist, budget, guest list, seating and timeline in one place, plus an AI advisor that knows your wedding. You stay in control, and you hire the vendors you choose from our vetted marketplace.",
   },
   {
-    question: "How does the AI Wedding Advisor work alongside my planner?",
+    question: "How does the AI Wedding Advisor work?",
     answer:
-      "The AI advisor helps with ideas, palettes, vendor suggestions and timelines whenever inspiration strikes. It complements — never replaces — your human planner, who owns the real-world coordination.",
+      "It answers planning questions grounded in your actual wedding — your budget, guest count, traditions and checklist — so the advice fits your celebration instead of being generic. Ask it for ideas, palettes, vendor suggestions or a timeline whenever inspiration strikes.",
   },
   {
     question: "Can my family help with the planning?",
@@ -943,16 +943,9 @@ export const weddingProfile: WeddingProfile = {
   currency: "$",
 };
 
-/** Assigned human planner (a core PRD promise). */
-export const assignedPlanner = {
-  name: "Meera Kapoor",
-  title: "Lead Wedding Planner",
-  initials: "MK",
-  since: "Jan 2026",
-  phone: "+91 98••• •••42",
-  email: "meera@kalyanam.co",
-  plate: plates.forest,
-};
+// NOTE: `assignedPlanner` (a hardcoded "Meera Kapoor" with a fake +91 number)
+// was removed — it rendered on the couple dashboard as if a real human planner
+// had been assigned. The dashboard now surfaces the AI Advisor, which exists.
 
 // ── Checklist ───────────────────────────────────────────────────
 export type ChecklistPhase =

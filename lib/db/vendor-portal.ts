@@ -125,6 +125,16 @@ export async function getMyVendor(): Promise<MyVendor | null> {
     price: toUSDisplay(p.price),
   }));
   profile.reviewList = (revs ?? []) as VendorProfile["reviewList"];
+
+  // Derive rating + review count from the ACTUAL reviews, never the
+  // hand-entered `vendors.rating`/`vendors.reviews` columns (seed data set
+  // those to invented figures like 4.9/218). A vendor's own portal must never
+  // show them a rating they didn't earn.
+  const list = profile.reviewList;
+  profile.reviews = list.length;
+  profile.rating = list.length
+    ? Math.round((list.reduce((s, r) => s + Number(r.rating), 0) / list.length) * 10) / 10
+    : 0;
   return profile;
 }
 
@@ -265,13 +275,10 @@ function slugForVendor(displayName: string, userId: string): string {
 
 /**
  * Provision a vendor record for a new vendor account (service-role, runs from
- * the signup action and self-heals on first portal visit). Claims an unclaimed
- * seeded row for its plates/placeholders BUT overwrites the identity with the
- * vendor's OWN business name — so a new vendor sees THEIR name, not a seeded
- * vendor's. If nothing is free, creates a fresh blank vendor.
- *
- * (A full blank-slate onboarding + admin approval flow is a separate milestone;
- * this ensures the name is correct today.)
+ * the signup action and self-heals on first portal visit). Always inserts a
+ * fresh, blank vendor owned by this user, named after their business, with
+ * status 'pending' so it stays off the public marketplace until an admin
+ * approves it. Idempotent: a user who already owns a row is left alone.
  */
 export async function claimVendorForUser(
   userId: string,
@@ -290,56 +297,16 @@ export async function claimVendorForUser(
   const name = displayName || "My Business";
   const slug = slugForVendor(displayName, userId);
 
-  // Take any unclaimed seeded row (for its plate placeholders), then rebrand it.
-  const { data: anyFree } = await admin
-    .from("vendors")
-    .select("id")
-    .is("owner_id", null)
-    .limit(1)
-    .maybeSingle();
-  const targetId = anyFree?.id as string | undefined;
-
-  if (targetId) {
-    // Rebrand to the new vendor: their name/slug + a TRULY blank profile. We
-    // must wipe EVERY seeded field (category/location/styles/images/etc.), not
-    // just the name — otherwise the vendor inherits the seeded row's Decor/
-    // Jaipur/styles/gallery. status:'pending' → hidden from the public
-    // marketplace until an admin approves (0008). Best-effort on the status
-    // field so a pre-0008 DB still claims successfully.
-    const base = {
-      owner_id: userId,
-      name,
-      slug,
-      tagline: "",
-      about: "",
-      category: "",
-      location: "",
-      instagram: "",
-      website: "",
-      availability: "",
-      starting_at: "",
-      price_tier: "$$",
-      rating: 0,
-      reviews: 0,
-      verified: false,
-      styles: [] as string[],
-      service_areas: [] as string[],
-      gallery_plates: [] as string[],
-      gallery_urls: [] as string[],
-      cover_plate: "",
-      logo_plate: "",
-      cover_url: null as string | null,
-      logo_url: null as string | null,
-    };
-    const { error } = await admin
-      .from("vendors")
-      .update({ ...base, status: "pending" })
-      .eq("id", targetId);
-    if (error) await admin.from("vendors").update(base).eq("id", targetId);
-    return;
-  }
-
-  // Nothing free — create a fresh blank vendor for them.
+  // ALWAYS create a brand-new row — never adopt an existing one.
+  //
+  // This used to claim "any row with owner_id IS NULL" to borrow its seeded
+  // gradient plates. That was unsafe: `vendors.owner_id` is `on delete set
+  // null`, so when a vendor's auth account is deleted their still-public,
+  // still-approved listing becomes NULL-owned — and the next signup would
+  // silently take over that live business, its reviews and its profile views.
+  // (Reproduced: one signup overwrote the `lolstudio` listing.) Vendors upload
+  // real images now, so there is nothing left to borrow. Inserting fresh makes
+  // hijacking structurally impossible.
   const insert = { owner_id: userId, slug, name, category: "" };
   const { error } = await admin
     .from("vendors")

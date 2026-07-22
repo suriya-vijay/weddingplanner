@@ -168,7 +168,7 @@ export function Header() {
                       {user.name}
                     </p>
                     <p className="text-xs capitalize text-ink-faint">
-                      {user.role} · demo
+                      {user.role}
                     </p>
                   </div>
                 </div>

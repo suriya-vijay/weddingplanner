@@ -7,9 +7,9 @@ import {
   CalendarClock,
   ArrowUpRight,
   MapPin,
-  Phone,
-  Mail,
   Check,
+  Heart,
+  Sparkles,
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,12 +18,12 @@ import { Stagger } from "@/components/ui/stagger";
 import { Plate } from "@/components/ui/plate";
 import { Countdown } from "@/components/dashboard/countdown";
 import { formatINR } from "@/lib/utils";
-import { assignedPlanner } from "@/lib/mock-data";
 import { getOrCreateWedding } from "@/lib/db/weddings";
 import { getChecklist } from "@/lib/db/checklist";
 import { getBudgetItems } from "@/lib/db/budget";
 import { getGuests } from "@/lib/db/guests";
 import { getInspiration } from "@/lib/db/inspiration";
+import { getSavedInspirationIds } from "@/lib/db/saved-inspiration";
 
 export const metadata: Metadata = {
   title: "Your Wedding · Kalyanam & Co.",
@@ -33,12 +33,14 @@ export default async function DashboardOverview() {
   const wedding = await getOrCreateWedding();
   if (!wedding) notFound();
 
-  const [checklistItems, budgetItems, guests, gallery] = await Promise.all([
-    getChecklist(wedding.id),
-    getBudgetItems(wedding.id),
-    getGuests(wedding.id),
-    getInspiration(),
-  ]);
+  const [checklistItems, budgetItems, guests, gallery, savedIds] =
+    await Promise.all([
+      getChecklist(wedding.id),
+      getBudgetItems(wedding.id),
+      getGuests(wedding.id),
+      getInspiration(),
+      getSavedInspirationIds(),
+    ]);
 
   const done = checklistItems.filter((c) => c.done).length;
   const checklistPct = checklistItems.length
@@ -60,8 +62,10 @@ export default async function DashboardOverview() {
     .reduce((s, g) => s + g.count, 0);
 
   const nextTasks = checklistItems.filter((c) => !c.done).slice(0, 5);
-  // Show a few gallery items as "recommended" (real board-saving lands later).
-  const saved = gallery.slice(0, 5);
+  // The couple's REAL mood board. (This used to be `gallery.slice(0, 5)` —
+  // the first five gallery items shown as if the couple had saved them.)
+  const savedSet = new Set(savedIds);
+  const saved = gallery.filter((g) => savedSet.has(g.id)).slice(0, 5);
 
   const prettyDate = wedding.date
     ? new Date(wedding.date + "T00:00:00").toLocaleDateString("en-US", {
@@ -225,58 +229,64 @@ export default async function DashboardOverview() {
                 Explore more <ArrowUpRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-5">
-              {saved.map((item) => (
-                <div key={item.id} className="group">
-                  <Plate
-                    imageUrl={item.imageUrl}
-                    fallback={item.plate}
-                    alt={item.title}
-                    className="aspect-square w-full rounded-xl shadow-[var(--shadow-xs)]"
-                  />
-                  <p className="mt-1.5 truncate text-xs text-ink-soft">
-                    {item.title}
-                  </p>
-                </div>
-              ))}
-            </div>
+            {saved.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 py-8 text-center">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-blush-100 text-blush-600">
+                  <Heart className="h-6 w-6" />
+                </span>
+                <p className="max-w-sm text-sm text-ink-soft">
+                  Nothing saved yet. Tap the heart on any photo in the gallery
+                  to start your mood board.
+                </p>
+                <Button href="/inspiration" variant="outline" size="sm">
+                  Browse the gallery
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-5">
+                {saved.map((item) => (
+                  <div key={item.id} className="group">
+                    <Plate
+                      imageUrl={item.imageUrl}
+                      fallback={item.plate}
+                      alt={item.title}
+                      className="aspect-square w-full rounded-xl shadow-[var(--shadow-xs)]"
+                    />
+                    <p className="mt-1.5 truncate text-xs text-ink-soft">
+                      {item.title}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </Panel>
         </div>
 
-        {/* Right column: planner card */}
+        {/* Right column */}
         <div className="space-y-6">
+          {/* AI Advisor — replaces a hardcoded "assigned planner" (a fake
+              person, with a fake +91 number) that made couples think a human
+              had been assigned to them. This links to a feature that exists. */}
           <Panel className="text-center">
-            <p className="eyebrow text-gold-600">Your dedicated planner</p>
+            <p className="eyebrow text-gold-600">Planning help</p>
             <span
               aria-hidden
-              className="mx-auto mt-4 grid h-20 w-20 place-items-center rounded-full font-serif text-2xl text-cream shadow-[var(--shadow-md)]"
-              style={{ background: assignedPlanner.plate }}
+              className="mx-auto mt-4 grid h-16 w-16 place-items-center rounded-2xl bg-forest-100 text-forest-700"
             >
-              {assignedPlanner.initials}
+              <Sparkles className="h-7 w-7" />
             </span>
-            <h2 className="mt-4 font-serif text-xl text-ink">
-              {assignedPlanner.name}
-            </h2>
-            <p className="text-sm text-ink-soft">{assignedPlanner.title}</p>
-            <p className="mt-1 text-xs text-ink-faint">
-              With you since {assignedPlanner.since}
+            <h2 className="mt-4 font-serif text-xl text-ink">AI Advisor</h2>
+            <p className="mt-2 text-sm text-ink-soft">
+              Ask anything about planning your wedding — grounded in your
+              budget, guest list and checklist.
             </p>
-
-            <div className="mt-5 space-y-2 border-t border-border pt-5 text-left text-sm">
-              <p className="flex items-center gap-2 text-ink-soft">
-                <Phone className="h-4 w-4 text-gold-600" /> {assignedPlanner.phone}
-              </p>
-              <p className="flex items-center gap-2 text-ink-soft">
-                <Mail className="h-4 w-4 text-gold-600" /> {assignedPlanner.email}
-              </p>
-            </div>
             <Button
-              href={`mailto:${assignedPlanner.email}`}
+              href="/dashboard/advisor"
               variant="primary"
               size="md"
               className="mt-5 w-full"
             >
-              Message {assignedPlanner.name.split(" ")[0]}
+              Ask the advisor
             </Button>
           </Panel>
 

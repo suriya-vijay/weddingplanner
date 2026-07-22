@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Gallery } from "@/components/inspiration/gallery";
 import { DividerOrnament } from "@/components/brand/motifs";
 import { getInspiration } from "@/lib/db/inspiration";
+import { getSavedInspirationIds } from "@/lib/db/saved-inspiration";
+import { getSessionUser } from "@/lib/auth/get-session";
 
 export const metadata: Metadata = {
   title: "Inspiration Gallery · Kalyanam & Co.",
@@ -10,7 +12,13 @@ export const metadata: Metadata = {
 };
 
 export default async function InspirationPage() {
-  const items = await getInspiration();
+  const [items, user] = await Promise.all([
+    getInspiration(),
+    getSessionUser(),
+  ]);
+  // Only a couple has a mood board; everyone else sees the sign-in prompt.
+  const canSave = user?.role === "couple";
+  const savedIds = canSave ? await getSavedInspirationIds() : [];
   return (
     <>
       {/* Page header */}
@@ -32,7 +40,11 @@ export default async function InspirationPage() {
       {/* Gallery */}
       <section className="section bg-cream">
         <div className="container-luxe">
-          <Gallery items={items} />
+          <Gallery
+            items={items}
+            initialSavedIds={savedIds}
+            canSave={canSave}
+          />
         </div>
       </section>
     </>

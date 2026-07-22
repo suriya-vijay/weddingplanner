@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { isImageUrl } from "@/components/ui/plate";
 import { ceremonies, traditions, colorThemes } from "@/lib/mock-data";
 import type { GalleryItem } from "@/lib/db/inspiration";
+import { toggleSavedInspirationAction } from "@/app/(marketing)/inspiration/actions";
 
 type InspirationItem = GalleryItem;
 
@@ -24,10 +25,23 @@ const FILTER_GROUPS: { key: FilterKey; label: string; options: readonly string[]
  * tags + a save-to-board heart (local state only; persistence comes later).
  * NO new animations beyond the existing card hover already in the design system.
  */
-export function Gallery({ items: allItems }: { items: InspirationItem[] }) {
+export function Gallery({
+  items: allItems,
+  initialSavedIds = [],
+  canSave = false,
+}: {
+  items: InspirationItem[];
+  /** Ids this couple has already saved (from the DB, server-rendered). */
+  initialSavedIds?: string[];
+  /** Only a signed-in couple can persist saves. */
+  canSave?: boolean;
+}) {
   const [active, setActive] = useState<Partial<Record<FilterKey, string>>>({});
-  const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [saved, setSaved] = useState<Set<string>>(
+    () => new Set(initialSavedIds),
+  );
   const [onlySaved, setOnlySaved] = useState(false);
+  const [signInHint, setSignInHint] = useState(false);
 
   const items = useMemo(() => {
     return allItems.filter((it) => {
@@ -45,13 +59,35 @@ export function Gallery({ items: allItems }: { items: InspirationItem[] }) {
     }));
   }
 
+  /**
+   * Persist the heart. Optimistic so it feels instant, reverted if the write
+   * fails. Signed-out visitors get a prompt instead of a save that silently
+   * disappears on refresh (which is what used to happen).
+   */
   function toggleSave(id: string) {
+    if (!canSave) {
+      setSignInHint(true);
+      return;
+    }
+    const wasSaved = saved.has(id);
     setSaved((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
+      if (wasSaved) next.delete(id);
       else next.add(id);
       return next;
     });
+    toggleSavedInspirationAction(id)
+      .then((res) => {
+        if (res.saved === null) throw new Error("not saved");
+      })
+      .catch(() => {
+        setSaved((prev) => {
+          const next = new Set(prev);
+          if (wasSaved) next.add(id);
+          else next.delete(id);
+          return next;
+        });
+      });
   }
 
   const activeCount = Object.values(active).filter(Boolean).length;
@@ -116,6 +152,15 @@ export function Gallery({ items: allItems }: { items: InspirationItem[] }) {
           Saved ({saved.size})
         </button>
       </div>
+
+      {signInHint && (
+        <p className="mt-4 rounded-xl bg-gold-100 px-4 py-3 text-sm text-gold-700">
+          <Link href="/login?next=/inspiration" className="font-medium underline">
+            Sign in
+          </Link>{" "}
+          as a couple to save inspiration to your mood board.
+        </p>
+      )}
 
       {/* Masonry grid (CSS columns) */}
       {items.length > 0 ? (

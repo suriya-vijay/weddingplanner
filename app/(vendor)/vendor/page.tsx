@@ -37,14 +37,17 @@ export default async function VendorOverview() {
   ).length;
   const booked = vendorEnquiries.filter((e) => e.status === "Booked").length;
 
-  // Mock "profile completeness" — a simple heuristic over filled fields.
+  // Profile completeness — only fields the VENDOR can actually fill in.
+  // `verified` was deliberately removed: it's an admin-controlled flag, so
+  // including it capped a fully-completed profile at 83% with no way to reach
+  // 100% — a progress bar you can't finish is worse than none.
   const checks = [
     !!vendor.about,
     vendor.gallery.length >= 6,
     vendor.packages.length >= 2,
     vendor.styles.length >= 2,
     !!vendor.instagram,
-    vendor.verified,
+    !!vendor.location,
   ];
   const completeness = Math.round(
     (checks.filter(Boolean).length / checks.length) * 100,
@@ -125,7 +128,7 @@ export default async function VendorOverview() {
           <StatTile
             label="Bookings"
             value={booked}
-            sub="confirmed this season"
+            sub="all time"
             icon={<CalendarCheck className="h-[1.1rem] w-[1.1rem]" />}
           />
         </Stagger>

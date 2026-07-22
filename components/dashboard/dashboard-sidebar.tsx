@@ -40,7 +40,11 @@ export function DashboardSidebar({
     // texture-paisley = a static tiled SVG (rasterized once, ~zero runtime
     // cost) so the workspace carries the same Indian luxury feel as the
     // marketing pages. No animation, no blur.
-    <aside className="texture-paisley on-dark relative flex w-full shrink-0 flex-col gap-1 border-b border-cream/10 bg-forest-900 px-4 py-4 text-cream lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
+    // The rail stretches to the FULL page height (lg:self-stretch) so the green
+    // never stops partway down on a tall page; the inner wrapper is what
+    // sticks, keeping the nav in view while scrolling.
+    <aside className="texture-paisley on-dark relative flex w-full shrink-0 flex-col border-b border-cream/10 bg-forest-900 px-4 py-4 text-cream lg:w-64 lg:self-stretch lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
+      <div className="flex flex-col gap-1 lg:sticky lg:top-7 lg:min-h-[calc(100dvh-3.5rem)]">
       <div className="mb-2 flex items-center gap-2.5 px-2 lg:mb-6">
         <LotusMark className="h-7 w-7 text-gold-400" />
         <div className="leading-tight">
@@ -81,7 +85,8 @@ export function DashboardSidebar({
         })}
       </nav>
 
-      <SidebarAccount />
+        <SidebarAccount />
+      </div>
     </aside>
   );
 }

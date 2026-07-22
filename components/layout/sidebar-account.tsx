@@ -24,13 +24,13 @@ export function SidebarAccount() {
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-cream">{user.name}</p>
             <p className="text-[0.65rem] capitalize text-cream/50">
-              {user.role} · demo
+              {user.role}
             </p>
           </div>
         </div>
       ) : (
         <p className="mb-1 rounded-xl bg-cream/[0.06] px-3 py-2.5 text-xs text-cream/50">
-          Demo preview — not signed in.
+          Not signed in.
         </p>
       )}
 

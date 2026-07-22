@@ -70,7 +70,7 @@ export function AccountMenu({ solid }: { solid: boolean }) {
           <div className="border-b border-border px-4 py-3">
             <p className="truncate text-sm font-medium text-ink">{user.name}</p>
             <p className="text-xs capitalize text-ink-faint">
-              {user.role} · demo session
+              {user.role}
             </p>
           </div>
           <div className="p-1.5">

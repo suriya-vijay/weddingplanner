@@ -173,17 +173,24 @@ export async function getVendorBySlug(
       .eq("vendor_id", row.id),
   ]);
 
-  return {
-    id: row.id,
-    ...toProfile(
-      row,
-      ((pkgs ?? []) as VendorPackage[]).map((p) => ({
-        ...p,
-        price: toUSDisplay(p.price),
-      })),
-      (revs ?? []) as VendorReview[],
-    ),
-  };
+  const reviewList = (revs ?? []) as VendorReview[];
+  const profile = toProfile(
+    row,
+    ((pkgs ?? []) as VendorPackage[]).map((p) => ({
+      ...p,
+      price: toUSDisplay(p.price),
+    })),
+    reviewList,
+  );
+  // Rating/count come from the real reviews, not the hand-entered columns.
+  profile.reviews = reviewList.length;
+  profile.rating = reviewList.length
+    ? Math.round(
+        (reviewList.reduce((s, r) => s + Number(r.rating), 0) /
+          reviewList.length) * 10,
+      ) / 10
+    : 0;
+  return { id: row.id, ...profile };
 }
 
 /** Slugs for generateStaticParams — but the marketplace is now dynamic, so
