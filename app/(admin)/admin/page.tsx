@@ -4,18 +4,22 @@ import { Sparkles, Store, Heart, TrendingUp, ArrowUpRight } from "lucide-react";
 import { Plate } from "@/components/ui/plate";
 import { getInspiration } from "@/lib/db/inspiration";
 import { getVendors } from "@/lib/db/vendors";
+import { getAdminStats } from "@/lib/db/admin-stats";
+import { Stagger } from "@/components/ui/stagger";
 
 export const metadata: Metadata = {
   title: "Admin · Kalyanam & Co.",
 };
 
 export default async function AdminDashboard() {
-  const [inspirationItems, vendors] = await Promise.all([
+  const [inspirationItems, vendors, stats] = await Promise.all([
     getInspiration(),
     getVendors(),
+    getAdminStats(),
   ]);
   const categories = new Set(vendors.map((v) => v.category)).size;
 
+  // Every tile is a real query — no placeholder figures.
   const STATS = [
     {
       label: "Inspirations",
@@ -29,8 +33,18 @@ export default async function AdminDashboard() {
       icon: Store,
       sub: `${categories} categories`,
     },
-    { label: "Total saves", value: 1284, icon: Heart, sub: "this month" },
-    { label: "Visits", value: "18.2k", icon: TrendingUp, sub: "last 30 days" },
+    {
+      label: "Total saves",
+      value: stats.totalSaves.toLocaleString("en-US"),
+      icon: Heart,
+      sub: "to couples’ mood boards",
+    },
+    {
+      label: "Profile views",
+      value: stats.profileViews.toLocaleString("en-US"),
+      icon: TrendingUp,
+      sub: "across all vendors",
+    },
   ];
 
   return (
@@ -44,24 +58,26 @@ export default async function AdminDashboard() {
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {STATS.map((s) => {
-          const Icon = s.icon;
-          return (
-            <div
-              key={s.label}
-              className="rounded-2xl border border-border bg-ivory p-5 shadow-[var(--shadow-sm)]"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-ink-soft">{s.label}</span>
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-forest-100 text-forest-700">
-                  <Icon className="h-[1.1rem] w-[1.1rem]" />
-                </span>
+        <Stagger>
+          {STATS.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div
+                key={s.label}
+                className="rounded-2xl border border-border bg-ivory p-5 shadow-[var(--shadow-sm)]"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-ink-soft">{s.label}</span>
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-forest-100 text-forest-700">
+                    <Icon className="h-[1.1rem] w-[1.1rem]" />
+                  </span>
+                </div>
+                <p className="mt-3 font-serif text-3xl text-ink">{s.value}</p>
+                <p className="mt-1 text-xs text-ink-faint">{s.sub}</p>
               </div>
-              <p className="mt-3 font-serif text-3xl text-ink">{s.value}</p>
-              <p className="mt-1 text-xs text-ink-faint">{s.sub}</p>
-            </div>
-          );
-        })}
+            );
+          })}
+        </Stagger>
       </div>
 
       {/* Recent inspiration */}

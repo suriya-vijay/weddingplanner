@@ -7,6 +7,7 @@ type TimelineRow = {
   detail: string;
   date: string | null;
   status: string;
+  sort?: number;
 };
 
 const toMilestone = (r: TimelineRow): TimelineMilestone => ({
@@ -15,6 +16,7 @@ const toMilestone = (r: TimelineRow): TimelineMilestone => ({
   detail: r.detail,
   date: r.date ?? "",
   status: r.status as TimelineMilestone["status"],
+  sort: r.sort ?? 0,
 });
 
 export async function getTimeline(
@@ -23,9 +25,11 @@ export async function getTimeline(
   const supabase = await createClient();
   const { data } = await supabase
     .from("timeline_milestones")
-    .select("id, title, detail, date, status")
+    .select("id, title, detail, date, status, sort")
     .eq("wedding_id", weddingId)
-    .order("sort");
+    // Chronological; undated last. `sort` breaks ties + orders undated items.
+    .order("date", { ascending: true, nullsFirst: false })
+    .order("sort", { ascending: true });
   return ((data ?? []) as TimelineRow[]).map(toMilestone);
 }
 
@@ -49,7 +53,7 @@ export async function addTimelineMilestone(
       status: m.status,
       sort: count ?? 0,
     })
-    .select("id, title, detail, date, status")
+    .select("id, title, detail, date, status, sort")
     .single();
   return data ? toMilestone(data as TimelineRow) : null;
 }
@@ -94,6 +98,19 @@ export async function addTimelineMilestones(
         sort: base + i,
       })),
     )
-    .select("id, title, detail, date, status");
+    .select("id, title, detail, date, status, sort");
   return ((data ?? []) as TimelineRow[]).map(toMilestone);
+}
+
+/**
+ * Persist a manual order (the up/down controls). `ids` is the full list in its
+ * desired order; each row's `sort` becomes its index.
+ */
+export async function reorderTimelineMilestones(ids: string[]): Promise<void> {
+  const supabase = await createClient();
+  await Promise.all(
+    ids.map((id, i) =>
+      supabase.from("timeline_milestones").update({ sort: i }).eq("id", id),
+    ),
+  );
 }

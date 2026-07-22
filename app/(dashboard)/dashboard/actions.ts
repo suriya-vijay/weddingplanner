@@ -13,7 +13,7 @@ import {
   type EnquiryMessage,
 } from "@/lib/db/enquiry-chat";
 import { buildAdvisorSystemPrompt } from "@/lib/ai/system-prompt";
-import { generateTimelineMilestones } from "@/lib/ai/gemini";
+import { generateTimelineMilestones, AiBusyError } from "@/lib/ai/gemini";
 import type {
   Guest,
   BudgetItem,
@@ -112,6 +112,11 @@ export async function deleteTimelineAction(id: string): Promise<void> {
   await timelineDb.deleteTimelineMilestone(id);
 }
 
+/** Persist a manual milestone order (ids in the desired order). */
+export async function reorderTimelineAction(ids: string[]): Promise<void> {
+  await timelineDb.reorderTimelineMilestones(ids);
+}
+
 /**
  * AI: generate a starter timeline tuned to the couple's wedding and insert the
  * milestones (editable afterward). Degrades gracefully if the AI key/quota is
@@ -132,6 +137,7 @@ export async function suggestTimelineAction(): Promise<{
   try {
     generated = await generateTimelineMilestones(context);
   } catch (err) {
+    if (err instanceof AiBusyError) return { ok: false, error: err.message };
     const msg =
       err instanceof Error && /GEMINI_API_KEY/.test(err.message)
         ? "The AI timeline isn't configured (missing GEMINI_API_KEY)."
@@ -139,7 +145,10 @@ export async function suggestTimelineAction(): Promise<{
     return { ok: false, error: msg };
   }
   if (!generated.length)
-    return { ok: false, error: "The AI didn't return any milestones." };
+    return {
+      ok: false,
+      error: "The AI couldn't build a timeline this time — please try again.",
+    };
 
   const milestones = await timelineDb.addTimelineMilestones(
     weddingId,

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { buildAdvisorSystemPrompt } from "@/lib/ai/system-prompt";
-import { streamAdvisorReply, type AdvisorTurn } from "@/lib/ai/gemini";
+import { streamAdvisorReply, AiBusyError, type AdvisorTurn } from "@/lib/ai/gemini";
 import {
   getOrCreateConversation,
   getMessages,
@@ -64,6 +64,10 @@ export async function POST(req: Request) {
   try {
     stream = await streamAdvisorReply({ systemInstruction, contents });
   } catch (err) {
+    // A busy upstream (free-tier 503) is temporary — say so honestly and with
+    // the right status, rather than a generic "unavailable" 500.
+    if (err instanceof AiBusyError)
+      return new Response(err.message, { status: 503 });
     const msg =
       err instanceof Error && /GEMINI_API_KEY/.test(err.message)
         ? "The AI advisor isn't configured yet (missing GEMINI_API_KEY)."

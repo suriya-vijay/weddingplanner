@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Panel, StatTile, ProgressRing } from "@/components/dashboard/ui";
+import { Stagger } from "@/components/ui/stagger";
 import { getMyVendor, getMyEnquiries } from "@/lib/db/vendor-portal";
 
 export const metadata: Metadata = {
@@ -100,32 +101,34 @@ export default async function VendorOverview() {
         </Button>
       </header>
 
-      {/* Stat tiles */}
+      {/* Stat tiles — one-shot staggered entrance (see components/ui/stagger) */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile
-          label="Profile views"
-          value={vendor.profileViews.toLocaleString("en-US")}
-          sub="all time"
-          icon={<Eye className="h-[1.1rem] w-[1.1rem]" />}
-        />
-        <StatTile
-          label="Open enquiries"
-          value={openEnquiries}
-          sub={`${vendorEnquiries.length} total leads`}
-          icon={<Inbox className="h-[1.1rem] w-[1.1rem]" />}
-        />
-        <StatTile
-          label="Average rating"
-          value={vendor.rating.toFixed(1)}
-          sub={`${vendor.reviews} reviews`}
-          icon={<Star className="h-[1.1rem] w-[1.1rem]" />}
-        />
-        <StatTile
-          label="Bookings"
-          value={booked}
-          sub="confirmed this season"
-          icon={<CalendarCheck className="h-[1.1rem] w-[1.1rem]" />}
-        />
+        <Stagger>
+          <StatTile
+            label="Profile views"
+            value={vendor.profileViews.toLocaleString("en-US")}
+            sub="all time"
+            icon={<Eye className="h-[1.1rem] w-[1.1rem]" />}
+          />
+          <StatTile
+            label="Open enquiries"
+            value={openEnquiries}
+            sub={`${vendorEnquiries.length} total leads`}
+            icon={<Inbox className="h-[1.1rem] w-[1.1rem]" />}
+          />
+          <StatTile
+            label="Average rating"
+            value={vendor.rating.toFixed(1)}
+            sub={`${vendor.reviews} reviews`}
+            icon={<Star className="h-[1.1rem] w-[1.1rem]" />}
+          />
+          <StatTile
+            label="Bookings"
+            value={booked}
+            sub="confirmed this season"
+            icon={<CalendarCheck className="h-[1.1rem] w-[1.1rem]" />}
+          />
+        </Stagger>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">

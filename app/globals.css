@@ -312,6 +312,21 @@
     animation-play-state: running;
   }
 
+  /* ── Loading skeletons ──────────────────────────────────────────────
+     CONDITIONAL motion only: a skeleton exists solely while a route is
+     loading and is unmounted the moment data arrives (same category as the
+     button spinner). Opacity-only = GPU-cheap, no layout work, no blur.
+     It never persists on a settled page, so it does not count against the
+     ambient cap. Reduced-motion → static (handled by the global block). */
+  @keyframes skeleton-pulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 0.9; }
+  }
+  .skeleton {
+    background-color: var(--cream-deep);
+    animation: skeleton-pulse 1.6s var(--ease-soft) infinite;
+  }
+
   /* One-shot "draw-in" for line-art SVG (lotus/paisley). Runs once via
      .reveal.is-visible; never loops. Reduced-motion shows it fully drawn. */
   .draw path {

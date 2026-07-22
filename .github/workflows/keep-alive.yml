@@ -1,0 +1,45 @@
+# Keeps the Supabase project from being paused for inactivity.
+#
+# Supabase pauses FREE projects after ~7 days of low activity (a few requests a
+# day is enough to stay active). This makes one tiny read every 3 days so quiet
+# early weeks can't pause the backend. Once real traffic arrives this is
+# redundant but harmless; on a paid plan it's unnecessary (paid projects are
+# never auto-paused).
+#
+# SETUP — add two repository secrets (Settings → Secrets and variables →
+# Actions). Use the ANON key, never the service-role key:
+#   SUPABASE_URL       = https://<project-ref>.supabase.co
+#   SUPABASE_ANON_KEY  = <the public anon key>
+name: Supabase keep-alive
+
+on:
+  schedule:
+    # 09:00 UTC, every 3rd day of the month (well inside the 7-day window).
+    - cron: "0 9 */3 * *"
+  workflow_dispatch: # lets you run it once by hand to verify setup
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the database
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "::error::SUPABASE_URL / SUPABASE_ANON_KEY secrets are not set."
+            exit 1
+          fi
+          # A real (public, RLS-safe) read — dashboard visits alone don't count.
+          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "${SUPABASE_URL%/}/rest/v1/inspiration_items?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+          echo "Supabase responded: HTTP $code"
+          # 2xx = healthy. Anything else should fail loudly so the run goes red.
+          case "$code" in
+            2*) echo "Project is awake." ;;
+            *)  echo "::error::Unexpected status $code"; exit 1 ;;
+          esac

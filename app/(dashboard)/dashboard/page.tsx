@@ -14,6 +14,7 @@ import {
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Panel, StatTile, ProgressBar, ProgressRing } from "@/components/dashboard/ui";
+import { Stagger } from "@/components/ui/stagger";
 import { Plate } from "@/components/ui/plate";
 import { Countdown } from "@/components/dashboard/countdown";
 import { formatINR } from "@/lib/utils";
@@ -111,32 +112,34 @@ export default async function DashboardOverview() {
         </div>
       </header>
 
-      {/* Stat tiles */}
+      {/* Stat tiles — one-shot staggered entrance (see components/ui/stagger) */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile
-          label="Planning progress"
-          value={`${checklistPct}%`}
-          sub={`${done} of ${checklistItems.length} tasks done`}
-          icon={<ListChecks className="h-[1.1rem] w-[1.1rem]" />}
-        />
-        <StatTile
-          label="Budget spent"
-          value={formatINR(totalSpent)}
-          sub={`of ${formatINR(wedding.totalBudget)} budget`}
-          icon={<Wallet className="h-[1.1rem] w-[1.1rem]" />}
-        />
-        <StatTile
-          label="Guests confirmed"
-          value={confirmed}
-          sub={`${headcount} invited · ${pending} pending`}
-          icon={<Users className="h-[1.1rem] w-[1.1rem]" />}
-        />
-        <StatTile
-          label="Committed so far"
-          value={formatINR(totalEstimated)}
-          sub="across all vendors"
-          icon={<CalendarClock className="h-[1.1rem] w-[1.1rem]" />}
-        />
+        <Stagger>
+          <StatTile
+            label="Planning progress"
+            value={`${checklistPct}%`}
+            sub={`${done} of ${checklistItems.length} tasks done`}
+            icon={<ListChecks className="h-[1.1rem] w-[1.1rem]" />}
+          />
+          <StatTile
+            label="Budget spent"
+            value={formatINR(totalSpent)}
+            sub={`of ${formatINR(wedding.totalBudget)} budget`}
+            icon={<Wallet className="h-[1.1rem] w-[1.1rem]" />}
+          />
+          <StatTile
+            label="Guests confirmed"
+            value={confirmed}
+            sub={`${headcount} invited · ${pending} pending`}
+            icon={<Users className="h-[1.1rem] w-[1.1rem]" />}
+          />
+          <StatTile
+            label="Committed so far"
+            value={formatINR(totalEstimated)}
+            sub="across all vendors"
+            icon={<CalendarClock className="h-[1.1rem] w-[1.1rem]" />}
+          />
+        </Stagger>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">

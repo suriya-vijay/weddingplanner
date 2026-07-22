@@ -16,7 +16,9 @@ export function Hero() {
   return (
     <AmbientZone
       as="section"
-      className="texture-paisley on-dark relative flex min-h-dvh flex-col justify-center overflow-hidden bg-forest-900 pt-32 pb-16"
+      /* min-h clamped below 100dvh + tighter top padding: at desktop widths a
+         full-height centred box left ~650px of empty ground above the headline. */
+      className="texture-paisley on-dark relative flex min-h-[min(88dvh,52rem)] flex-col justify-center overflow-hidden bg-forest-900 pt-28 pb-20"
     >
       {/* Ambient ground (over the paisley texture via gradient transparency) */}
       <div
@@ -83,15 +85,17 @@ export function Hero() {
           <GlobalSearch />
         </div>
 
-        {/* Trust strip */}
+        {/* Trust strip — what the platform actually offers. Deliberately NOT
+            numbers: invented counts ("2,400+ vendors") read as dishonest on a
+            new marketplace. Swap to real figures once they're worth quoting. */}
         <dl className="mt-14 flex flex-wrap gap-x-12 gap-y-6">
           {[
-            ["2,400+", "Curated vendors"],
-            ["120+", "Cities worldwide"],
-            ["4.9/5", "Couple rating"],
+            ["Hand-vetted", "Every vendor reviewed before listing"],
+            ["End-to-end", "Guests, budget, seating & timeline"],
+            ["AI-guided", "Planning advice tuned to your traditions"],
           ].map(([stat, label]) => (
-            <div key={label}>
-              <dt className="font-serif text-3xl text-gold-400">{stat}</dt>
+            <div key={label} className="max-w-[15rem]">
+              <dt className="font-serif text-2xl text-gold-400">{stat}</dt>
               <dd className="mt-1 text-sm text-cream/55">{label}</dd>
             </div>
           ))}

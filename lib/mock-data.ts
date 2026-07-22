@@ -1035,6 +1035,8 @@ export type TimelineMilestone = {
   /** ISO date */
   date: string;
   status: "done" | "upcoming";
+  /** Manual order — breaks ties between same-date/undated milestones. */
+  sort?: number;
 };
 
 export const timelineMilestones: TimelineMilestone[] = [

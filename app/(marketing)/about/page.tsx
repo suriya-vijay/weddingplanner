@@ -52,11 +52,16 @@ const PILLARS = [
   },
 ];
 
+/**
+ * Promises, not metrics. A new marketplace can't honestly claim "1,200+
+ * weddings curated" — invented counts undermine trust with exactly the couples
+ * we want. Replace with real figures once they're worth quoting.
+ */
 const STATS = [
-  { value: "1,200+", label: "Weddings curated" },
-  { value: "450+", label: "Trusted vendors" },
-  { value: "12", label: "Cities & destinations" },
-  { value: "1", label: "Planner per couple" },
+  { value: "Vetted", label: "Every vendor reviewed before listing" },
+  { value: "One home", label: "Guests, budget, seating & timeline together" },
+  { value: "Your rituals", label: "Built around your traditions, not generic" },
+  { value: "1", label: "Dedicated planner per couple" },
 ];
 
 export default function AboutPage() {
@@ -181,10 +186,8 @@ export default function AboutPage() {
           <Reveal className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
             {STATS.map((s) => (
               <div key={s.label}>
-                <p className="font-serif text-5xl text-gold-400">{s.value}</p>
-                <p className="mt-2 text-sm uppercase tracking-[0.16em] text-cream/70">
-                  {s.label}
-                </p>
+                <p className="font-serif text-3xl text-gold-400">{s.value}</p>
+                <p className="mt-2 text-sm text-cream/70">{s.label}</p>
               </div>
             ))}
           </Reveal>

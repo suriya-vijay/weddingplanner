@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * gold ring on focus.
  */
 const SEGMENTS = [
-  { key: "location", label: "Where", placeholder: "Udaipur, Goa, abroad…", icon: MapPin },
+  { key: "location", label: "Where", placeholder: "Edison, Fremont, Chicago…", icon: MapPin },
   { key: "tradition", label: "Tradition", placeholder: "Hindu, Sikh, Tamil…", icon: Sparkles },
   { key: "vendor", label: "Looking for", placeholder: "Photographer, decor…", icon: Store },
 ] as const;

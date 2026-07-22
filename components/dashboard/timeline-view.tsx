@@ -1,17 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Clock, Plus, Trash2, X, Sparkles } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Check,
+  Clock,
+  Plus,
+  Trash2,
+  X,
+  Sparkles,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn, byDateThenSort } from "@/lib/utils";
 import type { TimelineMilestone } from "@/lib/mock-data";
 import {
   addTimelineAction,
   updateTimelineAction,
   deleteTimelineAction,
   suggestTimelineAction,
+  reorderTimelineAction,
 } from "@/app/(dashboard)/dashboard/actions";
 
 function fmt(iso: string) {
@@ -36,6 +46,42 @@ export function TimelineView({
   const [notice, setNotice] = useState<string | null>(null);
 
   const doneCount = items.filter((m) => m.status === "done").length;
+
+  // Always render chronologically. Deriving (rather than sorting state) means a
+  // date edit, an add, or an AI insert re-orders the list instantly.
+  const ordered = useMemo(() => [...items].sort(byDateThenSort), [items]);
+
+  /**
+   * Move a milestone up/down within its tie-group. Dates drive the primary
+   * order, so this only shuffles items that compare equal (same date, or both
+   * undated) — we swap their `sort` values and persist the whole new order.
+   */
+  function move(id: string, dir: -1 | 1) {
+    const i = ordered.findIndex((m) => m.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= ordered.length) return;
+    const a = ordered[i];
+    const b = ordered[j];
+    // Only reorder within a tie-group; different dates are date-ordered.
+    if (byDateThenSort(a, b) !== 0 && (a.date || b.date) && a.date !== b.date)
+      return;
+    const next = [...ordered];
+    next[i] = b;
+    next[j] = a;
+    const resorted = next.map((m, k) => ({ ...m, sort: k }));
+    setItems(resorted);
+    reorderTimelineAction(resorted.map((m) => m.id)).catch(() =>
+      setItems(items),
+    );
+  }
+
+  /** Can this row move within its tie-group? (dates otherwise decide order) */
+  function canMove(id: string, dir: -1 | 1) {
+    const i = ordered.findIndex((m) => m.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= ordered.length) return false;
+    return ordered[i].date === ordered[j].date;
+  }
 
   function toggle(id: string) {
     const item = items.find((m) => m.id === id);
@@ -124,7 +170,7 @@ export function TimelineView({
           </p>
         ) : (
           <ol className="relative ml-3 border-l border-border-strong">
-            {items.map((m) => {
+            {ordered.map((m) => {
               const done = m.status === "done";
               return (
                 <li key={m.id} className="group relative ml-8 pb-8 last:pb-0">
@@ -155,6 +201,30 @@ export function TimelineView({
                         aria-label={`Date for ${m.title}`}
                         className="rounded-lg border border-border-strong bg-ivory px-2 py-1 text-sm text-ink focus:border-gold-400 focus:outline-2 focus:outline-offset-1 focus:outline-gold-500"
                       />
+                      {/* Reorder within a tie-group (same date / both undated);
+                          different dates are ordered chronologically. */}
+                      {(canMove(m.id, -1) || canMove(m.id, 1)) && (
+                        <span className="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100">
+                          <button
+                            type="button"
+                            onClick={() => move(m.id, -1)}
+                            disabled={!canMove(m.id, -1)}
+                            aria-label={`Move ${m.title} earlier`}
+                            className="grid h-8 w-6 place-items-center rounded-lg text-ink-soft hover:bg-cream-deep hover:text-forest-700 disabled:pointer-events-none disabled:opacity-30"
+                          >
+                            <ChevronUp className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => move(m.id, 1)}
+                            disabled={!canMove(m.id, 1)}
+                            aria-label={`Move ${m.title} later`}
+                            className="grid h-8 w-6 place-items-center rounded-lg text-ink-soft hover:bg-cream-deep hover:text-forest-700 disabled:pointer-events-none disabled:opacity-30"
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </button>
+                        </span>
+                      )}
                       <button
                         type="button"
                         onClick={() => remove(m.id)}
