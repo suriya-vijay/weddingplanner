@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Plus, Trash2, X } from "lucide-react";
+import { Check, Plus, Trash2, X, ListChecks } from "lucide-react";
 import { Panel, ProgressBar } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
@@ -187,11 +188,18 @@ export function ChecklistView({
           );
         })}
         {visible.length === 0 && (
-          <Panel>
-            <p className="py-6 text-center text-ink-soft">
-              No tasks here yet. Click “Add task” to create your own.
-            </p>
-          </Panel>
+          <EmptyState
+            icon={<ListChecks className="h-6 w-6" />}
+            title="Nothing here yet"
+            action={
+              <Button variant="primary" size="md" onClick={() => setAdding(true)}>
+                <Plus className="h-4 w-4" /> Add a task
+              </Button>
+            }
+          >
+            Add your own tasks alongside the starter list — anything from
+            booking a priest to ordering favours.
+          </EmptyState>
         )}
       </div>
 

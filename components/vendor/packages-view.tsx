@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, Package } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import type { VendorPackage } from "@/lib/mock-data";
 import {
@@ -66,6 +67,21 @@ export function PackagesView({ seed }: { seed: Pkg[] }) {
         </Button>
       </header>
 
+      {pkgs.length === 0 && (
+        <EmptyState
+          icon={<Package className="h-6 w-6" />}
+          title="No packages yet"
+          action={
+            <Button variant="primary" size="md" onClick={() => setCreating(true)}>
+              <Plus className="h-4 w-4" /> Add your first package
+            </Button>
+          }
+        >
+          Packages are what couples compare when they&rsquo;re deciding. List
+          what you offer, what it costs, and what&rsquo;s included.
+        </EmptyState>
+      )}
+
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {pkgs.map((pkg) => (
           <Panel key={pkg.id} className="flex flex-col">
@@ -89,7 +105,7 @@ export function PackagesView({ seed }: { seed: Pkg[] }) {
                   type="button"
                   onClick={() => remove(pkg.id)}
                   aria-label={`Delete ${pkg.name}`}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-faint transition-colors hover:bg-maroon/10 hover:text-maroon"
+                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-faint transition-colors hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -174,7 +190,7 @@ function PackageDialog({
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-ink">Price</span>
-            <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. $6,50,000" />
+            <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. $6,500" />
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-ink">

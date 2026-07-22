@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
 import { Panel, StatTile, ProgressBar } from "@/components/dashboard/ui";
+import { EmptyState } from "@/components/ui/empty-state";
 import { getMyVendor } from "@/lib/db/vendor-portal";
 
 export const metadata: Metadata = {
@@ -44,6 +45,15 @@ export default async function VendorReviewsPage() {
         />
       </div>
 
+      {vendor.reviewList.length === 0 ? (
+        <EmptyState
+          icon={<Star className="h-6 w-6" />}
+          title="No reviews yet"
+        >
+          Once couples you&rsquo;ve worked with leave a review, it appears here
+          and on your public profile.
+        </EmptyState>
+      ) : (
       <div className="grid gap-6 lg:grid-cols-[1fr_1.6fr]">
         {/* Distribution */}
         <Panel>
@@ -81,6 +91,7 @@ export default async function VendorReviewsPage() {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }

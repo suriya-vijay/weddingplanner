@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Plus, Trash2, X, Users, Check, Clock } from "lucide-react";
 import { Panel, StatTile } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
@@ -128,6 +129,29 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
 
       {/* Table */}
       <Panel>
+        {rows.length === 0 ? (
+          <EmptyState
+            bare
+            icon={<Users className="h-6 w-6" />}
+            title="No guests yet"
+            action={
+              <Button variant="primary" size="md" onClick={() => setAdding(true)}>
+                <Plus className="h-4 w-4" /> Add your first guest
+              </Button>
+            }
+          >
+            Add families or individuals, track their RSVP and meal
+            preferences, and seat them later from the Seating page.
+          </EmptyState>
+        ) : visible.length === 0 ? (
+          <EmptyState
+            bare
+            icon={<Users className="h-6 w-6" />}
+            title="No guests match this filter"
+          >
+            Try a different side, or clear the filter to see everyone.
+          </EmptyState>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[44rem] border-collapse text-sm">
             <thead>
@@ -180,7 +204,7 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
                       type="button"
                       onClick={() => remove(g.id)}
                       aria-label={`Remove ${g.name}`}
-                      className="text-ink-faint transition-colors hover:text-maroon"
+                      className="text-ink-faint transition-colors hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -190,9 +214,13 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
             </tbody>
           </table>
         </div>
-        <p className="mt-4 text-xs text-ink-faint">
-          Tip: click an RSVP badge to cycle Confirmed → Pending → Declined.
-        </p>
+        )}
+        {/* Only meaningful when there are badges on screen to click. */}
+        {visible.length > 0 && (
+          <p className="mt-4 text-xs text-ink-faint">
+            Tip: click an RSVP badge to cycle Confirmed → Pending → Declined.
+          </p>
+        )}
       </Panel>
 
       {adding && <AddGuestDialog onClose={() => setAdding(false)} onAdd={add} />}
@@ -290,7 +318,7 @@ function AddGuestDialog({
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 98765 43210"
+                placeholder="(555) 123-4567"
               />
             </Field>
           </div>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Inbox } from "lucide-react";
 import { Panel, StatTile } from "@/components/dashboard/ui";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { EnquiryThread } from "@/components/enquiry/enquiry-thread";
 import { type VendorEnquiry, type EnquiryStatus } from "@/lib/mock-data";
@@ -159,13 +160,24 @@ export function EnquiriesView({
             </div>
           </Panel>
         ))}
-        {visible.length === 0 && (
-          <Panel>
-            <p className="text-center text-sm text-ink-soft">
-              No enquiries in this status.
-            </p>
-          </Panel>
-        )}
+        {/* True-zero reads differently from filtered-zero: a brand-new vendor
+            used to be told "No enquiries in this status" under the All tab. */}
+        {rows.length === 0 ? (
+          <EmptyState
+            icon={<Inbox className="h-6 w-6" />}
+            title="No enquiries yet"
+          >
+            When a couple sends you an enquiry from the marketplace it lands
+            here, and you can reply in the same thread.
+          </EmptyState>
+        ) : visible.length === 0 ? (
+          <EmptyState
+            icon={<Inbox className="h-6 w-6" />}
+            title="Nothing in this status"
+          >
+            Try another tab, or choose &ldquo;All&rdquo; to see every enquiry.
+          </EmptyState>
+        ) : null}
       </div>
     </div>
   );

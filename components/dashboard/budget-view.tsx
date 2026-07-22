@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X, Wallet } from "lucide-react";
 import { Panel, StatTile, ProgressBar } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { cn, formatINR } from "@/lib/utils";
 import { type BudgetItem } from "@/lib/mock-data";
@@ -99,7 +100,9 @@ export function BudgetView({
         <ProgressBar value={budgetPct} />
       </Panel>
 
-      {/* Category breakdown */}
+      {/* Category breakdown — hidden until there's something to break down
+          (it used to render a lone heading above nothing). */}
+      {items.length > 0 && (
       <Panel>
         <h2 className="font-serif text-xl text-ink">By category</h2>
         <div className="mt-5 space-y-4">
@@ -126,6 +129,7 @@ export function BudgetView({
           })}
         </div>
       </Panel>
+      )}
 
       {/* Line items */}
       <Panel>
@@ -140,6 +144,21 @@ export function BudgetView({
           </Button>
         </div>
 
+        {items.length === 0 ? (
+          <EmptyState
+            bare
+            icon={<Wallet className="h-6 w-6" />}
+            title="No budget items yet"
+            action={
+              <Button variant="primary" size="md" onClick={() => setAdding(true)}>
+                <Plus className="h-4 w-4" /> Add your first item
+              </Button>
+            }
+          >
+            Track what you plan to spend and what you&rsquo;ve actually paid —
+            venue, catering, outfits, everything.
+          </EmptyState>
+        ) : (
         <div className="mt-5 overflow-x-auto">
           <table className="w-full min-w-[40rem] border-collapse text-sm">
             <thead>
@@ -178,7 +197,7 @@ export function BudgetView({
                       type="button"
                       onClick={() => remove(b.id)}
                       aria-label={`Remove ${b.label}`}
-                      className="text-ink-faint transition-colors hover:text-maroon"
+                      className="text-ink-faint transition-colors hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -188,6 +207,7 @@ export function BudgetView({
             </tbody>
           </table>
         </div>
+        )}
       </Panel>
 
       {adding && <AddItemDialog onClose={() => setAdding(false)} onAdd={add} />}

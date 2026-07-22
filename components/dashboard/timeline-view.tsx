@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { cn, byDateThenSort } from "@/lib/utils";
 import type { TimelineMilestone } from "@/lib/mock-data";
@@ -164,10 +165,19 @@ export function TimelineView({
 
       <Panel>
         {items.length === 0 ? (
-          <p className="py-8 text-center text-ink-soft">
-            No milestones yet. Add your own, or let the AI suggest a starter
-            timeline.
-          </p>
+          <EmptyState
+            bare
+            icon={<Clock className="h-6 w-6" />}
+            title="No milestones yet"
+            action={
+              <Button variant="primary" size="md" onClick={() => setAdding(true)}>
+                <Plus className="h-4 w-4" /> Add a milestone
+              </Button>
+            }
+          >
+            Map the big moments between now and the wedding — or let the AI
+            suggest a starter timeline you can edit.
+          </EmptyState>
         ) : (
           <ol className="relative ml-3 border-l border-border-strong">
             {ordered.map((m) => {

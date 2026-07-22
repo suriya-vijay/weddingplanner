@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Mail, Phone, MapPin, Clock, ArrowUpRight } from "lucide-react";
+import { Mail, MapPin, Clock, ArrowUpRight } from "lucide-react";
 import { ContactForm } from "@/components/contact/contact-form";
 import { DividerOrnament } from "@/components/brand/motifs";
 
@@ -10,11 +10,13 @@ export const metadata: Metadata = {
     "Get in touch with Kalyanam & Co. — for couples planning a wedding, vendors joining the marketplace, press and partnerships.",
 };
 
+// Email is the only channel that actually reaches anyone today — a fake phone
+// number and a Mumbai studio address (on a platform for American-Indian
+// weddings) were both invented. Add a real number/address when they exist.
 const DETAILS = [
   { icon: Mail, label: "Email", value: "hello@kalyanam.co", href: "mailto:hello@kalyanam.co" },
-  { icon: Phone, label: "Phone", value: "+91 98••• •••00", href: "tel:+9198000000" },
-  { icon: MapPin, label: "Studio", value: "Bandra West, Mumbai, India" },
-  { icon: Clock, label: "Hours", value: "Mon–Sat · 10am–7pm IST" },
+  { icon: MapPin, label: "Serving", value: "Couples across the United States" },
+  { icon: Clock, label: "Hours", value: "Mon–Sat · 9am–6pm ET" },
 ];
 
 export default function ContactPage() {

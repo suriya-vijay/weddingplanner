@@ -146,6 +146,12 @@ export default async function VendorOverview() {
               View all <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
+          {recent.length === 0 && (
+            <p className="py-8 text-center text-sm text-ink-soft">
+              No enquiries yet — they&rsquo;ll appear here when couples reach
+              out.
+            </p>
+          )}
           <ul className="mt-5 space-y-3">
             {recent.map((e) => (
               <li

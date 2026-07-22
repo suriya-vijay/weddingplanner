@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { isImageUrl } from "@/components/ui/plate";
 import {
   marketplaceCategories,
-  vendorLocations,
   type VendorProfile,
 } from "@/lib/mock-data";
 
@@ -19,6 +18,15 @@ import {
 export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
   const [category, setCategory] = useState<string>("All");
   const [location, setLocation] = useState<string>("All");
+
+  // Derive the filter options from the vendors actually listed. The old
+  // hardcoded list was Indian cities (Mumbai/Jaipur/Goa…) while vendors pick
+  // from US_CITIES, so no option could ever match — the filter was dead.
+  const locationOptions = useMemo(
+    () =>
+      [...new Set(vendors.map((v) => v.location).filter(Boolean))].sort(),
+    [vendors],
+  );
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => {
@@ -61,7 +69,7 @@ export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
           className="h-12 rounded-full border border-border-strong bg-ivory px-5 text-[0.95rem] text-ink focus:border-gold-400 focus:outline-2 focus:outline-offset-2 focus:outline-gold-500 sm:w-52"
         >
           <option value="All">All locations</option>
-          {vendorLocations.map((l) => (
+          {locationOptions.map((l) => (
             <option key={l} value={l}>
               {l}
             </option>
