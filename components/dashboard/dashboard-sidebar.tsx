@@ -37,7 +37,10 @@ export function DashboardSidebar({
 }) {
   const pathname = usePathname();
   return (
-    <aside className="flex w-full shrink-0 flex-col gap-1 border-b border-cream/10 bg-forest-900 px-4 py-4 text-cream lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
+    // texture-paisley = a static tiled SVG (rasterized once, ~zero runtime
+    // cost) so the workspace carries the same Indian luxury feel as the
+    // marketing pages. No animation, no blur.
+    <aside className="texture-paisley on-dark relative flex w-full shrink-0 flex-col gap-1 border-b border-cream/10 bg-forest-900 px-4 py-4 text-cream lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
       <div className="mb-2 flex items-center gap-2.5 px-2 lg:mb-6">
         <LotusMark className="h-7 w-7 text-gold-400" />
         <div className="leading-tight">

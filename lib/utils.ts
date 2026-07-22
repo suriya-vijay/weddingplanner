@@ -14,6 +14,25 @@ export function formatUSD(amount: number): string {
 export const formatINR = formatUSD;
 
 /**
+ * Display guard for money strings coming out of the DB.
+ *
+ * The ₹→$ switch changed the code, but rows written before it (and any typed
+ * by hand) still hold rupees — e.g. "₹4,50,000" / "₹₹₹" rendered on the live
+ * marketplace. Normalize at the render boundary so a stray ₹ can never reach a
+ * user, and convert Indian digit grouping (4,50,000) to US (450,000).
+ */
+export function toUSDisplay(value: string | null | undefined): string {
+  if (!value) return "";
+  if (!value.includes("₹")) return value;
+  // Price tiers ("₹₹₹") → "$$$"
+  if (/^₹+$/.test(value)) return "$".repeat(value.length);
+  return value.replace(/₹\s*([\d,]+)/g, (_m, digits: string) => {
+    const n = Number(String(digits).replace(/,/g, ""));
+    return Number.isFinite(n) ? formatUSD(n) : "$" + digits;
+  });
+}
+
+/**
  * Chronological comparator for timeline milestones: earliest date first,
  * undated last, `sort` as the tiebreak (so same-date/undated items keep their
  * manual order). Client-safe — the view sorts optimistically with this after an

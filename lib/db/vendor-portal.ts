@@ -1,4 +1,5 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { toUSDisplay } from "@/lib/utils";
 import type { VendorProfile, VendorEnquiry } from "@/lib/mock-data";
 
 /**
@@ -57,8 +58,10 @@ function toProfile(v: VendorRow): MyVendor {
     serviceAreas: v.service_areas ?? [],
     rating: Number(v.rating),
     reviews: v.reviews,
-    startingAt: v.starting_at,
-    priceTier: (v.price_tier as VendorProfile["priceTier"]) || "$$",
+    // Normalize legacy ₹ rows at the boundary (see toUSDisplay).
+    startingAt: toUSDisplay(v.starting_at),
+    priceTier:
+      (toUSDisplay(v.price_tier) as VendorProfile["priceTier"]) || "$$",
     verified: v.verified,
     styles: v.styles ?? [],
     about: v.about,
@@ -117,7 +120,10 @@ export async function getMyVendor(): Promise<MyVendor | null> {
   ]);
 
   const profile = toProfile(row);
-  profile.packages = (pkgs ?? []) as VendorProfile["packages"];
+  profile.packages = ((pkgs ?? []) as VendorProfile["packages"]).map((p) => ({
+    ...p,
+    price: toUSDisplay(p.price),
+  }));
   profile.reviewList = (revs ?? []) as VendorProfile["reviewList"];
   return profile;
 }
@@ -239,12 +245,12 @@ export async function getMyPackages(
     .select("id, name, price, features")
     .eq("vendor_id", vendorId)
     .order("sort");
-  return (data ?? []) as {
+  return ((data ?? []) as {
     id: string;
     name: string;
     price: string;
     features: string[];
-  }[];
+  }[]).map((p) => ({ ...p, price: toUSDisplay(p.price) }));
 }
 
 /** Build a URL-safe slug from a business name, kept unique with a uid suffix. */

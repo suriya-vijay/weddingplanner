@@ -113,11 +113,32 @@ export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
 
       {/* Grid */}
       {results.length > 0 ? (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {results.map((v) => (
-            <VendorCard key={v.slug} vendor={v} />
-          ))}
-        </div>
+        <>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map((v) => (
+              <VendorCard key={v.slug} vendor={v} />
+            ))}
+          </div>
+          {/* A young marketplace looks broken with a couple of cards and a sea
+              of whitespace. Frame it as growing, and recruit. */}
+          {results.length < 6 && (
+            <div className="mt-10 rounded-3xl border border-dashed border-border-strong bg-ivory/60 px-8 py-10 text-center">
+              <p className="font-serif text-xl text-ink">
+                We&rsquo;re growing — carefully
+              </p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-ink-soft">
+                Every vendor is reviewed before they appear here, so this list
+                grows slowly and deliberately. Know someone exceptional?
+              </p>
+              <Link
+                href="/signup"
+                className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-forest-700 px-5 py-2.5 text-sm font-medium text-cream transition-colors duration-[var(--dur-fast)] hover:bg-forest-600"
+              >
+                Become a vendor
+              </Link>
+            </div>
+          )}
+        </>
       ) : (
         <div className="mt-16 text-center">
           <p className="font-serif text-2xl text-ink">No vendors match</p>

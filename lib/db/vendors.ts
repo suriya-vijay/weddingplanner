@@ -1,4 +1,5 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { toUSDisplay } from "@/lib/utils";
 import type {
   VendorProfile,
   VendorPackage,
@@ -51,8 +52,10 @@ function toProfile(
     serviceAreas: v.service_areas ?? [],
     rating: Number(v.rating),
     reviews: v.reviews,
-    startingAt: v.starting_at,
-    priceTier: (v.price_tier as VendorProfile["priceTier"]) || "$$",
+    // Normalize legacy ₹ rows at the boundary so no stray rupee reaches a user.
+    startingAt: toUSDisplay(v.starting_at),
+    priceTier:
+      (toUSDisplay(v.price_tier) as VendorProfile["priceTier"]) || "$$",
     verified: v.verified,
     styles: v.styles ?? [],
     about: v.about,
@@ -174,7 +177,10 @@ export async function getVendorBySlug(
     id: row.id,
     ...toProfile(
       row,
-      (pkgs ?? []) as VendorPackage[],
+      ((pkgs ?? []) as VendorPackage[]).map((p) => ({
+        ...p,
+        price: toUSDisplay(p.price),
+      })),
       (revs ?? []) as VendorReview[],
     ),
   };

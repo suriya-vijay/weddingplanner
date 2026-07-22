@@ -28,7 +28,9 @@ export default async function VendorsPage() {
         </div>
       </section>
 
-      <section className="section bg-cream">
+      {/* Tighter top than `.section`: the filter bar sits right under the hero,
+          so the full section padding left a large empty band above it. */}
+      <section className="section bg-cream !pt-12">
         <div className="container-luxe">
           <Marketplace vendors={vendors} />
         </div>
