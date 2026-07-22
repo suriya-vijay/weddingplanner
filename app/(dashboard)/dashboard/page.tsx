@@ -4,7 +4,6 @@ import {
   ListChecks,
   Wallet,
   Users,
-  CalendarClock,
   ArrowUpRight,
   MapPin,
   Check,
@@ -137,11 +136,14 @@ export default async function DashboardOverview() {
             sub={`${headcount} invited · ${pending} pending`}
             icon={<Users className="h-[1.1rem] w-[1.1rem]" />}
           />
+          {/* Was "Committed so far · across all vendors" — but this is the
+              sum of the couple's own budget ESTIMATES, unrelated to any
+              vendor. It read as money already owed. */}
           <StatTile
-            label="Committed so far"
+            label="Planned spend"
             value={formatINR(totalEstimated)}
-            sub="across all vendors"
-            icon={<CalendarClock className="h-[1.1rem] w-[1.1rem]" />}
+            sub="your budget estimates"
+            icon={<Wallet className="h-[1.1rem] w-[1.1rem]" />}
           />
         </Stagger>
       </div>

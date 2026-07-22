@@ -54,13 +54,23 @@ export function ProgressBar({
   className,
   tone = "gold",
 }: {
-  /** 0–100 */
+  /** 0–100 (values above 100 clamp the bar but should use tone="over") */
   value: number;
   className?: string;
-  tone?: "gold" | "forest";
+  /**
+   * `over` = spent more than planned. Without it an over-budget bar clamps to
+   * 100% and renders in the normal colour, so 125% spent looks like a healthy
+   * "fully complete" bar — the opposite of the truth.
+   */
+  tone?: "gold" | "forest" | "over";
 }) {
   const pct = Math.max(0, Math.min(100, value));
-  const bar = tone === "gold" ? "bg-gold-500" : "bg-forest-600";
+  const bar =
+    tone === "over"
+      ? "bg-destructive"
+      : tone === "gold"
+        ? "bg-gold-500"
+        : "bg-forest-600";
   return (
     <div
       className={cn("h-2.5 w-full overflow-hidden rounded-full bg-cream-deep", className)}

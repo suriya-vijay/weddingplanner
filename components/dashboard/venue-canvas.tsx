@@ -65,9 +65,18 @@ export function VenueCanvas({
   migrationReady: boolean;
 }) {
   const [shapes, setShapes] = useState<VenueShape[]>(initialData.shapes);
-  const [seats, setSeats] = useState<Record<string, string[]>>(
-    initialData.seats,
-  );
+  // Drop seat assignments for guests that no longer exist. The layout is a
+  // detached JSON blob with no FK to `guests`, so deleting a guest leaves a
+  // dangling id behind; pruning on load lets the saved layout self-heal.
+  const [seats, setSeats] = useState<Record<string, string[]>>(() => {
+    const live = new Set(guests.map((g) => g.id));
+    return Object.fromEntries(
+      Object.entries(initialData.seats).map(([tableId, ids]) => [
+        tableId,
+        ids.filter((id) => live.has(id)),
+      ]),
+    );
+  });
   const [selected, setSelected] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
     "idle",
@@ -163,10 +172,14 @@ export function VenueCanvas({
     );
 
   // Head-count sum for a table (a party of 3 counts as 3 seats).
+  // Ignore ids that no longer match a guest. A deleted guest used to keep
+  // occupying their seat forever: the roster row vanished (so it couldn't be
+  // un-seated) but the `?? 1` fallback kept counting them, so a table showed
+  // "6/8" with 5 people listed and refused new seating.
   const headcountAt = useCallback(
     (tableId: string) =>
       (seats[tableId] ?? []).reduce(
-        (n, gid) => n + (guests.find((g) => g.id === gid)?.count ?? 1),
+        (n, gid) => n + (guests.find((g) => g.id === gid)?.count ?? 0),
         0,
       ),
     [seats, guests],
@@ -349,6 +362,16 @@ export function VenueCanvas({
                       className="h-8 w-16 rounded-md border border-border-strong bg-ivory px-2 text-sm text-ink focus:border-gold-400 focus:outline-2 focus:outline-offset-1 focus:outline-gold-500"
                     />
                   </label>
+                  {/* Capacity can be lowered below who's already seated —
+                      say so rather than silently rendering "8/2". */}
+                  {headcountAt(selectedShape.id) >
+                    (selectedShape.seats ?? 8) && (
+                    <p className="mt-2 rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">
+                      {headcountAt(selectedShape.id)} seated but only{" "}
+                      {selectedShape.seats ?? 8} seats — unseat someone or raise
+                      the capacity.
+                    </p>
+                  )}
                   <p className="mt-2 text-xs text-ink-faint">
                     Seated: {headcountAt(selectedShape.id)}/
                     {selectedShape.seats ?? 8} people

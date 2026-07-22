@@ -47,41 +47,50 @@ export function SettingsForm({ wedding }: { wedding: Wedding }) {
     setSaved(res.ok);
   }
 
+  /** Clear the "Saved ✓" as soon as the couple edits again — otherwise it
+   *  lingers and implies unsaved changes are already stored. */
+  function edited<T>(setter: (v: T) => void) {
+    return (v: T) => {
+      if (saved) setSaved(false);
+      setter(v);
+    };
+  }
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <Panel>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Couple names (as shown)" className="sm:col-span-2">
-            <Input value={coupleNames} onChange={(e) => setCoupleNames(e.target.value)} placeholder="e.g. Aanya & Vikram" />
+            <Input value={coupleNames} onChange={(e) => edited(setCoupleNames)(e.target.value)} placeholder="e.g. Aanya & Vikram" />
           </Field>
           <Field label="Partner one">
-            <Input value={partnerA} onChange={(e) => setPartnerA(e.target.value)} placeholder="e.g. Aanya" />
+            <Input value={partnerA} onChange={(e) => edited(setPartnerA)(e.target.value)} placeholder="e.g. Aanya" />
           </Field>
           <Field label="Partner two">
-            <Input value={partnerB} onChange={(e) => setPartnerB(e.target.value)} placeholder="e.g. Vikram" />
+            <Input value={partnerB} onChange={(e) => edited(setPartnerB)(e.target.value)} placeholder="e.g. Vikram" />
           </Field>
           <Field label="Wedding date">
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <Input type="date" value={date} onChange={(e) => edited(setDate)(e.target.value)} />
           </Field>
           <Field label="City">
             <Combobox
               value={city}
-              onChange={setCity}
+              onChange={edited(setCity)}
               options={US_CITIES}
               placeholder="e.g. Jersey City, NJ"
             />
           </Field>
           <Field label="Venue">
-            <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. The Grand Ballroom" />
+            <Input value={venue} onChange={(e) => edited(setVenue)(e.target.value)} placeholder="e.g. The Grand Ballroom" />
           </Field>
           <Field label="Tradition">
-            <Input value={tradition} onChange={(e) => setTradition(e.target.value)} placeholder="e.g. North Indian · Hindu" />
+            <Input value={tradition} onChange={(e) => edited(setTradition)(e.target.value)} placeholder="e.g. North Indian · Hindu" />
           </Field>
           <Field label="Guest estimate">
-            <Input type="number" inputMode="numeric" value={guestEstimate} onChange={(e) => setGuestEstimate(e.target.value)} placeholder="e.g. 420" />
+            <Input type="number" inputMode="numeric" value={guestEstimate} onChange={(e) => edited(setGuestEstimate)(e.target.value)} placeholder="e.g. 420" />
           </Field>
           <Field label="Total budget ($)">
-            <Input type="number" inputMode="numeric" value={totalBudget} onChange={(e) => setTotalBudget(e.target.value)} placeholder="e.g. 8000000" />
+            <Input type="number" inputMode="numeric" value={totalBudget} onChange={(e) => edited(setTotalBudget)(e.target.value)} placeholder="e.g. 50000" />
           </Field>
         </div>
 

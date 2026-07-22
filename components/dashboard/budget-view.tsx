@@ -42,9 +42,11 @@ export function BudgetView({
   const totalEstimated = items.reduce((s, b) => s + b.estimated, 0);
   const totalSpent = items.reduce((s, b) => s + b.spent, 0);
   const remaining = totalBudget - totalSpent;
-  const budgetPct = totalBudget
+  const hasBudget = totalBudget > 0;
+  const budgetPct = hasBudget
     ? Math.round((totalSpent / totalBudget) * 100)
     : 0;
+  const overBudget = hasBudget && totalSpent > totalBudget;
 
   // category rollup for the bars (React Compiler memoizes this automatically)
   const byCategory = ((): [string, { estimated: number; spent: number }][] => {
@@ -82,32 +84,71 @@ export function BudgetView({
         <p className="eyebrow text-gold-600">Planning</p>
         <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">Budget</h1>
         <p className="mt-1 text-ink-soft">
-          Track every allocation and payment against your{" "}
-          {formatINR(totalBudget)} budget.
+          {hasBudget
+            ? `Plan what you expect to spend, then record what you've actually paid — against your ${formatINR(totalBudget)} budget.`
+            : "Plan what you expect to spend, then record what you've actually paid."}
         </p>
       </header>
 
       {/* Summary tiles */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="Total budget" value={formatINR(totalBudget)} />
-        <StatTile label="Committed" value={formatINR(totalEstimated)} sub="planned across vendors" />
-        <StatTile label="Spent" value={formatINR(totalSpent)} sub={`${budgetPct}% of budget`} />
+        {/* "Committed" implied a contractual obligation; these are the
+            couple's own estimates. */}
+        <StatTile
+          label="Planned"
+          value={formatINR(totalEstimated)}
+          sub="your estimates"
+        />
+        <StatTile
+          label="Spent"
+          value={formatINR(totalSpent)}
+          // "0% of budget" next to real spending is nonsense; say why instead.
+          sub={hasBudget ? `${budgetPct}% of budget` : "no budget set"}
+        />
         <StatTile
           label="Remaining"
-          value={formatINR(remaining)}
-          sub={remaining < 0 ? "over budget" : "still available"}
+          value={hasBudget ? formatINR(remaining) : "—"}
+          sub={
+            !hasBudget
+              ? "set a total to track this"
+              : remaining < 0
+                ? "over budget"
+                : "still available"
+          }
         />
       </div>
 
-      {/* Overall bar */}
+      {/* Overall bar — or a prompt, since the total lives on Settings and
+          isn't discoverable from here. */}
       <Panel>
-        <div className="mb-2 flex items-baseline justify-between text-sm">
-          <span className="text-ink-soft">Budget used</span>
-          <span className="font-medium text-ink">
-            {formatINR(totalSpent)} / {formatINR(totalBudget)}
-          </span>
-        </div>
-        <ProgressBar value={budgetPct} />
+        {hasBudget ? (
+          <>
+            <div className="mb-2 flex items-baseline justify-between text-sm">
+              <span className="text-ink-soft">Budget used</span>
+              <span
+                className={cn(
+                  "font-medium",
+                  overBudget ? "text-destructive" : "text-ink",
+                )}
+              >
+                {formatINR(totalSpent)} / {formatINR(totalBudget)}
+                {overBudget && ` · ${formatINR(totalSpent - totalBudget)} over`}
+              </span>
+            </div>
+            <ProgressBar value={budgetPct} tone={overBudget ? "over" : "gold"} />
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-3 py-4 text-center">
+            <p className="text-sm text-ink-soft">
+              You haven&rsquo;t set a total budget yet, so there&rsquo;s nothing
+              to track spending against.
+            </p>
+            <Button href="/dashboard/settings" variant="outline" size="sm">
+              Set your total budget
+            </Button>
+          </div>
+        )}
       </Panel>
 
       {/* Category breakdown — hidden until there's something to break down
@@ -117,23 +158,38 @@ export function BudgetView({
         <h2 className="font-serif text-xl text-ink">By category</h2>
         <div className="mt-5 space-y-4">
           {byCategory.map(([cat, v]) => {
-            const pct = totalEstimated
+            // The bar shows spent-vs-planned for THIS category. The caption
+            // must describe the same thing — it used to show the category's
+            // share of total planned spend, so a full bar sat under "29%".
+            const share = totalEstimated
               ? Math.round((v.estimated / totalEstimated) * 100)
               : 0;
+            const spentPct = v.estimated
+              ? Math.round((v.spent / v.estimated) * 100)
+              : 0;
+            const over = v.spent > v.estimated;
             return (
               <div key={cat}>
                 <div className="mb-1.5 flex items-baseline justify-between text-sm">
                   <span className="text-ink">{cat}</span>
-                  <span className="text-ink-soft">
+                  <span className={over ? "text-destructive" : "text-ink-soft"}>
                     {formatINR(v.spent)}{" "}
-                    <span className="text-ink-faint">/ {formatINR(v.estimated)}</span>
+                    <span className={over ? "" : "text-ink-faint"}>
+                      / {formatINR(v.estimated)} planned
+                    </span>
                   </span>
                 </div>
                 <ProgressBar
-                  value={v.estimated ? (v.spent / v.estimated) * 100 : 0}
-                  tone="forest"
+                  value={spentPct}
+                  tone={over ? "over" : "forest"}
                 />
-                <p className="mt-1 text-xs text-ink-faint">{pct}% of committed budget</p>
+                <p className="mt-1 text-xs text-ink-faint">
+                  {over
+                    ? `${formatINR(v.spent - v.estimated)} over plan`
+                    : `${spentPct}% of this category spent`}
+                  {" · "}
+                  {share}% of your total plan
+                </p>
               </div>
             );
           })}

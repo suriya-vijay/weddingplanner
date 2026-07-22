@@ -43,20 +43,6 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
     updateGuestAction(id, patch).catch(() => setRows(snapshot));
   };
 
-  const totals = useMemo(() => {
-    const invited = rows.reduce((s, g) => s + g.count, 0);
-    const confirmed = rows
-      .filter((g) => g.rsvp === "Confirmed")
-      .reduce((s, g) => s + g.count, 0);
-    const pending = rows
-      .filter((g) => g.rsvp === "Pending")
-      .reduce((s, g) => s + g.count, 0);
-    const declined = rows
-      .filter((g) => g.rsvp === "Declined")
-      .reduce((s, g) => s + g.count, 0);
-    return { invited, confirmed, pending, declined };
-  }, [rows]);
-
   const visible = useMemo(
     () =>
       sideFilter === "All"
@@ -64,6 +50,20 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
         : rows.filter((g) => g.side === sideFilter || g.side === "Both"),
     [rows, sideFilter],
   );
+
+  // Totals follow the filter, so the tiles always describe the rows on screen.
+  // (They used to read from `rows`, so picking "Bride" shrank the table but
+  // left "Total invited" showing the whole wedding.)
+  const totals = useMemo(() => {
+    const headcount = (list: Guest[]) =>
+      list.reduce((s, g) => s + g.count, 0);
+    return {
+      invited: headcount(visible),
+      confirmed: headcount(visible.filter((g) => g.rsvp === "Confirmed")),
+      pending: headcount(visible.filter((g) => g.rsvp === "Pending")),
+      declined: headcount(visible.filter((g) => g.rsvp === "Declined")),
+    };
+  }, [visible]);
 
   const cycleRsvp = (id: string) => {
     const g = rows.find((r) => r.id === id);
@@ -106,7 +106,14 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
 
       {/* Summary */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile label="Total invited" value={totals.invited} icon={<Users className="h-[1.1rem] w-[1.1rem]" />} />
+        {/* These count PEOPLE (party sizes summed), while the table lists
+            parties — state the unit so 5 rows reading "40" makes sense. */}
+        <StatTile
+          label="Total invited"
+          value={totals.invited}
+          sub={`${visible.length} ${visible.length === 1 ? "party" : "parties"}${sideFilter === "All" ? "" : ` · ${sideFilter}`}`}
+          icon={<Users className="h-[1.1rem] w-[1.1rem]" />}
+        />
         <StatTile label="Confirmed" value={totals.confirmed} icon={<Check className="h-[1.1rem] w-[1.1rem]" />} />
         <StatTile label="Pending" value={totals.pending} icon={<Clock className="h-[1.1rem] w-[1.1rem]" />} />
         <StatTile label="Declined" value={totals.declined} />
