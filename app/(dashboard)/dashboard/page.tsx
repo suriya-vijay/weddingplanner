@@ -14,6 +14,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Panel, StatTile, ProgressBar, ProgressRing } from "@/components/dashboard/ui";
 import { Stagger } from "@/components/ui/stagger";
+import { Reveal } from "@/components/ui/reveal";
 import { Plate } from "@/components/ui/plate";
 import { Countdown } from "@/components/dashboard/countdown";
 import { formatINR } from "@/lib/utils";
@@ -148,9 +149,11 @@ export default async function DashboardOverview() {
         </Stagger>
       </div>
 
+      {/* Reveal the two columns in sequence so entrance motion continues past
+          the stat row instead of stopping a third of the way down the page. */}
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Left column */}
-        <div className="space-y-6">
+        <Reveal className="space-y-6" delay={60}>
           {/* Progress + budget summary */}
           <Panel>
             <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:justify-around">
@@ -262,10 +265,10 @@ export default async function DashboardOverview() {
               </div>
             )}
           </Panel>
-        </div>
+        </Reveal>
 
         {/* Right column */}
-        <div className="space-y-6">
+        <Reveal className="space-y-6" delay={140}>
           {/* AI Advisor — replaces a hardcoded "assigned planner" (a fake
               person, with a fake +91 number) that made couples think a human
               had been assigned to them. This links to a feature that exists. */}
@@ -309,7 +312,7 @@ export default async function DashboardOverview() {
               </Button>
             </div>
           </Panel>
-        </div>
+        </Reveal>
       </div>
     </div>
   );

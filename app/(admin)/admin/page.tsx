@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Sparkles, Store, Heart, TrendingUp, ArrowUpRight } from "lucide-react";
 import { Plate } from "@/components/ui/plate";
+import { StatTile } from "@/components/dashboard/ui";
 import { getInspiration } from "@/lib/db/inspiration";
 import { getVendors } from "@/lib/db/vendors";
 import { getAdminStats } from "@/lib/db/admin-stats";
 import { Stagger } from "@/components/ui/stagger";
+import { Reveal } from "@/components/ui/reveal";
 
 export const metadata: Metadata = {
   title: "Admin · Kalyanam & Co.",
@@ -61,27 +63,23 @@ export default async function AdminDashboard() {
         <Stagger>
           {STATS.map((s) => {
             const Icon = s.icon;
+            // Use the shared StatTile (was reimplemented inline here, so it
+            // silently missed the hover + tabular-nums added in 4a).
             return (
-              <div
+              <StatTile
                 key={s.label}
-                className="rounded-2xl border border-border bg-ivory p-5 shadow-[var(--shadow-sm)]"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-ink-soft">{s.label}</span>
-                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-forest-100 text-forest-700">
-                    <Icon className="h-[1.1rem] w-[1.1rem]" />
-                  </span>
-                </div>
-                <p className="mt-3 font-serif text-3xl text-ink">{s.value}</p>
-                <p className="mt-1 text-xs text-ink-faint">{s.sub}</p>
-              </div>
+                label={s.label}
+                value={s.value}
+                sub={s.sub}
+                icon={<Icon className="h-[1.1rem] w-[1.1rem]" />}
+              />
             );
           })}
         </Stagger>
       </div>
 
       {/* Recent inspiration */}
-      <section className="rounded-2xl border border-border bg-ivory p-6 shadow-[var(--shadow-sm)]">
+      <Reveal delay={60} as="section" className="rounded-2xl border border-border bg-ivory p-6 shadow-[var(--shadow-sm)]">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-xl text-ink">Recent inspiration</h2>
           <Link
@@ -114,7 +112,7 @@ export default async function AdminDashboard() {
             </div>
           ))}
         </div>
-      </section>
+      </Reveal>
     </div>
   );
 }

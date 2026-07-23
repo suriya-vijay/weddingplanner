@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Panel, StatTile, ProgressRing } from "@/components/dashboard/ui";
 import { Stagger } from "@/components/ui/stagger";
+import { Reveal } from "@/components/ui/reveal";
 import { getMyVendor, getMyEnquiries } from "@/lib/db/vendor-portal";
 
 export const metadata: Metadata = {
@@ -137,6 +138,7 @@ export default async function VendorOverview() {
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Recent enquiries */}
+        <Reveal delay={60}>
         <Panel>
           <div className="flex items-center justify-between">
             <h2 className="font-serif text-xl text-ink">Recent enquiries</h2>
@@ -174,8 +176,10 @@ export default async function VendorOverview() {
             ))}
           </ul>
         </Panel>
+        </Reveal>
 
         {/* Profile completeness */}
+        <Reveal delay={140}>
         <Panel className="flex flex-col items-center text-center">
           <h2 className="font-serif text-xl text-ink">Profile strength</h2>
           <div className="my-5">
@@ -202,6 +206,7 @@ export default async function VendorOverview() {
             Edit my profile
           </Button>
         </Panel>
+        </Reveal>
       </div>
     </div>
   );
