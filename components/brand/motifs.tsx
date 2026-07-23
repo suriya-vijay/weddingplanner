@@ -6,6 +6,93 @@ import { cn } from "@/lib/utils";
  * All decorative SVGs are aria-hidden.
  */
 
+/**
+ * MandalaBloom — a jewelled hero mandala. Where MandalaRing is a single thin
+ * stroke ("drawn on paper"), this layers concentric rings of varied weight, two
+ * offset petal rings, a scalloped band and a lotus core, drawn with a soft gold
+ * gradient stroke. Reads as intricate Indian ornament, not line-art. Still one
+ * static SVG (the slow rotation lives on the wrapper via .ambient-spin).
+ */
+export function MandalaBloom({ className }: { className?: string }) {
+  const outer = Array.from({ length: 24 });
+  const inner = Array.from({ length: 12 });
+  const scallop = Array.from({ length: 36 });
+  return (
+    <svg
+      viewBox="0 0 200 200"
+      fill="none"
+      aria-hidden="true"
+      className={cn("h-full w-full", className)}
+    >
+      <defs>
+        <linearGradient id="mandala-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#e6c66e" />
+          <stop offset="50%" stopColor="#c99a3a" />
+          <stop offset="100%" stopColor="#e8b4b8" />
+        </linearGradient>
+      </defs>
+      <g stroke="url(#mandala-gold)" fill="none" strokeLinecap="round">
+        {/* Concentric rings, varied weight for depth */}
+        <circle cx="100" cy="100" r="26" strokeWidth="1.4" opacity="0.85" />
+        <circle cx="100" cy="100" r="40" strokeWidth="0.7" opacity="0.55" />
+        <circle cx="100" cy="100" r="62" strokeWidth="1.1" opacity="0.6" />
+        <circle cx="100" cy="100" r="80" strokeWidth="0.6" opacity="0.4" />
+        <circle cx="100" cy="100" r="96" strokeWidth="1.2" opacity="0.5" />
+
+        {/* Scalloped band between the outer rings */}
+        {scallop.map((_, i) => (
+          <circle
+            key={`s${i}`}
+            cx="100"
+            cy="12"
+            r="3.2"
+            strokeWidth="0.7"
+            opacity="0.4"
+            transform={`rotate(${(360 / scallop.length) * i} 100 100)`}
+          />
+        ))}
+
+        {/* Outer petal ring */}
+        {outer.map((_, i) => (
+          <path
+            key={`o${i}`}
+            d="M100 40c6 10 6 26 0 40-6-14-6-30 0-40Z"
+            strokeWidth="0.8"
+            opacity="0.5"
+            transform={`rotate(${(360 / outer.length) * i} 100 100)`}
+          />
+        ))}
+
+        {/* Inner petal ring, offset half a step, filled faintly */}
+        {inner.map((_, i) => (
+          <path
+            key={`i${i}`}
+            d="M100 62c5 7 5 16 0 24-5-8-5-17 0-24Z"
+            strokeWidth="1"
+            fill="url(#mandala-gold)"
+            fillOpacity="0.06"
+            opacity="0.7"
+            transform={`rotate(${(360 / inner.length) * i + 15} 100 100)`}
+          />
+        ))}
+
+        {/* Lotus core */}
+        {Array.from({ length: 8 }).map((_, i) => (
+          <path
+            key={`c${i}`}
+            d="M100 84c3 5 3 11 0 16-3-5-3-11 0-16Z"
+            strokeWidth="1"
+            fill="url(#mandala-gold)"
+            fillOpacity="0.1"
+            transform={`rotate(${45 * i} 100 100)`}
+          />
+        ))}
+        <circle cx="100" cy="100" r="5" strokeWidth="1.2" opacity="0.9" />
+      </g>
+    </svg>
+  );
+}
+
 /** Eight-petal lotus, line-art. The Kalyanam mark. */
 export function LotusMark({ className }: { className?: string }) {
   return (

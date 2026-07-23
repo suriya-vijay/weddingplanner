@@ -167,15 +167,22 @@
     transform: rotate(360deg);
   }
 }
-@keyframes ambient-breathe {
-  0%,
-  100% {
-    opacity: 0.22;
-    transform: scale(1);
+/* Aurora: a large multi-stop radial wash that slowly drifts its position +
+   opacity for luminous atmospheric depth. GPU-cheap (background-position +
+   opacity, NO blur filter). This IS the hero's single glow slot — it is the
+   repurposed hero glow, not a 3rd continuous animation. */
+@keyframes ambient-aurora {
+  0% {
+    background-position: 30% 40%;
+    opacity: 0.5;
   }
   50% {
-    opacity: 0.36;
-    transform: scale(1.06);
+    background-position: 65% 55%;
+    opacity: 0.72;
+  }
+  100% {
+    background-position: 30% 40%;
+    opacity: 0.5;
   }
 }
 
@@ -306,12 +313,16 @@
     animation: ambient-rotate 110s linear infinite;
     animation-play-state: paused;
   }
-  .ambient-glow {
-    animation: ambient-breathe 7s ease-in-out infinite;
+  /* The hero's glow slot, a drifting aurora (replaces the old breathing glow).
+     Same single slot, same pause-off-screen discipline — NOT an extra ambient
+     motion; the hero runs exactly 2 (spin + aurora). */
+  .ambient-aurora {
+    background-size: 180% 180%;
+    animation: ambient-aurora 14s ease-in-out infinite;
     animation-play-state: paused;
   }
   .in-view .ambient-spin,
-  .in-view .ambient-glow {
+  .in-view .ambient-aurora {
     animation-play-state: running;
   }
 
@@ -374,9 +385,9 @@
   }
   /* Hard-stop ambient motion regardless of in-view state */
   .ambient-spin,
-  .ambient-glow,
+  .ambient-aurora,
   .in-view .ambient-spin,
-  .in-view .ambient-glow {
+  .in-view .ambient-aurora {
     animation: none !important;
   }
   .reveal {

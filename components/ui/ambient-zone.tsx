@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Wraps a section that contains ambient motion (.ambient-spin / .ambient-glow).
+ * Wraps a section that contains ambient motion (.ambient-spin / .ambient-aurora).
  * Toggles `.in-view` ONLY while the section is on-screen, so the animation
  * pauses (zero GPU) the moment it scrolls out of view. This is the safety
  * mechanism that lets us have continuous motion without the old crash.

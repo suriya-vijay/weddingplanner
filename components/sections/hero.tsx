@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { MandalaRing } from "@/components/brand/motifs";
+import { MandalaBloom } from "@/components/brand/motifs";
 import { MandalaCorner } from "@/components/brand/patterns";
 import { AmbientZone } from "@/components/ui/ambient-zone";
 import { GlobalSearch } from "./global-search";
 
 /**
  * Hero — full-viewport, editorial, Indian-luxury. Deep forest ground with a
- * faint paisley fabric texture, gold mandala corners (draw-in), a slowly
- * drifting mandala, and a softly breathing blush glow.
- * Perf: ambient motion is capped (2: drift + glow), GPU-friendly, and PAUSED
- * whenever the hero is off-screen (AmbientZone toggles .in-view). One small
+ * faint paisley texture, gold mandala corners, a slowly-turning jewelled
+ * mandala, and a drifting gold/blush AURORA behind it for luminous depth.
+ * Perf: still exactly 2 ambient motions (mandala spin + aurora drift — the
+ * aurora IS the old glow slot, not a 3rd), GPU-friendly (transform +
+ * background-position, no blur), PAUSED off-screen via AmbientZone. One small
  * header blur lives in the header, not here. Reduced-motion = fully static.
  */
 export function Hero() {
@@ -32,20 +33,24 @@ export function Hero() {
       {/* Gold mandala corner flourishes (static) */}
       <MandalaCorner className="pointer-events-none absolute left-0 top-0 h-44 w-44 text-gold-400/30 sm:h-56 sm:w-56" />
       <MandalaCorner className="pointer-events-none absolute bottom-0 right-0 h-44 w-44 rotate-180 text-gold-400/25 sm:h-56 sm:w-56" />
-      {/* Slowly drifting mandala, right (paused off-screen via .ambient-spin) */}
+      {/* Aurora — drifting gold/blush light behind the mandala for depth.
+          This is the single glow slot (ambient-aurora), paused off-screen. */}
       <div
         aria-hidden
-        className="ambient-spin pointer-events-none absolute -right-32 top-1/2 hidden h-[40rem] w-[40rem] -translate-y-1/2 text-gold-400/[0.12] md:block"
+        className="ambient-aurora pointer-events-none absolute -right-40 top-1/2 hidden h-[52rem] w-[52rem] -translate-y-1/2 rounded-full md:block"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(230,198,110,0.20) 0%, rgba(232,180,184,0.12) 34%, rgba(20,60,42,0) 66%)",
+        }}
+      />
+      {/* Slowly turning jewelled mandala, right (paused off-screen). */}
+      <div
+        aria-hidden
+        className="ambient-spin pointer-events-none absolute -right-32 top-1/2 hidden h-[42rem] w-[42rem] -translate-y-1/2 md:block"
         style={{ transformOrigin: "center" }}
       >
-        <MandalaRing />
+        <MandalaBloom />
       </div>
-      {/* Soft blush glow, lower-left — gently breathing (no blur filter) */}
-      <div
-        aria-hidden
-        className="ambient-glow pointer-events-none absolute -bottom-40 -left-40 h-[34rem] w-[34rem] rounded-full"
-        style={{ background: "radial-gradient(circle, #e8b4b8 0%, transparent 68%)" }}
-      />
 
       <div className="container-luxe relative">
         <div className="max-w-3xl">
@@ -56,13 +61,17 @@ export function Hero() {
           <h1 className="mt-6 font-serif font-medium leading-[1.04] text-cream text-h1">
             Where forever
             <br />
-            <span className="italic text-gold-400">takes shape</span>.
+            {/* Gradient-filled text: gold→blush sweep instead of flat gold. */}
+            <span className="bg-gradient-to-r from-gold-300 via-gold-400 to-blush-300 bg-clip-text italic text-transparent">
+              takes shape
+            </span>
+            <span className="text-gold-400">.</span>
           </h1>
 
           <p className="lede mt-7 max-w-xl text-cream/75">
-            Inspiration, trusted vendors, planning tools, AI assistance, and your
-            own dedicated wedding planner — gathered into one elegant platform,
-            for celebrations as singular as your story.
+            Inspiration, trusted vendors, planning tools and AI assistance —
+            gathered into one elegant platform, for celebrations as singular as
+            your story.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
