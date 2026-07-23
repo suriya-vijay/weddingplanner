@@ -20,14 +20,17 @@ import { GoogleGenAI, Type } from "@google/genai";
 export const ADVISOR_MODEL = "gemini-flash-latest";
 
 /**
- * ⚠️ THINKING BUDGET — do not remove.
- * gemini-2.5-flash class models are *thinking* models: internal reasoning is
- * billed against `maxOutputTokens`. With the old 1024 cap the model spent ~981
- * tokens thinking and left ~29 for the answer → finishReason MAX_TOKENS → empty
- * / truncated output. (That silently broke the AI timeline 100% of the time.)
- * We disable thinking for these short, structured tasks and keep a roomy cap.
+ * Token cap. gemini-flash-latest is a *thinking* model — internal reasoning is
+ * billed against this budget — so it must be roomy enough for both the thinking
+ * and the answer. 2048 leaves ample room (observed: ~840 thinking + a full
+ * answer, finishReason STOP).
+ *
+ * NOTE: we used to also pass `thinkingConfig: { thinkingBudget: 0 }` to skip
+ * thinking. Google's API now REJECTS that on this model with a 400
+ * INVALID_ARGUMENT, which broke the advisor AND the timeline generator. A
+ * generous cap alone solves the original truncation problem, so the field is
+ * gone — do not re-add it.
  */
-const THINKING_OFF = { thinkingBudget: 0 } as const;
 const MAX_TOKENS = 2048;
 
 /** True for transient upstream failures worth one retry (503 / overloaded). */
@@ -134,9 +137,7 @@ export async function streamAdvisorReply(opts: {
       config: {
         systemInstruction: opts.systemInstruction,
         temperature: 0.7,
-        // Thinking off + roomy cap: otherwise reasoning eats the token budget
-        // and replies truncate mid-sentence (see THINKING_OFF above).
-        thinkingConfig: THINKING_OFF,
+        // Roomy cap so thinking + answer both fit (see MAX_TOKENS).
         maxOutputTokens: MAX_TOKENS,
       },
     }),
@@ -197,9 +198,7 @@ export async function generateTimelineMilestones(
           },
         },
         temperature: 0.6,
-        // Thinking off + roomy cap — see THINKING_OFF. Without this the model
-        // burns the whole budget reasoning and returns nothing parseable.
-        thinkingConfig: THINKING_OFF,
+        // Roomy cap so thinking + the JSON both fit (see MAX_TOKENS).
         maxOutputTokens: MAX_TOKENS,
       },
     }),
