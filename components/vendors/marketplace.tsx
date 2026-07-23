@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Star, MapPin, Search, BadgeCheck, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isImageUrl } from "@/components/ui/plate";
@@ -16,7 +17,23 @@ import {
  * the server page and passed in as a prop. Cards link to /vendors/[slug].
  */
 export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
-  const [category, setCategory] = useState<string>("All");
+  // Seed the filters from the URL so the hero search bar can deep-link here
+  // pre-filtered (e.g. /vendors?looking=Photography&where=Edison, NJ).
+  const params = useSearchParams();
+  const categories = useMemo(
+    () => new Set(vendors.map((v) => v.category)),
+    [vendors],
+  );
+  const initialCategory = (() => {
+    const raw = (params.get("looking") ?? "").trim();
+    if (!raw) return "All";
+    // Case-insensitive match against a real category; else treat as free text.
+    const hit = [...categories].find(
+      (c) => c.toLowerCase() === raw.toLowerCase(),
+    );
+    return hit ?? "All";
+  })();
+  const [category, setCategory] = useState<string>(initialCategory);
   const [location, setLocation] = useState<string>("All");
 
   // Derive the filter options from the vendors actually listed. The old
@@ -27,7 +44,17 @@ export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
       [...new Set(vendors.map((v) => v.location).filter(Boolean))].sort(),
     [vendors],
   );
-  const [query, setQuery] = useState("");
+  // "where" + "tradition" + any non-category "looking" text seed the search box.
+  const [query, setQuery] = useState(() =>
+    [
+      params.get("where"),
+      params.get("tradition"),
+      initialCategory === "All" ? params.get("looking") : null,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+  );
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -1,26 +1,40 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { MapPin, Sparkles, Store, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Airbnb-style global search (UX Bible §6) — visual + mock only this phase.
- * Pill-shaped, ivory, segmented; active segment lifts with a blush wash and
- * gold ring on focus.
+ * Airbnb-style global search (UX Bible §6). Real search: submitting routes to
+ * the vendor marketplace pre-filtered by the entered where/tradition/looking —
+ * the "search bar is the CTA" marketplace pattern. Marketplace seeds its
+ * filters from these query params.
  */
 const SEGMENTS = [
-  { key: "location", label: "Where", placeholder: "Edison, Fremont, Chicago…", icon: MapPin },
+  { key: "where", label: "Where", placeholder: "Edison, Fremont, Chicago…", icon: MapPin },
   { key: "tradition", label: "Tradition", placeholder: "Hindu, Sikh, Tamil…", icon: Sparkles },
-  { key: "vendor", label: "Looking for", placeholder: "Photographer, decor…", icon: Store },
+  { key: "looking", label: "Looking for", placeholder: "Photographer, decor…", icon: Store },
 ] as const;
 
 export function GlobalSearch() {
+  const router = useRouter();
   const [active, setActive] = useState<string | null>(null);
+  const [values, setValues] = useState<Record<string, string>>({});
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const qs = new URLSearchParams();
+    for (const seg of SEGMENTS) {
+      const v = values[seg.key]?.trim();
+      if (v) qs.set(seg.key, v);
+    }
+    router.push(qs.toString() ? `/vendors?${qs}` : "/vendors");
+  }
 
   return (
     <form
-      onSubmit={(e) => e.preventDefault()}
+      onSubmit={submit}
       className="flex flex-col gap-2 rounded-[1.75rem] bg-ivory p-2 shadow-[var(--shadow-lg)] sm:flex-row sm:items-center sm:rounded-full sm:gap-0"
       role="search"
       aria-label="Search weddings, vendors and inspiration"
@@ -45,6 +59,10 @@ export function GlobalSearch() {
               <input
                 type="text"
                 placeholder={seg.placeholder}
+                value={values[seg.key] ?? ""}
+                onChange={(e) =>
+                  setValues((v) => ({ ...v, [seg.key]: e.target.value }))
+                }
                 onFocus={() => setActive(seg.key)}
                 onBlur={() => setActive(null)}
                 className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-faint"
