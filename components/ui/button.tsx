@@ -27,8 +27,11 @@ const buttonVariants = cva(
           "bg-forest-700 text-cream shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:bg-forest-600 hover:shadow-[var(--shadow-md)]",
         outline:
           "border border-forest-700/30 bg-transparent text-forest-700 hover:border-forest-700 hover:bg-forest-700 hover:text-cream",
+        // Gold underline grows in on hover (UX-Bible §1), via a gradient
+        // background sized 0→100% — transform/opacity-class equivalent with no
+        // extra DOM. Kept the faint tint too for a clear hover surface.
         ghost:
-          "bg-transparent text-forest-700 hover:bg-forest-700/[0.06]",
+          "bg-transparent bg-gradient-to-r from-gold-400 to-gold-400 bg-[length:0%_2px] bg-left-bottom bg-no-repeat text-forest-700 transition-[background-size,background-color] duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-[length:100%_2px] hover:bg-forest-700/[0.04]",
         link: "bg-transparent px-0 text-forest-700 underline-offset-4 hover:text-gold-600 hover:underline",
       },
       size: {

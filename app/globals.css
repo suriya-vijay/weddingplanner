@@ -188,6 +188,9 @@
   }
   html {
     scroll-behavior: smooth;
+    /* Anchor links (#vendors, #features…) land below the fixed header instead
+       of under it — UX-Bible §4 / skill fixed-element-offset. */
+    scroll-padding-top: 5rem;
     -webkit-text-size-adjust: 100%;
   }
   body {
