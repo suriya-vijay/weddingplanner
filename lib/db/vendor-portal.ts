@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { toUSDisplay } from "@/lib/utils";
 import type { VendorProfile, VendorEnquiry } from "@/lib/mock-data";
@@ -84,7 +85,7 @@ function toProfile(v: VendorRow): MyVendor {
  * — mirroring how getOrCreateWedding() provisions a couple. This keeps the
  * whole portal from 404ing when a vendor was never provisioned.
  */
-export async function getMyVendor(): Promise<MyVendor | null> {
+export const getMyVendor = cache(async function getMyVendor(): Promise<MyVendor | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -136,7 +137,7 @@ export async function getMyVendor(): Promise<MyVendor | null> {
     ? Math.round((list.reduce((s, r) => s + Number(r.rating), 0) / list.length) * 10) / 10
     : 0;
   return profile;
-}
+});
 
 /** Enquiries for the signed-in vendor's business. */
 export async function getMyEnquiries(vendorId: string): Promise<VendorEnquiry[]> {

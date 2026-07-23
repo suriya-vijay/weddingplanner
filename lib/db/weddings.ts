@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { STARTER_CHECKLIST, STARTER_TIMELINE } from "@/lib/db/starter-data";
 
@@ -46,8 +47,11 @@ function toWedding(r: WeddingRow): Wedding {
  * Resolve the signed-in couple's wedding, creating it on first visit with a
  * starter checklist + timeline. Returns null if not signed in. RLS ensures a
  * couple only ever sees their own row.
+ *
+ * React.cache: the layout, page and any server action in the same request share
+ * one lookup — and it also collapses a first-visit double-create race into one.
  */
-export async function getOrCreateWedding(): Promise<Wedding | null> {
+export const getOrCreateWedding = cache(async function getOrCreateWedding(): Promise<Wedding | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -99,7 +103,7 @@ export async function getOrCreateWedding(): Promise<Wedding | null> {
   ]);
 
   return toWedding(created as WeddingRow);
-}
+});
 
 /** Update editable wedding profile fields (settings page). */
 export async function updateWedding(
