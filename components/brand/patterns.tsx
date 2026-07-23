@@ -154,3 +154,130 @@ export function PaisleyBorder({ className }: { className?: string }) {
     </div>
   );
 }
+
+/**
+ * LeafVine — a trailing gold creeper: one long curving stem with alternating
+ * teardrop leaves and small buds. Sized wide (viewBox 400×48) so it runs as a
+ * horizontal divider/edge band; mirror with `-scale-x-100`. Static line-art.
+ */
+export function LeafVine({ className }: { className?: string }) {
+  // A gentle S-curve stem; leaves alternate above/below along it.
+  const stem = "M4 24 C 60 8, 120 40, 180 24 S 300 8, 396 24";
+  const leaves = Array.from({ length: 9 });
+  return (
+    <svg
+      viewBox="0 0 400 48"
+      fill="none"
+      aria-hidden="true"
+      preserveAspectRatio="none"
+      className={cn("h-6 w-full", className)}
+    >
+      <g stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path d={stem} strokeWidth="1.2" opacity="0.75" />
+        {leaves.map((_, i) => {
+          const x = 24 + i * 44;
+          const up = i % 2 === 0;
+          const y = 24 + (up ? -2 : 2);
+          const ty = up ? -13 : 13;
+          // teardrop leaf + center vein, curving away from the stem
+          return (
+            <g key={i} opacity="0.7">
+              <path
+                d={`M${x} ${y} q ${up ? 7 : -7} ${ty * 0.5} 2 ${ty} q ${up ? -9 : 9} ${-ty * 0.6} -2 ${-ty}Z`}
+                strokeWidth="1"
+              />
+              <path d={`M${x} ${y} l 1 ${ty * 0.8}`} strokeWidth="0.7" opacity="0.6" />
+              {/* small bud between leaves */}
+              {i < leaves.length - 1 && (
+                <circle cx={x + 22} cy={24} r="1.4" fill="currentColor" stroke="none" opacity="0.5" />
+              )}
+            </g>
+          );
+        })}
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * TempleArch — a stylized mandap / temple archway (two columns + a scalloped
+ * ogee arch). Used low-opacity behind a section heading as the "old India"
+ * focal ornament. Static line-art; color via currentColor.
+ */
+export function TempleArch({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 240 200" fill="none" aria-hidden="true" className={cn("h-48 w-56", className)}>
+      <g stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2">
+        {/* ogee / cusped arch across the top */}
+        <path
+          d="M40 84 C 40 46, 80 30, 120 30 C 160 30, 200 46, 200 84"
+          opacity="0.7"
+        />
+        {/* inner scalloped arch line (echo) */}
+        <path
+          d="M52 86 C 52 56, 86 42, 120 42 C 154 42, 188 56, 188 86"
+          opacity="0.4"
+          strokeWidth="0.9"
+        />
+        {/* small cusp dots along the arch */}
+        {Array.from({ length: 7 }).map((_, i) => {
+          const t = i / 6;
+          const x = 40 + t * 160;
+          const y = 84 - Math.sin(Math.PI * t) * 52;
+          return <circle key={i} cx={x} cy={y} r="1.4" fill="currentColor" stroke="none" opacity="0.5" />;
+        })}
+        {/* left column: shaft, capital, base */}
+        <path d="M46 84 v96" opacity="0.7" />
+        <path d="M58 84 v96" opacity="0.7" />
+        <path d="M42 84 h20" opacity="0.6" />
+        <path d="M42 92 h20" opacity="0.4" />
+        <path d="M40 180 h24" opacity="0.7" />
+        <path d="M38 188 h28" opacity="0.5" />
+        {/* right column (mirror) */}
+        <path d="M182 84 v96" opacity="0.7" />
+        <path d="M194 84 v96" opacity="0.7" />
+        <path d="M178 84 h20" opacity="0.6" />
+        <path d="M178 92 h20" opacity="0.4" />
+        <path d="M176 180 h24" opacity="0.7" />
+        <path d="M174 188 h28" opacity="0.5" />
+        {/* tiny finial / kalash at the arch apex */}
+        <path d="M120 30 v-10" opacity="0.6" />
+        <circle cx="120" cy="16" r="3" opacity="0.6" />
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * DiyaRow — a horizontal row of oil lamps (diya) each with a teardrop flame.
+ * A warm, traditional wedding accent band. Static line-art via currentColor;
+ * flames can be tinted separately by the caller if wanted (kept single-color).
+ */
+export function DiyaRow({ className, count = 5 }: { className?: string; count?: number }) {
+  return (
+    <div
+      className={cn("flex items-end justify-center gap-6 text-gold-400", className)}
+      aria-hidden="true"
+    >
+      {Array.from({ length: count }).map((_, i) => (
+        <svg key={i} viewBox="0 0 32 34" fill="none" className="h-8 w-8">
+          <g stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            {/* flame */}
+            <path
+              d="M16 4 c 3 5, 3 9, 0 12 c -3 -3, -3 -7, 0 -12Z"
+              strokeWidth="1.1"
+              opacity="0.9"
+            />
+            {/* flame glow dot */}
+            <circle cx="16" cy="13" r="1" fill="currentColor" stroke="none" opacity="0.7" />
+            {/* lamp bowl */}
+            <path d="M6 22 c 0 5, 5 8, 10 8 s 10 -3 10 -8" strokeWidth="1.2" opacity="0.85" />
+            <path d="M4 22 h24" strokeWidth="1.2" opacity="0.85" />
+            {/* little spout on the right */}
+            <path d="M26 22 l 4 1" strokeWidth="1.1" opacity="0.7" />
+          </g>
+        </svg>
+      ))}
+    </div>
+  );
+}

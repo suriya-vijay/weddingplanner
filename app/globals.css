@@ -313,6 +313,14 @@
     opacity: 0.05;
     --pattern-paisley: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84' viewBox='0 0 84 84' fill='none' stroke='%23a98729' stroke-width='1.1'%3E%3Cpath d='M30 8c10 4 13 16 7 25-5 8-16 9-22 3-5-5-4-13 2-17 4-3 10-2 12 2 1 3 0 6-2 8'/%3E%3Cpath d='M64 50c10 4 13 16 7 25-5 8-16 9-22 3-5-5-4-13 2-17 4-3 10-2 12 2 1 3 0 6-2 8' opacity='0.6'/%3E%3Ccircle cx='24' cy='30' r='1.2' fill='%23a98729' stroke='none'/%3E%3Ccircle cx='58' cy='72' r='1.2' fill='%23a98729' stroke='none'/%3E%3C/svg%3E");
   }
+  /* Gold-on-dark, RICHER — denser tile (two mirrored butas + a leaf + more
+     dots) at higher opacity so the fabric actually reads on a forest ground.
+     Still a single tiled background rasterized once; text sits in front. */
+  .texture-paisley.on-dark-rich::before {
+    opacity: 0.1;
+    background-size: 96px 96px;
+    --pattern-paisley: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96' fill='none' stroke='%23d8b961' stroke-width='1.1'%3E%3Cpath d='M28 10c11 5 14 18 7 27-6 9-18 10-25 3-5-5-4-14 2-18 5-3 11-2 13 3 2 3 1 7-3 9'/%3E%3Cpath d='M68 60c11 5 14 18 7 27-6 9-18 10-25 3-5-5-4-14 2-18 5-3 11-2 13 3 2 3 1 7-3 9'/%3E%3Cpath d='M18 62c5-3 11-2 14 3-4 4-11 4-14-3Z' opacity='0.7'/%3E%3Cpath d='M78 20c-5-3-11-2-14 3 4 4 11 4 14-3Z' opacity='0.7'/%3E%3Ccircle cx='20' cy='34' r='1.3' fill='%23d8b961' stroke='none'/%3E%3Ccircle cx='60' cy='84' r='1.3' fill='%23d8b961' stroke='none'/%3E%3Ccircle cx='72' cy='40' r='1' fill='%23d8b961' stroke='none' opacity='0.7'/%3E%3Ccircle cx='30' cy='80' r='1' fill='%23d8b961' stroke='none' opacity='0.7'/%3E%3C/svg%3E");
+  }
 
   /* ── Capped ambient motion ──────────────────────────────────────────
      Gentle continuous motion that is PAUSED by default and only runs while
