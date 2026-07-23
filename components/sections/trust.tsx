@@ -1,6 +1,8 @@
 import { ShieldCheck, Lock, LayoutGrid, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { DividerOrnament } from "@/components/brand/motifs";
+import { MandalaCornerSoft } from "@/components/brand/patterns";
+import { ParallaxLayer } from "@/components/ui/parallax-layer";
 
 /**
  * Trust & safety — the credibility a new marketplace has to earn. Every claim
@@ -33,8 +35,16 @@ const PILLARS = [
 
 export function Trust() {
   return (
-    <section className="section bg-sunken">
-      <div className="container-luxe">
+    <section className="section texture-paisley on-light bg-sunken relative overflow-hidden">
+      {/* Corner flourishes drifting with scroll (matches the Features section). */}
+      <ParallaxLayer speed={0.04} className="pointer-events-none absolute -right-8 -top-8">
+        <MandalaCornerSoft className="h-40 w-40 -scale-x-100 text-gold-500/18 sm:h-52 sm:w-52" />
+      </ParallaxLayer>
+      <ParallaxLayer speed={-0.04} className="pointer-events-none absolute -bottom-8 -left-8">
+        <MandalaCornerSoft className="h-40 w-40 -scale-y-100 text-gold-500/18 sm:h-52 sm:w-52" />
+      </ParallaxLayer>
+
+      <div className="container-luxe relative">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">Why couples trust us</p>
           <h2 className="mt-4 font-serif text-h2 text-ink">
@@ -56,8 +66,8 @@ export function Trust() {
             const Icon = p.icon;
             return (
               <Reveal key={p.title} delay={i * 60}>
-                <div className="flex h-full flex-col rounded-2xl border border-border bg-ivory p-6 shadow-[var(--shadow-sm)] transition-[transform,box-shadow,border-color] duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-0.5 hover:border-gold-200 hover:shadow-[var(--shadow-md)]">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-forest-100 text-forest-700">
+                <div className="group flex h-full flex-col rounded-2xl border border-border bg-ivory p-6 shadow-[var(--shadow-sm)] transition-[transform,box-shadow,border-color] duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-1 hover:border-gold-200 hover:shadow-[var(--shadow-md)]">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-forest-100 text-forest-700 transition-colors duration-[var(--dur-base)] group-hover:bg-forest-700 group-hover:text-gold-400">
                     <Icon className="h-[1.35rem] w-[1.35rem]" strokeWidth={1.6} aria-hidden />
                   </span>
                   <h3 className="mt-4 font-serif text-xl text-ink">{p.title}</h3>

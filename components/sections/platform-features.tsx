@@ -1,5 +1,6 @@
 import { Reveal } from "@/components/ui/reveal";
-import { KalashDivider, MandalaCorner } from "@/components/brand/patterns";
+import { KalashDivider, MandalaCornerSoft } from "@/components/brand/patterns";
+import { ParallaxLayer } from "@/components/ui/parallax-layer";
 import { features } from "@/lib/mock-data";
 
 /**
@@ -16,9 +17,14 @@ export function PlatformFeatures() {
       id="features"
       className="section texture-paisley on-light bg-sunken relative overflow-hidden"
     >
-      {/* Static gold mandala flourishes anchoring the section's corners. */}
-      <MandalaCorner className="pointer-events-none absolute -left-8 -top-8 h-40 w-40 text-gold-500/15 sm:h-52 sm:w-52" />
-      <MandalaCorner className="pointer-events-none absolute -bottom-8 -right-8 h-40 w-40 rotate-180 text-gold-500/15 sm:h-52 sm:w-52" />
+      {/* Refined gold flourishes anchoring the corners — drifting gently with
+          scroll via ParallaxLayer (opposite directions for a subtle depth). */}
+      <ParallaxLayer speed={0.04} className="pointer-events-none absolute -left-8 -top-8">
+        <MandalaCornerSoft className="h-40 w-40 text-gold-500/20 sm:h-52 sm:w-52" />
+      </ParallaxLayer>
+      <ParallaxLayer speed={-0.04} className="pointer-events-none absolute -bottom-8 -right-8">
+        <MandalaCornerSoft className="h-40 w-40 rotate-180 text-gold-500/20 sm:h-52 sm:w-52" />
+      </ParallaxLayer>
 
       <div className="container-luxe relative">
         <Reveal className="mx-auto max-w-2xl text-center">
