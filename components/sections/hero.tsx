@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MandalaBloom } from "@/components/brand/motifs";
-import { MandalaCorner } from "@/components/brand/patterns";
+import { MandalaCornerSoft } from "@/components/brand/patterns";
 import { AmbientZone } from "@/components/ui/ambient-zone";
 import { GlobalSearch } from "./global-search";
 
@@ -30,9 +30,9 @@ export function Hero() {
             "radial-gradient(120% 90% at 15% 10%, rgba(27,67,50,0.92) 0%, rgba(15,44,31,0.96) 55%, #0b2017 100%)",
         }}
       />
-      {/* Gold mandala corner flourishes (static) */}
-      <MandalaCorner className="pointer-events-none absolute left-0 top-0 h-44 w-44 text-gold-400/30 sm:h-56 sm:w-56" />
-      <MandalaCorner className="pointer-events-none absolute bottom-0 right-0 h-44 w-44 rotate-180 text-gold-400/25 sm:h-56 sm:w-56" />
+      {/* Refined gold corner flourishes (static, curved petals not stray lines) */}
+      <MandalaCornerSoft className="pointer-events-none absolute left-0 top-0 h-40 w-40 text-gold-400/25 sm:h-52 sm:w-52" />
+      <MandalaCornerSoft className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rotate-180 text-gold-400/20 sm:h-52 sm:w-52" />
       {/* Aurora — drifting gold/blush light behind the mandala for depth.
           This is the single glow slot (ambient-aurora), paused off-screen. */}
       <div
@@ -61,8 +61,16 @@ export function Hero() {
           <h1 className="mt-6 font-serif font-medium leading-[1.04] text-cream text-h1">
             Where forever
             <br />
-            {/* Gradient-filled text: gold→blush sweep instead of flat gold. */}
-            <span className="bg-gradient-to-r from-gold-300 via-gold-400 to-blush-300 bg-clip-text italic text-transparent">
+            {/* Gradient-filled text with a slow traveling shimmer — the gold
+                "wave" sweeps across the word (paused off-screen, static under
+                reduced-motion). The repeating gradient makes the sweep seamless. */}
+            <span
+              className="text-shimmer bg-clip-text italic text-transparent"
+              style={{
+                backgroundImage:
+                  "linear-gradient(100deg, var(--gold-500) 0%, var(--blush-300) 20%, var(--gold-400) 40%, var(--gold-200) 50%, var(--gold-400) 60%, var(--blush-300) 80%, var(--gold-500) 100%)",
+              }}
+            >
               takes shape
             </span>
             <span className="text-gold-400">.</span>

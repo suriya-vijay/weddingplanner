@@ -185,6 +185,17 @@
     opacity: 0.5;
   }
 }
+/* Shimmer sweep: slides a wide gradient across bg-clip-text so the gold "wave"
+   travels through the word. GPU-cheap (background-position only, no blur). Paused
+   off-screen via .in-view; frozen (but fully coloured) under reduced-motion. */
+@keyframes shimmer-sweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: -200% 50%;
+  }
+}
 
 /* ============================================================
    Base
@@ -321,8 +332,16 @@
     animation: ambient-aurora 14s ease-in-out infinite;
     animation-play-state: paused;
   }
+  /* Traveling gold shimmer for the hero headline accent. The gradient is set
+     inline on the span (gold→blush stops); this widens it and sweeps it. */
+  .text-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer-sweep 6s linear infinite;
+    animation-play-state: paused;
+  }
   .in-view .ambient-spin,
-  .in-view .ambient-aurora {
+  .in-view .ambient-aurora,
+  .in-view .text-shimmer {
     animation-play-state: running;
   }
 
@@ -386,9 +405,15 @@
   /* Hard-stop ambient motion regardless of in-view state */
   .ambient-spin,
   .ambient-aurora,
+  .text-shimmer,
   .in-view .ambient-spin,
-  .in-view .ambient-aurora {
+  .in-view .ambient-aurora,
+  .in-view .text-shimmer {
     animation: none !important;
+  }
+  /* Keep the shimmer text fully coloured, just not moving. */
+  .text-shimmer {
+    background-position: 0% 50% !important;
   }
   .reveal {
     opacity: 1;

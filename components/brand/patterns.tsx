@@ -61,6 +61,50 @@ export function MandalaCorner({ className }: { className?: string }) {
 }
 
 /**
+ * MandalaCornerSoft — a refined corner flourish. Where MandalaCorner uses
+ * straight ray lines (which can read as stray marks against a plain ground),
+ * this uses delicate concentric arcs with small curved lotus-petals and a bud,
+ * so it reads as intentional ornament. Static; driven by `currentColor`.
+ */
+export function MandalaCornerSoft({ className }: { className?: string }) {
+  const petals = Array.from({ length: 5 });
+  return (
+    <svg viewBox="0 0 160 160" fill="none" aria-hidden="true" className={cn("h-40 w-40", className)}>
+      <g stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        {/* soft concentric arcs radiating from the corner (0,0) */}
+        <path d="M0 40A40 40 0 0 1 40 0" strokeWidth="1.2" opacity="0.5" />
+        <path d="M0 66A66 66 0 0 1 66 0" strokeWidth="0.9" opacity="0.32" />
+        <path d="M0 96A96 96 0 0 1 96 0" strokeWidth="0.7" opacity="0.2" />
+        {/* small curved lotus petals sitting on the inner arc */}
+        {petals.map((_, i) => {
+          const a = (Math.PI / 2) * ((i + 0.5) / petals.length);
+          const r = 40;
+          const cx = Math.cos(a) * r;
+          const cy = Math.sin(a) * r;
+          const dx = Math.cos(a) * 12;
+          const dy = Math.sin(a) * 12;
+          // teardrop petal pointing outward from the arc
+          return (
+            <path
+              key={i}
+              d={`M${cx} ${cy} q ${dx * 0.5 - dy * 0.4} ${dy * 0.5 + dx * 0.4} ${dx} ${dy} q ${-dx * 0.5 - dy * 0.4} ${-dy * 0.5 + dx * 0.4} ${-dx} ${-dy}`}
+              strokeWidth="0.9"
+              opacity="0.4"
+            />
+          );
+        })}
+        {/* lotus bud at the inner corner */}
+        <path
+          d="M10 10c6 1 11 6 12 12-6-1-11-6-12-12Zm0 0c1 6 6 11 12 12C21 16 16 11 10 10Z"
+          strokeWidth="0.9"
+          opacity="0.55"
+        />
+      </g>
+    </svg>
+  );
+}
+
+/**
  * Kalash / temple-arch divider ornament — richer than the plain hairline.
  * A central kalash (sacred pot) flanked by paisleys and gold rules.
  */
