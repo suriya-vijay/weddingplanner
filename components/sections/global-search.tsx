@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
  */
 const SEGMENTS = [
   { key: "where", label: "Where", placeholder: "Edison, Fremont, Chicago…", icon: MapPin },
-  { key: "tradition", label: "Tradition", placeholder: "Hindu, Sikh, Tamil…", icon: Sparkles },
+  { key: "style", label: "Style", placeholder: "Cinematic, Regal, Boho…", icon: Sparkles },
   { key: "looking", label: "Looking for", placeholder: "Photographer, decor…", icon: Store },
 ] as const;
 

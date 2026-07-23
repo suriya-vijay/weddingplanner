@@ -44,11 +44,13 @@ export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
       [...new Set(vendors.map((v) => v.location).filter(Boolean))].sort(),
     [vendors],
   );
-  // "where" + "tradition" + any non-category "looking" text seed the search box.
+  // "where" + "style" (+ legacy "tradition") + any non-category "looking" text
+  // seed the search box. The searchable string below includes location + areas
+  // + styles, so each of these actually resolves to results.
   const [query, setQuery] = useState(() =>
     [
       params.get("where"),
-      params.get("tradition"),
+      params.get("style") ?? params.get("tradition"),
       initialCategory === "All" ? params.get("looking") : null,
     ]
       .filter(Boolean)
@@ -64,7 +66,9 @@ export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
         return false;
       if (
         q &&
-        !`${v.name} ${v.category} ${v.tagline} ${v.styles.join(" ")}`
+        // Search the full text of the vendor incl. location + service areas, so
+        // typing a city ("Cincinnati") in the hero WHERE box actually resolves.
+        !`${v.name} ${v.category} ${v.tagline} ${v.styles.join(" ")} ${v.location} ${v.serviceAreas.join(" ")}`
           .toLowerCase()
           .includes(q)
       )
