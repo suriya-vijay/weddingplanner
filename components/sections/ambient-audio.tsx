@@ -30,10 +30,11 @@ import { cn } from "@/lib/utils";
 type Track = { src: string; title: string };
 
 // Edit this list to match the files you drop into public/music/.
+// See public/music/README.md for recommended royalty-free tracks + steps.
 const TRACKS: Track[] = [
-  { src: "/music/track-1.mp3", title: "Sitar Reverie" },
-  { src: "/music/track-2.mp3", title: "Veena at Dusk" },
-  { src: "/music/track-3.mp3", title: "Mandap Morning" },
+  { src: "/music/track-1.mp3", title: "Indian Classical — Sitar" },
+  { src: "/music/track-2.mp3", title: "Indian Classical Instrumental" },
+  { src: "/music/track-3.mp3", title: "Indian Classical" },
 ];
 
 const KEY_ON = "kalyanam.music.on";

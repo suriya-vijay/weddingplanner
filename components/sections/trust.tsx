@@ -1,7 +1,7 @@
 import { ShieldCheck, Lock, LayoutGrid, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { DividerOrnament } from "@/components/brand/motifs";
-import { MandalaCornerSoft } from "@/components/brand/patterns";
+import { MandalaCornerSoft, LeafVine } from "@/components/brand/patterns";
 import { ParallaxLayer } from "@/components/ui/parallax-layer";
 
 /**
@@ -58,7 +58,10 @@ export function Trust() {
         </Reveal>
 
         <Reveal>
-          <DividerOrnament className="mx-auto my-12" />
+          <LeafVine className="mx-auto mt-8 h-7 max-w-xl text-gold-500/50" />
+        </Reveal>
+        <Reveal>
+          <DividerOrnament className="mx-auto mb-12 mt-4" />
         </Reveal>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
