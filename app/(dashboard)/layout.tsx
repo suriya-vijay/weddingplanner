@@ -14,7 +14,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-dvh flex-col bg-cream lg:flex-row">
       <DashboardSidebar unreadEnquiries={unread} />
-      <main className="flex-1 overflow-x-hidden px-5 py-7 sm:px-8 lg:px-12">
+      <main className="texture-paisley on-light flex-1 overflow-x-hidden px-5 py-7 sm:px-8 lg:px-12">
         {children}
       </main>
     </div>

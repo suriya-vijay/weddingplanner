@@ -1,4 +1,6 @@
 import { Panel } from "@/components/dashboard/ui";
+import { Reveal } from "@/components/ui/reveal";
+import { LotusMark } from "@/components/brand/motifs";
 import { cn } from "@/lib/utils";
 
 /**
@@ -19,8 +21,8 @@ export function EmptyState({
   className,
   bare = false,
 }: {
-  /** A lucide icon element, e.g. <Wallet className="h-6 w-6" /> */
-  icon: React.ReactNode;
+  /** Optional override; defaults to a lotus line-motif (UX-Bible §8). */
+  icon?: React.ReactNode;
   title: string;
   /** One or two short sentences of guidance. */
   children?: React.ReactNode;
@@ -37,12 +39,20 @@ export function EmptyState({
         className,
       )}
     >
-      <span
-        aria-hidden
-        className="grid h-12 w-12 place-items-center rounded-2xl bg-forest-100 text-forest-700"
-      >
-        {icon}
-      </span>
+      {icon ? (
+        <span
+          aria-hidden
+          className="grid h-12 w-12 place-items-center rounded-2xl bg-forest-100 text-forest-700"
+        >
+          {icon}
+        </span>
+      ) : (
+        // The UX-Bible asks for "a single lotus line-motif, not a stock
+        // illustration." One-shot draw-in via .draw (dies under reduced-motion).
+        <Reveal>
+          <LotusMark className="draw h-12 w-12 text-gold-500" aria-hidden />
+        </Reveal>
+      )}
       <h3 className="font-serif text-lg text-ink">{title}</h3>
       {children && (
         <p className="max-w-sm text-sm text-ink-soft">{children}</p>

@@ -19,7 +19,7 @@ export function PlatformFeatures() {
           </h2>
           <p className="lede mx-auto mt-4">
             From the first spark of inspiration to the final farewell — ten
-            considered tools, and one human planner, working in concert.
+            considered tools working in concert.
           </p>
         </Reveal>
 
