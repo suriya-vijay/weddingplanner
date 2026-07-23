@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MandalaBloom } from "@/components/brand/motifs";
 import { MandalaCornerSoft } from "@/components/brand/patterns";
 import { AmbientZone } from "@/components/ui/ambient-zone";
+import { ParallaxLayer } from "@/components/ui/parallax-layer";
 import { GlobalSearch } from "./global-search";
 
 /**
@@ -34,23 +35,36 @@ export function Hero() {
       <MandalaCornerSoft className="pointer-events-none absolute left-0 top-0 h-40 w-40 text-gold-400/25 sm:h-52 sm:w-52" />
       <MandalaCornerSoft className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rotate-180 text-gold-400/20 sm:h-52 sm:w-52" />
       {/* Aurora — drifting gold/blush light behind the mandala for depth.
-          This is the single glow slot (ambient-aurora), paused off-screen. */}
-      <div
-        aria-hidden
-        className="ambient-aurora pointer-events-none absolute -right-40 top-1/2 hidden h-[52rem] w-[52rem] -translate-y-1/2 rounded-full md:block"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 50%, rgba(230,198,110,0.20) 0%, rgba(232,180,184,0.12) 34%, rgba(20,60,42,0) 66%)",
-        }}
-      />
-      {/* Slowly turning jewelled mandala, right (paused off-screen). */}
-      <div
-        aria-hidden
-        className="ambient-spin pointer-events-none absolute -right-32 top-1/2 hidden h-[42rem] w-[42rem] -translate-y-1/2 md:block"
-        style={{ transformOrigin: "center" }}
+          The single glow slot (ambient-aurora), paused off-screen. The outer
+          ParallaxLayer only does the scroll translate; centering + the ambient
+          animation live on inner elements so the transforms don't collide. */}
+      <ParallaxLayer
+        speed={0.05}
+        className="pointer-events-none absolute -right-40 top-1/2 hidden md:block"
       >
-        <MandalaBloom />
-      </div>
+        <div className="-translate-y-1/2">
+          <div
+            className="ambient-aurora h-[52rem] w-[52rem] rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 50%, rgba(230,198,110,0.20) 0%, rgba(232,180,184,0.12) 34%, rgba(20,60,42,0) 66%)",
+            }}
+          />
+        </div>
+      </ParallaxLayer>
+      {/* Slowly turning jewelled mandala (paused off-screen), with a slightly
+          stronger parallax so it reads as the front layer. */}
+      <ParallaxLayer
+        speed={0.08}
+        max={16}
+        className="pointer-events-none absolute -right-32 top-1/2 hidden md:block"
+      >
+        <div className="-translate-y-1/2">
+          <div className="ambient-spin h-[42rem] w-[42rem]" style={{ transformOrigin: "center" }}>
+            <MandalaBloom />
+          </div>
+        </div>
+      </ParallaxLayer>
 
       <div className="container-luxe relative">
         <div className="max-w-3xl">
