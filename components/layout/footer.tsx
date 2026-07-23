@@ -35,7 +35,7 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
       { label: "Inspiration Gallery", href: "/inspiration" },
       { label: "Vendor Marketplace", href: "/vendors" },
       { label: "Wedding Dashboard", href: "/dashboard" },
-      { label: "AI Assistant" }, // coming soon
+      { label: "AI Assistant", href: "/dashboard/advisor" },
     ],
   },
   {
@@ -80,7 +80,7 @@ export function Footer() {
             </p>
             <div className="mt-6 flex gap-3">
               {[
-                { icon: Mail, label: "Email", href: "mailto:hello@kalyanam.co" },
+                { icon: Mail, label: "Email", href: "mailto:kalyanam.admin@gmail.com" },
                 { icon: InstagramIcon, label: "Instagram" },
                 { icon: FacebookIcon, label: "Facebook" },
               ].map(({ icon: Icon, label, href }) => {

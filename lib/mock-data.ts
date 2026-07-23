@@ -164,7 +164,7 @@ export const features: Feature[] = [
     icon: LayoutDashboard,
     title: "Wedding Dashboard",
     description:
-      "Your entire wedding — countdown, progress, budget, guests and planner — gathered into one calm workspace.",
+      "Your entire wedding — countdown, progress, budget, guests and timeline — gathered into one calm workspace.",
   },
   {
     icon: ListChecks,
@@ -526,18 +526,12 @@ export type VendorProfile = {
   reviewList: VendorReview[];
 };
 
-/** Marketplace vendor categories (with counts derived below). */
-export const marketplaceCategories = [
-  "All",
-  "Photography",
-  "Decor",
-  "Catering",
-  "Mehendi",
-  "Makeup",
-  "Entertainment",
-  "Florists",
-  "Venues",
-] as const;
+/**
+ * Marketplace filter categories — "All" + every category a vendor can choose
+ * (see `vendorCategories` above). Keeping these in sync guarantees a vendor's
+ * chosen category always has a matching filter chip on the marketplace.
+ */
+export const marketplaceCategories = ["All", ...vendorCategories] as const;
 
 export const vendorLocations = [
   "Mumbai",
@@ -991,7 +985,7 @@ export const checklistItems: ChecklistItem[] = [
   { id: "c15", task: "Arrange guest transport & logistics", phase: "1–3 months", category: "Guests", done: false },
   { id: "c16", task: "Confirm final guest count with vendors", phase: "1–3 months", category: "Guests", done: false },
   { id: "c17", task: "Bridal & groom trials (hair, makeup)", phase: "1–3 months", category: "Beauty", done: false },
-  { id: "c18", task: "Share the day-of timeline with the planner", phase: "Final month", category: "Planning", done: false },
+  { id: "c18", task: "Share the day-of timeline with your key vendors", phase: "Final month", category: "Planning", done: false },
   { id: "c19", task: "Confirm payments & final vendor briefs", phase: "Final month", category: "Vendors", done: false },
   { id: "c20", task: "Pack for the honeymoon", phase: "Final month", category: "Personal", done: false },
 ];

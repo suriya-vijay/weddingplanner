@@ -9,7 +9,7 @@ import { Plate, isImageUrl } from "@/components/ui/plate";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Combobox } from "@/components/ui/combobox";
 import { US_CITIES } from "@/lib/data/us-cities";
-import type { VendorProfile } from "@/lib/mock-data";
+import { vendorCategories, type VendorProfile } from "@/lib/mock-data";
 import { updateVendorProfileAction } from "@/app/(vendor)/vendor/actions";
 
 /**
@@ -144,7 +144,26 @@ export function VendorProfileView({
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
           <Field label="Category">
-            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              aria-label="Category"
+              className="h-12 w-full rounded-xl border border-border-strong bg-ivory px-4 text-[0.95rem] text-ink transition-colors duration-[var(--dur-fast)] focus:border-gold-400 focus:outline-2 focus:outline-offset-2 focus:outline-gold-500"
+            >
+              <option value="" disabled>
+                Choose a category…
+              </option>
+              {/* Keep any legacy/free-text value selectable so it isn't silently
+                  dropped, but nudge toward a real category. */}
+              {category && !vendorCategories.includes(category) && (
+                <option value={category}>{category} (update this)</option>
+              )}
+              {vendorCategories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="Tagline" className="sm:col-span-2">
             <Input value={tagline} onChange={(e) => setTagline(e.target.value)} />

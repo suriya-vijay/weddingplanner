@@ -39,8 +39,8 @@ export function Cta() {
                 <span className="italic text-gold-400"> of a lifetime</span>
               </h2>
               <p className="lede mx-auto mt-5 text-cream/75">
-                Create your wedding profile in minutes, invite your family, and
-                meet the planner who’ll bring it all to life.
+                Create your wedding profile in minutes, gather your vendors and
+                guests, and let our tools and AI advisor bring it all together.
               </p>
               <div className="mt-9 flex flex-wrap justify-center gap-4">
                 <Button href="/signup" variant="primary" size="lg">

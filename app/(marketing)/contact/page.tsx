@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 // number and a Mumbai studio address (on a platform for American-Indian
 // weddings) were both invented. Add a real number/address when they exist.
 const DETAILS = [
-  { icon: Mail, label: "Email", value: "hello@kalyanam.co", href: "mailto:hello@kalyanam.co" },
+  { icon: Mail, label: "Email", value: "kalyanam.admin@gmail.com", href: "mailto:kalyanam.admin@gmail.com" },
   { icon: MapPin, label: "Serving", value: "Couples across the United States" },
   { icon: Clock, label: "Hours", value: "Mon–Sat · 9am–6pm ET" },
 ];

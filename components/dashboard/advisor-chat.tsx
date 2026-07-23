@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { Send, Sparkles, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { renderMarkdown } from "@/lib/markdown";
 
 type Msg = { role: "user" | "model"; content: string };
 
@@ -123,13 +124,19 @@ export function AdvisorChat({ initialMessages }: { initialMessages: Msg[] }) {
             >
               <div
                 className={cn(
-                  "max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-[0.95rem] leading-relaxed",
+                  "max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] leading-relaxed",
                   m.role === "user"
-                    ? "bg-forest-700 text-cream"
+                    ? "whitespace-pre-wrap bg-forest-700 text-cream"
                     : "bg-cream-deep/60 text-ink",
                 )}
               >
-                {m.content || (busy ? "…" : "")}
+                {m.role === "user"
+                  ? m.content || (busy ? "…" : "")
+                  : m.content
+                    ? renderMarkdown(m.content)
+                    : busy
+                      ? "…"
+                      : ""}
               </div>
             </div>
           ))
