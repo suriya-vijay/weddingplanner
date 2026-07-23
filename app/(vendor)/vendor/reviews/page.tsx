@@ -24,7 +24,7 @@ export default async function VendorReviewsPage() {
     <div className="space-y-8">
       <header>
         <p className="eyebrow text-gold-600">Vendor portal</p>
-        <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">Reviews</h1>
+        <h1 className="mt-2 font-serif text-h1 text-ink">Reviews</h1>
         <p className="mt-1 text-ink-soft">
           What couples say about {vendor.name}.
         </p>

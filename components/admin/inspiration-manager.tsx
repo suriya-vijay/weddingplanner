@@ -75,7 +75,7 @@ export function InspirationManager({
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl text-ink sm:text-4xl">
+          <h1 className="font-serif text-h1 text-ink">
             Inspiration
           </h1>
           <p className="mt-1 text-ink-soft">
@@ -111,7 +111,7 @@ export function InspirationManager({
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.id} className="border-b border-border/60 last:border-0">
+              <tr key={item.id} className="border-b border-border/60 transition-colors duration-[var(--dur-fast)] last:border-0 hover:bg-cream-deep/50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Plate

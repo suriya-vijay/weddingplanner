@@ -83,7 +83,7 @@ export default async function VendorOverview() {
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow text-gold-600">Vendor portal</p>
-          <h1 className="mt-2 flex flex-wrap items-center gap-2 font-serif text-3xl text-ink sm:text-4xl">
+          <h1 className="mt-2 flex flex-wrap items-center gap-2 font-serif text-h1 text-ink">
             {vendor.name}
             {vendor.verified && (
               <span className="inline-flex items-center gap-1 text-sm font-medium text-forest-700">
@@ -157,7 +157,7 @@ export default async function VendorOverview() {
             {recent.map((e) => (
               <li
                 key={e.id}
-                className="flex items-start justify-between gap-4 rounded-xl border border-border/70 px-4 py-3"
+                className="flex items-start justify-between gap-4 rounded-xl border border-border/70 px-4 py-3 transition-[border-color,box-shadow] duration-[var(--dur-fast)] hover:border-gold-200 hover:shadow-[var(--shadow-xs)]"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-ink">{e.couple}</p>

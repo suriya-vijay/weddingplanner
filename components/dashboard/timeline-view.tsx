@@ -153,7 +153,7 @@ export function TimelineView({
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow text-gold-600">Planning</p>
-          <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">
+          <h1 className="mt-2 font-serif text-h1 text-ink">
             Timeline
           </h1>
           <p className="mt-1 text-ink-soft">

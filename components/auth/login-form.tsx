@@ -77,7 +77,7 @@ export function LoginForm() {
   return (
     <div className="space-y-7">
       <div>
-        <h1 className="font-serif text-3xl text-ink sm:text-4xl">Welcome back</h1>
+        <h1 className="font-serif text-h1 text-ink">Welcome back</h1>
         <p className="mt-2 text-ink-soft">
           Sign in to continue planning your celebration.
         </p>

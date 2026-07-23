@@ -82,7 +82,7 @@ export default async function DashboardOverview() {
       <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="eyebrow text-gold-600">Your wedding workspace</p>
-          <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">
+          <h1 className="mt-2 font-serif text-h1 text-ink">
             {coupleTitle}
           </h1>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-ink-soft">
@@ -208,7 +208,7 @@ export default async function DashboardOverview() {
               {nextTasks.map((t) => (
                 <li
                   key={t.id}
-                  className="flex items-center gap-3 rounded-xl border border-border/70 px-4 py-3"
+                  className="flex items-center gap-3 rounded-xl border border-border/70 px-4 py-3 transition-[border-color,box-shadow] duration-[var(--dur-fast)] hover:border-gold-200 hover:shadow-[var(--shadow-xs)]"
                 >
                   <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-border-strong text-transparent">
                     <Check className="h-3.5 w-3.5" />

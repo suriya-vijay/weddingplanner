@@ -82,7 +82,7 @@ export function SignupForm() {
   return (
     <div className="space-y-7">
       <div>
-        <h1 className="font-serif text-3xl text-ink sm:text-4xl">
+        <h1 className="font-serif text-h1 text-ink">
           Begin your journey
         </h1>
         <p className="mt-2 text-ink-soft">

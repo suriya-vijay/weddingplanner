@@ -111,7 +111,7 @@ export default async function VendorProfilePage({
                   </span>
                 )}
               </div>
-              <h1 className="mt-1 font-serif text-3xl text-ink sm:text-4xl">
+              <h1 className="mt-1 font-serif text-h1 text-ink">
                 {vendor.name}
               </h1>
               <p className="mt-1 text-ink-soft">{vendor.tagline}</p>

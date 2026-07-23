@@ -1,17 +1,57 @@
 import { cn } from "@/lib/utils";
 
+/**
+ * Standard page header for the panels — eyebrow + fluid `.text-h1` heading +
+ * lede + a gold hairline. Replaces the `font-serif text-3xl sm:text-4xl` string
+ * that was copy-pasted across ~22 headers; the fluid scale glides across the
+ * viewport instead of snapping at 640px, matching the marketing pages.
+ */
+export function PageHeader({
+  eyebrow,
+  title,
+  children,
+  actions,
+}: {
+  eyebrow?: string;
+  title: string;
+  /** Subtitle / lede text. */
+  children?: React.ReactNode;
+  /** Right-aligned action buttons. */
+  actions?: React.ReactNode;
+}) {
+  return (
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+        <h1 className="mt-2 font-serif text-h1 text-ink">{title}</h1>
+        {children && <p className="lede mt-1 max-w-2xl">{children}</p>}
+        <div className="rule-gold mt-5 w-24" />
+      </div>
+      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+    </header>
+  );
+}
+
 /** Section card — the standard ivory panel used across the dashboard. */
 export function Panel({
   children,
   className,
+  interactive = false,
 }: {
   children: React.ReactNode;
   className?: string;
+  /** Adds a subtle press feedback for panels that are themselves clickable. */
+  interactive?: boolean;
 }) {
   return (
     <section
       className={cn(
+        // Soft hover lift (refined & subtle — one step below the marketing
+        // cards). transform/shadow/border only, no continuous motion.
         "rounded-2xl border border-border bg-ivory p-6 shadow-[var(--shadow-sm)]",
+        "transition-[transform,box-shadow,border-color] duration-[var(--dur-base)] ease-[var(--ease-out)]",
+        "hover:-translate-y-0.5 hover:border-gold-200 hover:shadow-[var(--shadow-md)]",
+        interactive && "active:scale-[0.99]",
         className,
       )}
     >
@@ -33,7 +73,7 @@ export function StatTile({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-ivory p-5 shadow-[var(--shadow-sm)]">
+    <div className="rounded-2xl border border-border bg-ivory p-5 shadow-[var(--shadow-sm)] transition-[transform,box-shadow,border-color] duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-0.5 hover:border-gold-200 hover:shadow-[var(--shadow-md)]">
       <div className="flex items-center justify-between">
         <span className="text-sm text-ink-soft">{label}</span>
         {icon && (
@@ -42,7 +82,9 @@ export function StatTile({
           </span>
         )}
       </div>
-      <p className="mt-3 font-serif text-3xl text-ink">{value}</p>
+      {/* tabular-nums keeps figures from jittering as values change (skill
+          number-tabular). */}
+      <p className="mt-3 font-serif text-3xl tabular-nums text-ink">{value}</p>
       {sub && <p className="mt-1 text-xs text-ink-faint">{sub}</p>}
     </div>
   );

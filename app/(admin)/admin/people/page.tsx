@@ -25,7 +25,7 @@ export default async function AdminPeoplePage() {
     <div className="space-y-8">
       <header>
         <p className="eyebrow text-gold-600">Admin</p>
-        <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">People</h1>
+        <h1 className="mt-2 font-serif text-h1 text-ink">People</h1>
         <p className="mt-1 text-ink-soft">
           Everyone with an account on Kalyanam.
         </p>
@@ -56,7 +56,7 @@ export default async function AdminPeoplePage() {
               </thead>
               <tbody className="divide-y divide-border/70">
                 {people.map((p) => (
-                  <tr key={p.id} className="text-ink">
+                  <tr key={p.id} className="text-ink transition-colors duration-[var(--dur-fast)] hover:bg-cream-deep/50">
                     <td className="py-3 pr-4 font-medium">{p.name}</td>
                     <td className="py-3 pr-4 text-ink-soft">{p.email}</td>
                     <td className="py-3 pr-4">

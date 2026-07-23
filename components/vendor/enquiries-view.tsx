@@ -77,7 +77,7 @@ export function EnquiriesView({
     <div className="space-y-8">
       <header>
         <p className="eyebrow text-gold-600">Vendor portal</p>
-        <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">Enquiries</h1>
+        <h1 className="mt-2 font-serif text-h1 text-ink">Enquiries</h1>
         <p className="mt-1 text-ink-soft">
           Leads from couples who found you on Kalyanam. Click a status to advance
           it.

@@ -50,7 +50,7 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="font-serif text-3xl text-ink sm:text-4xl">Dashboard</h1>
+        <h1 className="font-serif text-h1 text-ink">Dashboard</h1>
         <p className="mt-1 text-ink-soft">
           Welcome back — here’s how Kalyanam is looking today.
         </p>
@@ -95,7 +95,7 @@ export default async function AdminDashboard() {
           {inspirationItems.slice(0, 6).map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-3 rounded-xl border border-border/70 p-2.5"
+              className="flex items-center gap-3 rounded-xl border border-border/70 p-2.5 transition-[border-color,box-shadow] duration-[var(--dur-fast)] hover:border-gold-200 hover:shadow-[var(--shadow-xs)]"
             >
               <Plate
                 imageUrl={item.imageUrl}

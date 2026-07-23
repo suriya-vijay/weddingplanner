@@ -98,7 +98,7 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
     <div className="space-y-8">
       <header>
         <p className="eyebrow text-gold-600">Planning</p>
-        <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">Guest list</h1>
+        <h1 className="mt-2 font-serif text-h1 text-ink">Guest list</h1>
         <p className="mt-1 text-ink-soft">
           Track families, RSVPs and meal preferences across both sides.
         </p>
@@ -184,7 +184,7 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
             </thead>
             <tbody className="divide-y divide-border/70">
               {visible.map((g) => (
-                <tr key={g.id} className="text-ink">
+                <tr key={g.id} className="text-ink transition-colors duration-[var(--dur-fast)] hover:bg-cream-deep/50">
                   <td className="py-3 pr-4 font-medium">{g.name}</td>
                   <td className="py-3 pr-4 text-ink-soft">{g.side}</td>
                   <td className="py-3 pr-4 text-ink-soft">{g.group}</td>

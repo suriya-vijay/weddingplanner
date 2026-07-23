@@ -21,7 +21,7 @@ export default async function AdminEnquiriesPage() {
     <div className="space-y-8">
       <header>
         <p className="eyebrow text-gold-600">Admin</p>
-        <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">
+        <h1 className="mt-2 font-serif text-h1 text-ink">
           Enquiries
         </h1>
         <p className="mt-1 text-ink-soft">

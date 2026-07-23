@@ -88,7 +88,7 @@ export function VendorsManager({
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-serif text-3xl text-ink sm:text-4xl">Vendors</h1>
+        <h1 className="font-serif text-h1 text-ink">Vendors</h1>
         <p className="mt-1 text-ink-soft">
           {vendors.length} vendors · {pending} awaiting review. Approve to
           publish on the marketplace, reject to hide, or delete inappropriate

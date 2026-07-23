@@ -34,7 +34,7 @@ export default async function AdminSettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <header>
-        <h1 className="font-serif text-3xl text-ink sm:text-4xl">Settings</h1>
+        <h1 className="font-serif text-h1 text-ink">Settings</h1>
         <p className="mt-1 text-ink-soft">
           Your workspace at a glance. Vendors and inspiration are managed from
           their own pages.

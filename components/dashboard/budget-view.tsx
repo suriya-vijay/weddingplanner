@@ -82,7 +82,7 @@ export function BudgetView({
     <div className="space-y-8">
       <header>
         <p className="eyebrow text-gold-600">Planning</p>
-        <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">Budget</h1>
+        <h1 className="mt-2 font-serif text-h1 text-ink">Budget</h1>
         <p className="mt-1 text-ink-soft">
           {hasBudget
             ? `Plan what you expect to spend, then record what you've actually paid — against your ${formatINR(totalBudget)} budget.`
@@ -171,7 +171,7 @@ export function BudgetView({
             return (
               <div key={cat}>
                 <div className="mb-1.5 flex items-baseline justify-between text-sm">
-                  <span className="text-ink">{cat}</span>
+                  <span className="text-ink transition-colors duration-[var(--dur-fast)] hover:bg-cream-deep/50">{cat}</span>
                   <span className={over ? "text-destructive" : "text-ink-soft"}>
                     {formatINR(v.spent)}{" "}
                     <span className={over ? "" : "text-ink-faint"}>
@@ -239,7 +239,7 @@ export function BudgetView({
             </thead>
             <tbody className="divide-y divide-border/70">
               {items.map((b) => (
-                <tr key={b.id} className="text-ink">
+                <tr key={b.id} className="text-ink transition-colors duration-[var(--dur-fast)] hover:bg-cream-deep/50">
                   <td className="py-3 pr-4 text-ink-soft">{b.category}</td>
                   <td className="py-3 pr-4">{b.label}</td>
                   <td className="py-3 pr-4 text-right tabular-nums">

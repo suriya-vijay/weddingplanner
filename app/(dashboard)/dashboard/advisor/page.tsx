@@ -16,7 +16,7 @@ export default async function AdvisorPage() {
     <div className="mx-auto flex max-w-3xl flex-col">
       <header className="mb-4">
         <p className="eyebrow text-gold-600">Wedding planning</p>
-        <h1 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">
+        <h1 className="mt-2 font-serif text-h1 text-ink">
           AI Advisor
         </h1>
         <p className="mt-1 text-ink-soft">
