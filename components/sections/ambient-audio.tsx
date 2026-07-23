@@ -1,46 +1,55 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, SkipForward, Music } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Ambient audio toggle — a small, elegant opt-in control for soft background
+ * Ambient music player — a small, elegant opt-in control for calm background
  * music while a visitor browses the public site (before they sign in).
+ * Play / pause / skip over a small playlist; shows the current track on hover.
  *
  * Design decisions (deliberate, professional / trust-safe):
  *  - OFF by default. Browsers block autoplay-with-sound anyway, and unexpected
- *    audio is hostile — so nothing ever plays until the visitor taps play.
- *  - The <audio> element is created lazily on first play (no network cost, no
- *    decoding until the visitor opts in).
- *  - The choice is remembered in localStorage, so a visitor who turned it on
- *    keeps music across page navigations within the session/site.
- *  - prefers-reduced-motion has no bearing on audio, but we keep the control
- *    itself static (no animation) so it never counts against the motion cap.
+ *    audio is hostile — nothing ever plays until the visitor taps play.
+ *  - The <audio> element is created lazily on first play (no network / decode
+ *    cost until the visitor opts in).
+ *  - Choice + current track index persist in localStorage across navigations.
+ *  - The control itself is static (no CSS animation) so it never counts against
+ *    the motion cap.
  *
- * DROP-IN: no audio ships with the repo yet. Add a short, softly-looping,
- * ROYALTY-FREE instrumental (sitar / ambient, licensed for commercial use) at
- * `public/ambient.mp3`, then rebuild/redeploy — the control auto-enables. Until
- * that file exists the control hides itself (a HEAD probe below), so the corner
- * stays clean and nothing 404s. (Next snapshots `public/` at build time, so the
- * file must be present before `next build`, not just at runtime.) Suggested
- * sources: royalty-free libraries where the license explicitly permits
- * commercial web use — keep the license note alongside the file.
+ * DROP-IN (no audio ships with the repo): add ROYALTY-FREE, commercial-use calm
+ * Indian instrumental tracks at the paths in TRACKS below (public/music/*.mp3),
+ * then rebuild/redeploy — the player auto-enables. Until the FIRST track exists
+ * the control hides itself (a HEAD probe), so the corner stays clean and nothing
+ * 404s. (Next snapshots public/ at build time, so files must be present before
+ * `next build`.) Keep each track's license note alongside the file. Good
+ * sources are royalty-free / Creative-Commons libraries whose license clearly
+ * permits commercial web use (e.g. calm sitar / veena / ambient raga).
  */
-const SRC = "/ambient.mp3";
-const STORAGE_KEY = "kalyanam.ambientAudio";
+type Track = { src: string; title: string };
 
-export function AmbientAudio() {
-  // `available` gates the whole control: only render once we've confirmed the
-  // audio file actually exists, so the corner isn't cluttered before drop-in.
+// Edit this list to match the files you drop into public/music/.
+const TRACKS: Track[] = [
+  { src: "/music/track-1.mp3", title: "Sitar Reverie" },
+  { src: "/music/track-2.mp3", title: "Veena at Dusk" },
+  { src: "/music/track-3.mp3", title: "Mandap Morning" },
+];
+
+const KEY_ON = "kalyanam.music.on";
+const KEY_IDX = "kalyanam.music.idx";
+
+export function AmbientMusic() {
+  // Gate the whole control on the first track actually existing.
   const [available, setAvailable] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [index, setIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Probe for the file once on mount. HEAD is cheap; a 200 means it's there.
+  // Probe the first track once on mount. 200 → the playlist is present.
   useEffect(() => {
     let cancelled = false;
-    fetch(SRC, { method: "HEAD" })
+    fetch(TRACKS[0].src, { method: "HEAD" })
       .then((r) => {
         if (!cancelled && r.ok) setAvailable(true);
       })
@@ -52,42 +61,47 @@ export function AmbientAudio() {
     };
   }, []);
 
-  // If the visitor previously opted in, resume once the file is confirmed.
+  // Restore the saved track index (and resume if the visitor had it on).
+  // Deferred to a microtask so we're not calling setState synchronously in the
+  // effect body (avoids the cascading-render lint + is closer to user intent).
   useEffect(() => {
     if (!available) return;
-    let resume = false;
-    try {
-      resume = localStorage.getItem(STORAGE_KEY) === "on";
-    } catch {
-      /* private mode / storage blocked */
-    }
-    if (resume) void start();
+    queueMicrotask(() => {
+      try {
+        const savedIdx = Number(localStorage.getItem(KEY_IDX));
+        if (Number.isInteger(savedIdx) && savedIdx >= 0 && savedIdx < TRACKS.length) {
+          setIndex(savedIdx);
+        }
+        if (localStorage.getItem(KEY_ON) === "1") void start(savedIdx || 0);
+      } catch {
+        /* storage blocked */
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [available]);
 
   function ensureAudio() {
     if (audioRef.current) return audioRef.current;
-    const el = new Audio(SRC);
-    el.loop = true;
-    el.volume = 0.35; // soft — background, never foreground
+    const el = new Audio();
+    el.volume = 0.32; // soft — background, never foreground
     el.preload = "none";
+    // When a track ends, advance to the next (wrap around) and keep playing.
+    el.addEventListener("ended", () => next(true));
     audioRef.current = el;
     return el;
   }
 
-  async function start() {
+  async function start(i = index) {
     const el = ensureAudio();
+    const track = TRACKS[i] ?? TRACKS[0];
+    if (!el.src.endsWith(track.src)) el.src = track.src;
     try {
       await el.play();
       setPlaying(true);
-      try {
-        localStorage.setItem(STORAGE_KEY, "on");
-      } catch {
-        /* ignore */
-      }
+      setIndex(i);
+      persist(true, i);
     } catch {
-      // Autoplay policy can still reject a resume that isn't user-initiated;
-      // that's fine — the visitor can tap the control to start it.
+      // Autoplay can reject a non-user-initiated resume; the visitor can tap.
       setPlaying(false);
     }
   }
@@ -95,8 +109,25 @@ export function AmbientAudio() {
   function stop() {
     audioRef.current?.pause();
     setPlaying(false);
+    persist(false, index);
+  }
+
+  function next(keepPlaying = playing) {
+    const i = (index + 1) % TRACKS.length;
+    setIndex(i);
+    persist(playing, i);
+    if (keepPlaying) {
+      const el = ensureAudio();
+      el.src = TRACKS[i].src;
+      void el.play().catch(() => setPlaying(false));
+      setPlaying(true);
+    }
+  }
+
+  function persist(on: boolean, i: number) {
     try {
-      localStorage.setItem(STORAGE_KEY, "off");
+      localStorage.setItem(KEY_ON, on ? "1" : "0");
+      localStorage.setItem(KEY_IDX, String(i));
     } catch {
       /* ignore */
     }
@@ -105,24 +136,46 @@ export function AmbientAudio() {
   if (!available) return null;
 
   return (
-    <button
-      type="button"
-      onClick={() => (playing ? stop() : void start())}
-      aria-pressed={playing}
-      aria-label={playing ? "Turn off background music" : "Play background music"}
-      title={playing ? "Turn off background music" : "Play soft background music"}
-      className={cn(
-        "fixed bottom-5 left-5 z-40 grid h-11 w-11 place-items-center rounded-full border shadow-[var(--shadow-md)] transition-colors duration-[var(--dur-fast)]",
-        playing
-          ? "border-gold-300 bg-forest-700 text-gold-300"
-          : "border-border bg-cream/95 text-forest-700 hover:border-gold-300 hover:text-gold-600",
+    <div className="fixed bottom-5 left-5 z-40 flex items-center gap-1 rounded-full border border-border bg-cream/95 p-1 shadow-[var(--shadow-md)]">
+      {/* Play / pause */}
+      <button
+        type="button"
+        onClick={() => (playing ? stop() : void start())}
+        aria-pressed={playing}
+        aria-label={playing ? "Pause background music" : "Play background music"}
+        title={playing ? "Pause music" : "Play soft wedding music"}
+        className={cn(
+          "grid h-9 w-9 place-items-center rounded-full transition-colors duration-[var(--dur-fast)]",
+          playing
+            ? "bg-forest-700 text-gold-400"
+            : "text-forest-700 hover:bg-cream-deep/60 hover:text-gold-600",
+        )}
+      >
+        {playing ? (
+          <Volume2 className="h-[1.15rem] w-[1.15rem]" aria-hidden />
+        ) : (
+          <VolumeX className="h-[1.15rem] w-[1.15rem]" aria-hidden />
+        )}
+      </button>
+
+      {/* Skip */}
+      <button
+        type="button"
+        onClick={() => next()}
+        aria-label="Skip to next track"
+        title="Next track"
+        className="grid h-9 w-9 place-items-center rounded-full text-forest-700 transition-colors duration-[var(--dur-fast)] hover:bg-cream-deep/60 hover:text-gold-600"
+      >
+        <SkipForward className="h-[1.05rem] w-[1.05rem]" aria-hidden />
+      </button>
+
+      {/* Current track title — appears when playing */}
+      {playing && (
+        <span className="flex items-center gap-1.5 pl-1 pr-2.5 text-xs text-ink-soft">
+          <Music className="h-3.5 w-3.5 text-gold-600" aria-hidden />
+          <span className="max-w-[8rem] truncate">{TRACKS[index]?.title}</span>
+        </span>
       )}
-    >
-      {playing ? (
-        <Volume2 className="h-5 w-5" aria-hidden />
-      ) : (
-        <VolumeX className="h-5 w-5" aria-hidden />
-      )}
-    </button>
+    </div>
   );
 }

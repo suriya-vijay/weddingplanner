@@ -1,6 +1,6 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { AmbientAudio } from "@/components/sections/ambient-audio";
+import { AmbientMusic } from "@/components/sections/ambient-audio";
 
 /**
  * Marketing layout — adds the public site chrome (header + footer).
@@ -14,9 +14,9 @@ export default function MarketingLayout({
       <Header />
       <main>{children}</main>
       <Footer />
-      {/* Opt-in ambient music — silent until tapped; hides itself until an
-          audio file is dropped in at public/ambient.mp3. */}
-      <AmbientAudio />
+      {/* Opt-in music player (play/pause/skip) — silent until tapped; hides
+          itself until tracks are dropped in at public/music/. */}
+      <AmbientMusic />
     </>
   );
 }
