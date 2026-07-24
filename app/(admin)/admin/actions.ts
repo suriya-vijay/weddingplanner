@@ -1,9 +1,11 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/auth/get-session";
 import { logModeration } from "@/lib/db/admin-moderation";
 import { setContactHandled } from "@/lib/db/contact";
+import { sendEmail } from "@/lib/email/client";
+import { vendorStatusEmail } from "@/lib/email/templates";
 import type { InspirationItem } from "@/lib/mock-data";
 import type { GalleryItem } from "@/lib/db/inspiration";
 
@@ -155,6 +157,35 @@ export async function setVendorStatusAction(
     action: status,
     reason,
   });
+
+  // Email the vendor about approve/reject (not pending). Best-effort: resolve
+  // their email from owner_id via the auth admin API (profiles hold no email).
+  // Any failure here must not fail the moderation action.
+  if (status === "approved" || status === "rejected") {
+    try {
+      const admin = createServiceClient();
+      const { data: row } = await admin
+        .from("vendors")
+        .select("owner_id, name")
+        .eq("id", id)
+        .single();
+      const ownerId = (row as { owner_id?: string | null } | null)?.owner_id;
+      if (ownerId) {
+        const { data: userRes } = await admin.auth.admin.getUserById(ownerId);
+        const to = userRes?.user?.email;
+        if (to) {
+          const { subject, html } = vendorStatusEmail({
+            name: (row as { name?: string }).name ?? "there",
+            status,
+            reason,
+          });
+          await sendEmail({ to, subject, html });
+        }
+      }
+    } catch (err) {
+      console.error("[email] vendor status notification skipped:", err);
+    }
+  }
   return { ok: true };
 }
 

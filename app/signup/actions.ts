@@ -2,6 +2,8 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import { claimVendorForUser } from "@/lib/db/vendor-portal";
+import { sendEmail } from "@/lib/email/client";
+import { welcomeEmail } from "@/lib/email/templates";
 import type { Role } from "@/components/auth/session";
 
 type SignupInput = {
@@ -49,6 +51,11 @@ export async function signUpAction(input: SignupInput): Promise<
   if (role === "vendor" && data.user) {
     await claimVendorForUser(data.user.id, displayName.trim());
   }
+
+  // Welcome email — best-effort: the account is already created, so a mail
+  // failure (or no RESEND_API_KEY) must never turn a good signup into an error.
+  const { subject, html } = welcomeEmail({ name: displayName.trim(), role });
+  await sendEmail({ to: email, subject, html });
 
   return { ok: true };
 }
