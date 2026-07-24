@@ -7,17 +7,13 @@ player appears automatically.
 
 ## What to add
 
-Put up to three MP3 files in this folder, named exactly:
+1. Drop your `.mp3` files into this folder (`public/music/`).
+2. List them in the `TRACKS` array in `components/sections/ambient-audio.tsx` —
+   each entry is `{ src: "/music/<your-file>.mp3", title: "What shows while playing" }`.
+   The `src` must match the filename exactly.
 
-```
-public/music/track-1.mp3
-public/music/track-2.mp3
-public/music/track-3.mp3
-```
-
-The player reads this list (and the on-screen titles) from the `TRACKS` array in
-`components/sections/ambient-audio.tsx`. If you use different titles, edit that
-array to match — the `src` paths must stay `/music/track-N.mp3`.
+The currently-wired tracks are the four Indian-wedding instrumentals already in
+this folder. To add/replace one, drop the file here and edit that array.
 
 > **Important:** Next.js snapshots the `public/` folder at **build time**, so add
 > the files **before** running `npm run build` / deploying, not just at runtime.
@@ -25,8 +21,8 @@ array to match — the `src` paths must stay `/music/track-N.mp3`.
 ## Recommended tracks (royalty-free, free for commercial use)
 
 All from **Pixabay Music** — its license permits commercial web use with **no
-attribution required**. Open a track, click **Download**, then rename the file to
-`track-1.mp3` etc. and drop it here. Prefer calm, soft, instrumental pieces
+attribution required**. Open a track, click **Download**, drop the file here, and
+add it to the `TRACKS` array. Prefer calm, soft, instrumental pieces
 (sitar / veena / flute / ambient raga) so it sits gently in the background.
 
 - **Indian Classical Music – Sitar** — https://pixabay.com/music/india-indian-classical-music-sitar-296787/

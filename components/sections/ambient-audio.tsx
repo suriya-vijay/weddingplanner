@@ -29,12 +29,13 @@ import { cn } from "@/lib/utils";
  */
 type Track = { src: string; title: string };
 
-// Edit this list to match the files you drop into public/music/.
-// See public/music/README.md for recommended royalty-free tracks + steps.
+// Edit this list to match the files in public/music/ (title = what shows while
+// playing). See public/music/README.md for how to add/replace tracks.
 const TRACKS: Track[] = [
-  { src: "/music/track-1.mp3", title: "Indian Classical — Sitar" },
-  { src: "/music/track-2.mp3", title: "Indian Classical Instrumental" },
-  { src: "/music/track-3.mp3", title: "Indian Classical" },
+  { src: "/music/india_happy-indian-wedding-490659.mp3", title: "Happy Indian Wedding" },
+  { src: "/music/aar_music-indian-classical-instrumental-319883.mp3", title: "Indian Classical Instrumental" },
+  { src: "/music/sigmamusicart-indian-diwali-hindu-background-music-425897.mp3", title: "Diwali Ambience" },
+  { src: "/music/the_mountain-wedding-165605.mp3", title: "Mountain Wedding" },
 ];
 
 const KEY_ON = "kalyanam.music.on";
