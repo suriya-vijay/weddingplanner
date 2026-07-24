@@ -128,8 +128,8 @@ export function ContactForm() {
         <p className="rounded-xl bg-destructive/10 px-4 py-3 text-center text-sm text-destructive">
           Something went wrong sending that. Please try again, or email us
           directly at{" "}
-          <a href="mailto:hello@kalyanam.co" className="font-medium underline">
-            hello@kalyanam.co
+          <a href="mailto:kalyanam.admin@gmail.com" className="font-medium underline">
+            kalyanam.admin@gmail.com
           </a>
           .
         </p>
