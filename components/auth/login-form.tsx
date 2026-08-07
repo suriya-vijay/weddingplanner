@@ -7,12 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import type { Role } from "@/components/auth/session";
-import {
-  AuthField,
-  GoogleButton,
-  AuthDivider,
-  AuthSwitch,
-} from "./auth-shell";
+import { AuthField, AuthSwitch } from "./auth-shell";
 
 /** Which panel each role lands on after sign-in. */
 const PANEL_FOR: Record<Role, string> = {
@@ -53,22 +48,34 @@ export function LoginForm() {
     setSubmitting(true);
 
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    let data, error;
+    try {
+      ({ data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      }));
+    } catch {
+      // Network/backend unreachable (e.g. the server is down) — signInWithPassword
+      // throws with no useful message, which previously rendered as "{}".
+      setSubmitting(false);
+      setFormError(
+        "We couldn’t reach the server. Please check your connection and try again in a moment.",
+      );
+      return;
+    }
 
     if (error) {
       setSubmitting(false);
       setFormError(
         error.message === "Invalid login credentials"
           ? "That email or password doesn’t look right."
-          : error.message,
+          : error.message ||
+              "We couldn’t reach the server. Please try again in a moment.",
       );
       return;
     }
 
-    const role = ((data.user?.user_metadata?.role as string) ?? "couple") as Role;
+    const role = ((data?.user?.user_metadata?.role as string) ?? "couple") as Role;
     const next = searchParams.get("next");
     router.push(next || PANEL_FOR[role]);
     router.refresh();
@@ -82,13 +89,6 @@ export function LoginForm() {
           Sign in to continue planning your celebration.
         </p>
       </div>
-
-      <GoogleButton
-        onClick={() =>
-          setFormError("Google sign-in is coming soon — please use email for now.")
-        }
-      />
-      <AuthDivider label="or sign in with email" />
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <AuthField label="Email address" htmlFor="email" error={errors.email}>

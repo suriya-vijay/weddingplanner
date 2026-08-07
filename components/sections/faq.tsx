@@ -17,8 +17,7 @@ export function Faq() {
               <span className="italic text-forest-700"> wondered</span>
             </h2>
             <p className="lede mt-4">
-              Still curious? Our team — and your assigned planner — are only ever
-              a message away.
+              Still curious? Our team is only ever a message away.
             </p>
           </div>
         </Reveal>

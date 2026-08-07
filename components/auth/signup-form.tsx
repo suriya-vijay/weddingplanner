@@ -8,12 +8,7 @@ import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { signUpAction } from "@/app/signup/actions";
-import {
-  AuthField,
-  GoogleButton,
-  AuthDivider,
-  AuthSwitch,
-} from "./auth-shell";
+import { AuthField, AuthSwitch } from "./auth-shell";
 
 type Account = "couple" | "vendor";
 
@@ -52,31 +47,39 @@ export function SignupForm() {
     if (!validate()) return;
     setSubmitting(true);
 
-    // 1) Create the (pre-confirmed) account server-side.
-    const result = await signUpAction({
-      email,
-      password,
-      role: account,
-      displayName: name,
-    });
-    if (!result.ok) {
-      setSubmitting(false);
-      setFormError(result.error);
-      return;
-    }
+    try {
+      // 1) Create the (pre-confirmed) account server-side.
+      const result = await signUpAction({
+        email,
+        password,
+        role: account,
+        displayName: name,
+      });
+      if (!result.ok) {
+        setSubmitting(false);
+        setFormError(result.error);
+        return;
+      }
 
-    // 2) Sign in on the client so the auth cookie is set, then route by role.
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setSubmitting(false);
-      setFormError("Account created — please sign in.");
-      router.push("/login");
-      return;
-    }
+      // 2) Sign in on the client so the auth cookie is set, then route by role.
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setSubmitting(false);
+        setFormError("Account created — please sign in.");
+        router.push("/login");
+        return;
+      }
 
-    router.push(account === "couple" ? "/dashboard" : "/vendor");
-    router.refresh();
+      router.push(account === "couple" ? "/dashboard" : "/vendor");
+      router.refresh();
+    } catch {
+      // Backend unreachable (server down) — show a clear message, not "{}".
+      setSubmitting(false);
+      setFormError(
+        "We couldn’t reach the server. Please check your connection and try again in a moment.",
+      );
+    }
   }
 
   return (
@@ -109,14 +112,6 @@ export function SignupForm() {
           label="I'm a vendor"
         />
       </div>
-
-      <GoogleButton
-        label="Sign up with Google"
-        onClick={() =>
-          setFormError("Google sign-up is coming soon — please use email for now.")
-        }
-      />
-      <AuthDivider label="or sign up with email" />
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <AuthField

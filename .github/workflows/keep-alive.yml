@@ -1,10 +1,12 @@
 # Keeps the Supabase project from being paused for inactivity.
 #
 # Supabase pauses FREE projects after ~7 days of low activity (a few requests a
-# day is enough to stay active). This makes one tiny read every 3 days so quiet
-# early weeks can't pause the backend. Once real traffic arrives this is
-# redundant but harmless; on a paid plan it's unnecessary (paid projects are
-# never auto-paused).
+# day is enough to stay active). This makes one tiny read EVERY DAY so the
+# project never gets close to the pause window — even if GitHub delays or drops
+# a scheduled run or two (which it does on quiet repos), a daily cadence against
+# a 7-day window leaves plenty of margin. Cost: ~5 min/month of GitHub's free
+# 2,000. Once real traffic arrives this is redundant but harmless; on a paid
+# plan it's unnecessary (paid projects are never auto-paused).
 #
 # SETUP — add two repository secrets (Settings → Secrets and variables →
 # Actions). Use the ANON key, never the service-role key:
@@ -14,9 +16,10 @@ name: Supabase keep-alive
 
 on:
   schedule:
-    # 09:00 UTC, every 3rd day of the month (well inside the 7-day window).
-    - cron: "0 9 */3 * *"
-  workflow_dispatch: # lets you run it once by hand to verify setup
+    # 09:00 UTC every day. (A previous every-3-days cron left too big a gap once
+    # GitHub's scheduler skipped a run — daily is the reliable choice.)
+    - cron: "0 9 * * *"
+  workflow_dispatch: # lets you run it by hand any time to verify
 
 jobs:
   ping:

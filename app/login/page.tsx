@@ -11,10 +11,10 @@ export default function LoginPage() {
   return (
     <AuthShell
       panelTitle="Your forever, beautifully planned."
-      panelText="Sign in to your private wedding workspace — inspiration, vendors, planning tools, and your dedicated planner, all in one elegant place."
+      panelText="Sign in to your private wedding workspace — inspiration, trusted vendors, planning tools, and an AI advisor, all in one elegant place."
       panelQuote={{
         quote:
-          "It felt like having a luxury planner in our pocket — and a real one on the day.",
+          "It felt like having a luxury planner in our pocket — every list, vendor and detail in one place.",
         name: "Aanya, married in Udaipur",
       }}
     >

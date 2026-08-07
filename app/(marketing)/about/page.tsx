@@ -24,8 +24,8 @@ const VALUES = [
   },
   {
     icon: HandHeart,
-    title: "A human on your side",
-    body: "Software helps, but people make weddings. Every couple is paired with a dedicated planner who orchestrates the day itself.",
+    title: "Guidance when you need it",
+    body: "Every vendor is reviewed by real people before they're listed, and an AI advisor — grounded in your budget, guest list and traditions — is on hand whenever a question comes up.",
   },
   {
     icon: Heart,
@@ -48,7 +48,7 @@ const PILLARS = [
   {
     step: "03",
     title: "Plan",
-    body: "Your private dashboard keeps budget, checklist, timeline and guest list in concert — and your planner keeps it all moving, gently.",
+    body: "Your private dashboard keeps budget, checklist, timeline and guest list in concert — with an AI advisor to keep it all moving, gently.",
   },
 ];
 
@@ -61,7 +61,7 @@ const STATS = [
   { value: "Vetted", label: "Every vendor reviewed before listing" },
   { value: "One home", label: "Guests, budget, seating & timeline together" },
   { value: "Your rituals", label: "Built around your traditions, not generic" },
-  { value: "1", label: "Dedicated planner per couple" },
+  { value: "AI-guided", label: "Planning advice tuned to your traditions" },
 ];
 
 export default function AboutPage() {
@@ -78,8 +78,8 @@ export default function AboutPage() {
           </h1>
           <p className="lede mx-auto mt-5 max-w-2xl text-cream/75">
             Kalyanam &amp; Co. is the luxury operating system for Indian weddings —
-            inspiration, trusted vendors, planning tools and a dedicated human
-            planner, gathered into one elegant place.
+            inspiration, trusted vendors, planning tools and AI assistance,
+            gathered into one elegant place.
           </p>
           <DividerOrnament className="mt-10" />
         </div>
@@ -102,8 +102,8 @@ export default function AboutPage() {
             <p className="mt-4 leading-relaxed text-ink-soft">
               We built Kalyanam so the magnitude never feels like a burden. One
               place to find inspiration, hire the very people behind it, and keep
-              every moving piece calm and in view — with a real planner beside
-              you from the first idea to the final farewell.
+              every moving piece calm and in view — with smart tools and AI
+              guidance beside you from the first idea to the final farewell.
             </p>
           </Reveal>
           <Reveal delay={80}>
@@ -204,8 +204,8 @@ export default function AboutPage() {
               <span className="italic text-forest-700"> in hand</span>
             </h2>
             <p className="lede mx-auto mt-4">
-              Create your wedding profile in minutes, invite your family, and meet
-              the planner who’ll bring it all to life.
+              Create your wedding profile in minutes, invite your family, and let
+              our tools and AI advisor bring it all together.
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-4">
               <Button href="/signup" variant="primary" size="lg">

@@ -12,7 +12,7 @@ export default function SignupPage() {
   return (
     <AuthShell
       panelTitle="Where forever takes shape."
-      panelText="Join couples and the finest wedding vendors on one elegant platform — inspiration, planning tools, and a dedicated planner for every celebration."
+      panelText="Join couples and the finest wedding vendors on one elegant platform — inspiration, planning tools, and an AI advisor for every celebration."
       panelQuote={{
         quote:
           "Every vendor we booked came from a wedding we'd admired. Just taste, beautifully organised.",
