@@ -64,6 +64,37 @@ const STATS = [
   { value: "AI-guided", label: "Planning advice tuned to your traditions" },
 ];
 
+/**
+ * The founders. To add a real headshot, drop a square image in
+ * `public/founders/` (e.g. `public/founders/suriya.jpg`) and set `photo` to
+ * `/founders/suriya.jpg`. If `photo` is empty, a tasteful gold initials avatar
+ * shows instead — so the section looks right before the photos land.
+ */
+const FOUNDERS: { name: string; role: string; photo: string; bio: string }[] = [
+  {
+    name: "Suriya Vijayakumar",
+    role: "Co-founder",
+    photo: "",
+    bio: "Building Kalyanam to make planning an Indian-American wedding feel calm, considered and unmistakably ours — from the first spark of inspiration to the final farewell.",
+  },
+  {
+    name: "Your Co-founder",
+    role: "Co-founder",
+    photo: "",
+    bio: "A short line about your cofounder — what they bring to Kalyanam and why they care about doing weddings beautifully. Swap this copy and add a headshot in public/founders/.",
+  },
+];
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 export default function AboutPage() {
   return (
     <>
@@ -156,8 +187,55 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* The model — three pillars */}
+      {/* Meet the founders */}
       <section className="section bg-cream">
+        <div className="container-luxe">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">The people behind it</p>
+            <h2 className="mt-4 font-serif text-h2 text-ink">
+              Meet the
+              <span className="italic text-forest-700"> founders</span>
+            </h2>
+            <p className="lede mx-auto mt-4">
+              Two people who believe planning the biggest day of your life should
+              feel as beautiful as the day itself.
+            </p>
+          </Reveal>
+
+          <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2">
+            {FOUNDERS.map((f, i) => (
+              <Reveal key={f.name} delay={(i % 2) * 60}>
+                <div className="flex h-full flex-col items-center rounded-3xl border border-border bg-ivory p-8 text-center shadow-[var(--shadow-sm)] transition-all duration-[var(--dur-base)] ease-[var(--ease-out)] hover:-translate-y-1 hover:border-gold-200 hover:shadow-[var(--shadow-md)]">
+                  {f.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={f.photo}
+                      alt={f.name}
+                      loading="lazy"
+                      className="h-28 w-28 rounded-full object-cover ring-4 ring-gold-200/50"
+                    />
+                  ) : (
+                    <span
+                      aria-hidden
+                      className="grid h-28 w-28 place-items-center rounded-full bg-forest-700 font-serif text-3xl text-gold-400 ring-4 ring-gold-200/50"
+                    >
+                      {initials(f.name)}
+                    </span>
+                  )}
+                  <h3 className="mt-5 font-serif text-xl text-ink">{f.name}</h3>
+                  <p className="mt-1 text-sm font-medium uppercase tracking-[0.14em] text-gold-600">
+                    {f.role}
+                  </p>
+                  <p className="mt-4 leading-relaxed text-ink-soft">{f.bio}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* The model — three pillars */}
+      <section className="section bg-sunken">
         <div className="container-luxe">
           <Reveal className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">How it works</p>
