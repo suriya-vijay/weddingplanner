@@ -94,11 +94,13 @@ export function SettingsForm({ wedding }: { wedding: Wedding }) {
           </Field>
         </div>
 
-        <div className="mt-6 flex items-center gap-4">
+        <div className="mt-6 flex items-center justify-between gap-4 border-t border-border pt-5">
+          <span className="text-sm text-forest-700">
+            {saved ? "Saved ✓" : ""}
+          </span>
           <Button type="submit" variant="primary" size="md" loading={saving}>
             <Save className="h-4 w-4" /> Save details
           </Button>
-          {saved && <span className="text-sm text-forest-700">Saved ✓</span>}
         </div>
       </Panel>
     </form>

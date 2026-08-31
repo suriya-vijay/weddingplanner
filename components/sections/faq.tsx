@@ -7,7 +7,7 @@ import { faqs } from "@/lib/mock-data";
  */
 export function Faq() {
   return (
-    <section className="section bg-cream">
+    <section id="faq" className="section bg-cream">
       <div className="container-luxe grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <Reveal>
           <div className="lg:sticky lg:top-32">

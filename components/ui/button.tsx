@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
  * disabled + loading states.
  */
 const buttonVariants = cva(
-  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-sans font-medium tracking-tight " +
+  "relative inline-flex flex-nowrap items-center justify-center gap-2 whitespace-nowrap rounded-full font-sans font-medium tracking-tight [&_svg]:shrink-0 " +
     "transition-[transform,box-shadow,background-color,color] duration-[var(--dur-fast)] ease-[var(--ease-soft)] " +
     "cursor-pointer select-none active:scale-[0.98] " +
     "focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-gold-500 " +
@@ -81,7 +81,14 @@ export function Button(props: ButtonProps) {
   return (
     <button className={classes} disabled={disabled || loading} {...buttonProps}>
       {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
-      <span className={cn(loading && "opacity-80")}>{children}</span>
+      <span
+        className={cn(
+          "inline-flex items-center gap-2 whitespace-nowrap [&_svg]:shrink-0",
+          loading && "opacity-80",
+        )}
+      >
+        {children}
+      </span>
     </button>
   );
 }

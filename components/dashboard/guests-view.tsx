@@ -138,7 +138,7 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
             </button>
           ))}
         </div>
-        <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
+        <Button variant="primary" size="md" className="shrink-0" onClick={() => setAdding(true)}>
           <Plus className="h-4 w-4" /> Add guest
         </Button>
       </div>
