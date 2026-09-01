@@ -15,6 +15,7 @@ import {
 import { buildAdvisorSystemPrompt } from "@/lib/ai/system-prompt";
 import { generateTimelineMilestones, AiBusyError } from "@/lib/ai/gemini";
 import { createInvite } from "@/lib/db/collaborators";
+import * as eventsDb from "@/lib/db/events";
 import { sendEmail } from "@/lib/email/client";
 import { partnerInviteEmail } from "@/lib/email/templates";
 import type {
@@ -251,4 +252,39 @@ export async function invitePartnerAction(
 
   revalidatePath("/dashboard/settings");
   return { ok: true, link };
+}
+
+// ── Events + guest assignment ───────────────────────────────────
+export async function addEventAction(
+  name: string,
+  date: string | null,
+  sort: number,
+): Promise<eventsDb.WeddingEvent | null> {
+  const weddingId = await myWeddingId();
+  if (!weddingId) return null;
+  const ev = await eventsDb.addEvent(weddingId, { name: name.trim(), date, sort });
+  revalidatePath("/dashboard/events");
+  return ev;
+}
+
+export async function updateEventAction(
+  id: string,
+  patch: { name?: string; date?: string | null; sort?: number },
+): Promise<void> {
+  await eventsDb.updateEvent(id, patch);
+  revalidatePath("/dashboard/events");
+}
+
+export async function deleteEventAction(id: string): Promise<void> {
+  await eventsDb.deleteEvent(id);
+  revalidatePath("/dashboard/events");
+}
+
+export async function setEventGuestAction(
+  eventId: string,
+  guestId: string,
+  attending: boolean,
+): Promise<void> {
+  await eventsDb.setEventGuest(eventId, guestId, attending);
+  revalidatePath("/dashboard/events");
 }
