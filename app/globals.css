@@ -357,9 +357,10 @@
       rgba(15, 44, 31, 0) 62%
     );
   }
-  /* Softer variant for the tall sidebars (a touch less busy vertically). */
+  /* Softer variant for the tall sidebars — a touch gentler than the full
+     marketing surfaces, but still clearly the woven brocade. */
   .texture-saree.saree-soft::before {
-    opacity: 0.12;
+    opacity: 0.55;
   }
 
   /* ── Capped ambient motion ──────────────────────────────────────────
