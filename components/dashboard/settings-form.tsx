@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Save } from "lucide-react";
+import { Save, UserPlus, Mail, Copy, Check } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
 import { US_CITIES } from "@/lib/data/us-cities";
-import { updateWeddingAction } from "@/app/(dashboard)/dashboard/actions";
+import {
+  updateWeddingAction,
+  invitePartnerAction,
+} from "@/app/(dashboard)/dashboard/actions";
 import type { Wedding } from "@/lib/db/weddings";
 
 /**
@@ -57,7 +60,8 @@ export function SettingsForm({ wedding }: { wedding: Wedding }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <div className="space-y-6">
+    <form onSubmit={onSubmit}>
       <Panel>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Couple names (as shown)" className="sm:col-span-2">
@@ -104,6 +108,9 @@ export function SettingsForm({ wedding }: { wedding: Wedding }) {
         </div>
       </Panel>
     </form>
+
+    <PartnerInvite />
+    </div>
   );
 }
 
@@ -121,5 +128,103 @@ function Field({
       <span className="mb-1.5 block text-sm font-medium text-ink">{label}</span>
       {children}
     </label>
+  );
+}
+
+/**
+ * Invite a partner to co-edit this wedding. They create their own login (no
+ * shared credentials) and are linked to the same dashboard. The couple can
+ * email the invite or copy the link to share however they like (WhatsApp, etc.).
+ */
+function PartnerInvite() {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [link, setLink] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function invite(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    setLink(null);
+    const res = await invitePartnerAction(email.trim());
+    setBusy(false);
+    if (!res.ok) {
+      setError(res.error ?? "Couldn't create the invite.");
+      return;
+    }
+    setLink(res.link ?? null);
+  }
+
+  async function copy() {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked — the link is visible to select manually */
+    }
+  }
+
+  return (
+    <Panel>
+      <div className="flex items-start gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-forest-100 text-forest-700">
+          <UserPlus className="h-5 w-5" aria-hidden />
+        </span>
+        <div>
+          <h2 className="font-serif text-lg text-ink">Invite your partner</h2>
+          <p className="mt-1 text-sm text-ink-soft">
+            Planning apart? Invite your partner to co-edit this same dashboard —
+            they&rsquo;ll get their own login, no shared passwords.
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={invite} className="mt-5 flex flex-col gap-3 sm:flex-row">
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="partner@email.com"
+          className="flex-1"
+        />
+        <Button type="submit" variant="primary" size="md" loading={busy} className="shrink-0">
+          <Mail className="h-4 w-4" /> Send invite
+        </Button>
+      </form>
+
+      {error && (
+        <p className="mt-3 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {error}
+        </p>
+      )}
+
+      {link && (
+        <div className="mt-4 rounded-xl border border-gold-200 bg-gold-50 p-4">
+          <p className="text-sm text-ink-soft">
+            Invite ready! We emailed it — or copy the link to share directly:
+          </p>
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <code className="flex-1 truncate rounded-lg border border-border bg-ivory px-3 py-2 text-xs text-ink">
+              {link}
+            </code>
+            <Button type="button" variant="outline" size="sm" onClick={copy} className="shrink-0">
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4" /> Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" /> Copy link
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+    </Panel>
   );
 }

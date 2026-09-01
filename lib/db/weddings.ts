@@ -61,13 +61,35 @@ export const getOrCreateWedding = cache(async function getOrCreateWedding(): Pro
   const displayName =
     (user.user_metadata?.display_name as string | undefined)?.trim() || "";
 
-  // Existing?
+  // Existing (as owner)?
   const { data: existing } = await supabase
     .from("weddings")
     .select("*")
     .eq("owner_id", user.id)
     .maybeSingle();
   if (existing) return toWedding(existing as WeddingRow);
+
+  // Collaborator? A partner invited to someone else's wedding co-edits THAT
+  // wedding — never gets a new empty one. (Guarded: if the table doesn't exist
+  // yet — pre-0014 — this returns null and we fall through to create.)
+  try {
+    const { data: collab } = await supabase
+      .from("wedding_collaborators")
+      .select("wedding_id")
+      .eq("user_id", user.id)
+      .eq("status", "accepted")
+      .maybeSingle();
+    if (collab?.wedding_id) {
+      const { data: shared } = await supabase
+        .from("weddings")
+        .select("*")
+        .eq("id", collab.wedding_id)
+        .maybeSingle();
+      if (shared) return toWedding(shared as WeddingRow);
+    }
+  } catch {
+    /* pre-0014 DB — no collaborators table; fall through */
+  }
 
   // Create the wedding row (owner_id defaults enforced by RLS with-check).
   const { data: created, error } = await supabase

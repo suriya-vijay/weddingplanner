@@ -101,3 +101,23 @@ export function vendorStatusEmail({
     `),
   };
 }
+
+export function partnerInviteEmail({
+  inviterName,
+  acceptUrl,
+}: {
+  inviterName: string;
+  acceptUrl: string;
+}): { subject: string; html: string } {
+  const who = inviterName?.trim() || "Your partner";
+  return {
+    subject: `${who} invited you to plan your wedding on Kalyanam & Co. 💍`,
+    html: shell(`
+      <h1 style="margin:0 0 12px;font-family:Georgia,serif;font-size:24px;color:#0f2c1f;">You're invited to plan together 💍</h1>
+      <p style="margin:0 0 14px;"><strong>${who}</strong> has invited you to co-plan your wedding on <strong>Kalyanam &amp; Co.</strong> — you'll both share the same dashboard: checklist, budget, guest list, timeline and seating, all in one place.</p>
+      <p style="margin:0 0 14px;">You'll set up your own private login (no shared passwords) and be linked to the same wedding automatically — perfect for planning together even when you're apart.</p>
+      <p style="margin:22px 0;text-align:center;">${button(acceptUrl, "Accept & join the dashboard")}</p>
+      <p style="margin:0;color:#66716b;font-size:13px;">If you didn't expect this invitation, you can safely ignore this email.</p>
+    `),
+  };
+}

@@ -2,6 +2,7 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import { claimVendorForUser } from "@/lib/db/vendor-portal";
+import { acceptInvite } from "@/lib/db/collaborators";
 import { sendEmail } from "@/lib/email/client";
 import { welcomeEmail } from "@/lib/email/templates";
 import type { Role } from "@/components/auth/session";
@@ -11,6 +12,8 @@ type SignupInput = {
   password: string;
   role: Extract<Role, "couple" | "vendor">;
   displayName: string;
+  /** When set, links the new account as a collaborator on a shared wedding. */
+  inviteToken?: string;
 };
 
 /**
@@ -24,7 +27,7 @@ type SignupInput = {
 export async function signUpAction(input: SignupInput): Promise<
   { ok: true } | { ok: false; error: string }
 > {
-  const { email, password, role, displayName } = input;
+  const { email, password, role, displayName, inviteToken } = input;
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     return { ok: false, error: "Please enter a valid email address." };
@@ -50,6 +53,12 @@ export async function signUpAction(input: SignupInput): Promise<
   // A new vendor claims a seeded vendor profile so their portal has content.
   if (role === "vendor" && data.user) {
     await claimVendorForUser(data.user.id, displayName.trim());
+  }
+
+  // Partner invite: link this new account as a collaborator on the shared
+  // wedding, so getOrCreateWedding() resolves the inviter's wedding for them.
+  if (inviteToken && role === "couple" && data.user) {
+    await acceptInvite(inviteToken, data.user.id);
   }
 
   // Welcome email — best-effort: the account is already created, so a mail

@@ -14,6 +14,9 @@ import {
 } from "@/lib/db/enquiry-chat";
 import { buildAdvisorSystemPrompt } from "@/lib/ai/system-prompt";
 import { generateTimelineMilestones, AiBusyError } from "@/lib/ai/gemini";
+import { createInvite } from "@/lib/db/collaborators";
+import { sendEmail } from "@/lib/email/client";
+import { partnerInviteEmail } from "@/lib/email/templates";
 import type {
   Guest,
   BudgetItem,
@@ -214,4 +217,38 @@ export async function updateWeddingAction(patch: {
   // Refresh every dashboard page so the countdown/budget/name update.
   revalidatePath("/dashboard", "layout");
   return { ok: true };
+}
+
+// ── Couple collaboration (invite a partner) ─────────────────────
+export async function invitePartnerAction(
+  email: string,
+): Promise<{ ok: boolean; link?: string; error?: string }> {
+  const trimmed = email.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmed))
+    return { ok: false, error: "Please enter a valid email address." };
+
+  const wedding = await getOrCreateWedding();
+  if (!wedding) return { ok: false, error: "Couldn't resolve your wedding." };
+
+  const invite = await createInvite(wedding.id, trimmed);
+  if (!invite)
+    return {
+      ok: false,
+      error: "Couldn't create the invite. Run migration 0014, then try again.",
+    };
+
+  const base =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    "https://kalyanam.co";
+  const link = `${base}/invite/partner/${invite.token}`;
+
+  // Best-effort email (no-ops if RESEND_API_KEY isn't set).
+  const { subject, html } = partnerInviteEmail({
+    inviterName: wedding.coupleNames || "Your partner",
+    acceptUrl: link,
+  });
+  await sendEmail({ to: trimmed, subject, html });
+
+  revalidatePath("/dashboard/settings");
+  return { ok: true, link };
 }

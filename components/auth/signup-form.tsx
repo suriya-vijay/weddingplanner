@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Heart, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,10 @@ type Account = "couple" | "vendor";
  */
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // A partner-invite token pins the account to "couple" and links it to the
+  // shared wedding after signup.
+  const inviteToken = searchParams.get("invite") ?? undefined;
   const [account, setAccount] = useState<Account>("couple");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -54,6 +58,7 @@ export function SignupForm() {
         password,
         role: account,
         displayName: name,
+        inviteToken,
       });
       if (!result.ok) {
         setSubmitting(false);
