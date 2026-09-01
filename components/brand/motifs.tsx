@@ -94,48 +94,22 @@ export function MandalaBloom({ className }: { className?: string }) {
 }
 
 /**
- * LotusMark — the Kalyanam brand mark: a lotus-diya (lotus cradling a sacred
- * flame in a bowl), drawn as line-art so it inherits `currentColor` and stays
- * crisp at any size. Modelled on the gold lotus-diya identity. Symmetric about
- * x=32 in a 64×64 box.
+ * LotusMark — the Kalyanam brand mark: the real gold lotus-diya logo, extracted
+ * onto transparency from the source artwork (public/brand/lotus-gold.png) so it
+ * sits cleanly on any surface (green sidebars, the header, cream panels). It's a
+ * fixed-gold raster (no currentColor tint), which is fine — gold reads on both
+ * dark and light, and the mark is never placed on a gold surface. `className`
+ * keeps the same sizing contract as before (h-6 w-6 default, overridable).
  */
 export function LotusMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 100 100"
-      fill="none"
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/brand/lotus-gold.png"
+      alt=""
       aria-hidden="true"
-      className={cn("h-6 w-6", className)}
-    >
-      <g
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      >
-        {/* finial dots above the crown */}
-        <circle cx="50" cy="14" r="1.1" fill="currentColor" stroke="none" />
-        <circle cx="50" cy="18.5" r="1.7" fill="currentColor" stroke="none" />
-        {/* outer side petals (widest, fanning up + out) */}
-        <path d="M50 59 C 33 55, 20 44, 17 33 C 30 36, 44 46, 50 59 Z" />
-        <path d="M50 59 C 67 55, 80 44, 83 33 C 70 36, 56 46, 50 59 Z" />
-        {/* inner side petals (steeper) */}
-        <path d="M50 58 C 40 50, 34 40, 34 30 C 43 35, 49 46, 50 58 Z" />
-        <path d="M50 58 C 60 50, 66 40, 66 30 C 57 35, 51 46, 50 58 Z" />
-        {/* crown petal + inner echo */}
-        <path d="M50 22 C 59 33, 59 48, 50 58 C 41 48, 41 33, 50 22 Z" />
-        <path d="M50 29 C 55 37, 55 48, 50 55 C 45 48, 45 37, 50 29 Z" />
-        {/* central flame (the diya light) */}
-        <path d="M50 39 C 53 44, 53 51, 50 55 C 47 51, 47 44, 50 39 Z" />
-        {/* rim + diya bowl */}
-        <path d="M27 62 H 73" />
-        <path d="M29 63 C 31 74, 39 80, 50 80 C 61 80, 69 74, 71 63" />
-        {/* drop finial below the bowl */}
-        <path d="M50 84 C 52 87, 52 91, 50 93 C 48 91, 48 87, 50 84 Z" />
-        <circle cx="50" cy="96.5" r="1.1" fill="currentColor" stroke="none" />
-      </g>
-    </svg>
+      className={cn("h-6 w-6 object-contain", className)}
+    />
   );
 }
 
