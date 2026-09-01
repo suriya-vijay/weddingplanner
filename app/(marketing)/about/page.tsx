@@ -74,8 +74,8 @@ const FOUNDERS: { name: string; role: string; photo: string; bio: string }[] = [
   {
     name: "Suriya Vijayakumar",
     role: "Co-founder",
-    photo: "",
-    bio: "Building Kalyanam to make planning an Indian-American wedding feel calm, considered and unmistakably ours — from the first spark of inspiration to the final farewell.",
+    photo: "/founders/suriya.jpg",
+    bio: "A chemical engineering student at Ohio State and a builder at heart — from computer-vision lab tools to fundraising over $60,000 for schools and families in India through AID for India. Suriya started Kalyanam to bring that same care and craft to Indian-American weddings, making the whole journey feel calm, considered and unmistakably ours.",
   },
   {
     name: "Your Co-founder",
