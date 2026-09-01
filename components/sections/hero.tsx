@@ -22,13 +22,14 @@ export function Hero() {
          full-height centred box left ~650px of empty ground above the headline. */
       className="texture-saree relative flex min-h-[min(88dvh,52rem)] flex-col justify-center overflow-hidden bg-forest-900 pt-28 pb-20"
     >
-      {/* Ambient ground (over the paisley texture via gradient transparency) */}
+      {/* Soft vignette for depth — kept LIGHT so the saree brocade texture
+          (on .texture-saree::before) reads through it. */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-0"
+        className="absolute inset-0 -z-[3]"
         style={{
           background:
-            "radial-gradient(120% 90% at 15% 10%, rgba(27,67,50,0.92) 0%, rgba(15,44,31,0.96) 55%, #0b2017 100%)",
+            "radial-gradient(120% 90% at 15% 10%, rgba(27,67,50,0.35) 0%, rgba(15,44,31,0.45) 55%, rgba(11,32,23,0.6) 100%)",
         }}
       />
       {/* Refined gold corner flourishes (static, curved petals not stray lines) */}

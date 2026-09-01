@@ -176,11 +176,18 @@ export function CurveDivider({
   className,
   flip = false,
   fill = "var(--cream)",
+  textured = false,
 }: {
   className?: string;
   flip?: boolean;
   fill?: string;
+  /** Fill the wave with the saree brocade (matches a textured forest section). */
+  textured?: boolean;
 }) {
+  // Textured dividers share one brocade pattern per orientation (identical
+  // fills, so a shared id is safe and keeps this a server component).
+  const pid = flip ? "saree-flip" : "saree-up";
+  const wave = "M0 64C240 16 480 16 720 48s480 64 720 16v56H0V64Z";
   return (
     <div
       aria-hidden="true"
@@ -191,10 +198,34 @@ export function CurveDivider({
         preserveAspectRatio="none"
         className="block h-[60px] w-full sm:h-[90px]"
       >
-        <path
-          d="M0 64C240 16 480 16 720 48s480 64 720 16v56H0V64Z"
-          fill={fill}
-        />
+        {textured ? (
+          <>
+            <defs>
+              <pattern
+                id={pid}
+                patternUnits="userSpaceOnUse"
+                width="300"
+                height="120"
+                /* flip the tile back upright when the divider is rotated */
+                patternTransform={flip ? "scale(1,-1)" : undefined}
+              >
+                <rect width="300" height="120" fill="var(--forest-900)" />
+                <image
+                  href="/brand/saree-tile.png"
+                  x="0"
+                  y="-90"
+                  width="300"
+                  height="300"
+                  opacity="0.7"
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </pattern>
+            </defs>
+            <path d={wave} fill={`url(#${pid})`} />
+          </>
+        ) : (
+          <path d={wave} fill={fill} />
+        )}
       </svg>
     </div>
   );

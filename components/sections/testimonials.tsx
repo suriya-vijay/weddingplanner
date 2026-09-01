@@ -11,7 +11,7 @@ export function Testimonials() {
   const [lead, ...rest] = testimonials;
   return (
     <>
-      <CurveDivider fill="var(--forest-900)" />
+      <CurveDivider textured fill="var(--forest-900)" />
       <section id="about" className="texture-saree relative overflow-hidden bg-forest-900 py-20 sm:py-28">
         <div className="container-luxe">
           <Reveal className="mx-auto max-w-2xl text-center">
@@ -50,7 +50,7 @@ export function Testimonials() {
           </div>
         </div>
       </section>
-      <CurveDivider flip fill="var(--forest-900)" />
+      <CurveDivider flip textured fill="var(--forest-900)" />
     </>
   );
 }

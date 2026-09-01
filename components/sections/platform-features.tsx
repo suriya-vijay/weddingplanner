@@ -23,7 +23,7 @@ export function PlatformFeatures() {
   return (
     <>
       {/* Wave transition down into the forest panel from the light section above. */}
-      <CurveDivider fill="var(--forest-900)" />
+      <CurveDivider textured fill="var(--forest-900)" />
 
       <section
         id="features"
@@ -102,7 +102,7 @@ export function PlatformFeatures() {
       </section>
 
       {/* Wave transition back up into the light section below. */}
-      <CurveDivider flip fill="var(--forest-900)" />
+      <CurveDivider flip textured fill="var(--forest-900)" />
     </>
   );
 }
