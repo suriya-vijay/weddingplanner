@@ -338,10 +338,11 @@
     inset: 0;
     z-index: -2;
     pointer-events: none;
-    opacity: 0.16;
-    background-size: 80px 80px;
+    opacity: 0.7;
+    background-size: 300px 300px;
     background-repeat: repeat;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80' fill='none' stroke='%23d8b961' stroke-width='0.9'%3E%3Cpath d='M40 0l40 40-40 40L0 40z' opacity='0.35'/%3E%3Cpath d='M40 26c6 3 8 10 4 15-4 5-11 5-15 1' opacity='0.8'/%3E%3Cpath d='M40 54c-6-3-8-10-4-15 4-5 11-5 15-1' opacity='0.8'/%3E%3Ccircle cx='40' cy='40' r='2.4'/%3E%3Ccircle cx='40' cy='40' r='0.9' fill='%23d8b961' stroke='none'/%3E%3Cg opacity='0.7'%3E%3Ccircle cx='0' cy='40' r='1.4' fill='%23d8b961' stroke='none'/%3E%3Ccircle cx='80' cy='40' r='1.4' fill='%23d8b961' stroke='none'/%3E%3Ccircle cx='40' cy='0' r='1.4' fill='%23d8b961' stroke='none'/%3E%3Ccircle cx='40' cy='80' r='1.4' fill='%23d8b961' stroke='none'/%3E%3C/g%3E%3Cpath d='M12 12c3 1 4 4 2 7' opacity='0.5'/%3E%3Cpath d='M68 68c-3-1-4-4-2-7' opacity='0.5'/%3E%3Cpath d='M68 12c-3 1-4 4-2 7' opacity='0.5'/%3E%3Cpath d='M12 68c3-1 4-4 2-7' opacity='0.5'/%3E%3C/svg%3E");
+    /* The REAL woven brocade cropped + mirror-tiled from the brand artwork. */
+    background-image: url("/brand/saree-tile.png");
   }
   .texture-saree::after {
     content: "";
