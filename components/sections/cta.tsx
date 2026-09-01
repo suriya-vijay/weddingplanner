@@ -14,7 +14,7 @@ export function Cta() {
       <div className="container-luxe">
         <Reveal>
           <div
-            className="texture-paisley on-dark relative overflow-hidden rounded-[2.5rem] px-8 py-16 text-center shadow-[var(--shadow-lg)] sm:px-16 sm:py-24"
+            className="texture-saree relative overflow-hidden rounded-[2.5rem] px-8 py-16 text-center shadow-[var(--shadow-lg)] sm:px-16 sm:py-24"
             style={{
               background:
                 "radial-gradient(120% 120% at 50% 0%, rgba(45,106,79,0.95) 0%, rgba(27,67,50,0.97) 55%, #0f2c1f 100%)",

@@ -99,7 +99,7 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero header */}
-      <section className="bg-forest-900 pb-16 pt-36 text-center">
+      <section className="texture-saree relative overflow-hidden bg-forest-900 pb-16 pt-36 text-center">
         <div className="container-luxe">
           <LotusMark className="draw mx-auto mb-5 h-10 w-10 text-gold-400" />
           <p className="eyebrow text-gold-400">Our story</p>
@@ -139,7 +139,7 @@ export default function AboutPage() {
           </Reveal>
           <Reveal delay={80}>
             <div
-              className="texture-paisley on-dark relative overflow-hidden rounded-[2rem] p-10 text-cream shadow-[var(--shadow-lg)]"
+              className="texture-saree relative overflow-hidden rounded-[2rem] p-10 text-cream shadow-[var(--shadow-lg)]"
               style={{
                 background:
                   "radial-gradient(120% 120% at 20% 0%, rgba(45,106,79,0.95) 0%, rgba(27,67,50,0.97) 60%, #0f2c1f 100%)",
@@ -259,7 +259,7 @@ export default function AboutPage() {
       </section>
 
       {/* By the numbers */}
-      <section className="bg-forest-900 py-20 sm:py-24">
+      <section className="texture-saree relative overflow-hidden bg-forest-900 py-20 sm:py-24">
         <div className="container-luxe">
           <Reveal className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
             {STATS.map((s) => (

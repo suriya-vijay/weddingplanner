@@ -31,7 +31,7 @@ export function AdminSidebar() {
   return (
     // Static tiled paisley (rasterized once, ~zero runtime cost) — no motion.
     // Rail stretches the full page height; the inner wrapper is what sticks.
-    <aside className="texture-paisley on-dark relative flex w-full shrink-0 flex-col border-b border-cream/10 bg-forest-900 px-4 py-4 text-cream lg:w-64 lg:self-stretch lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
+    <aside className="texture-saree saree-soft relative flex w-full shrink-0 flex-col border-b border-cream/10 bg-forest-900 px-4 py-4 text-cream lg:w-64 lg:self-stretch lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
       <div className="flex flex-col gap-1 lg:sticky lg:top-7 lg:min-h-[calc(100dvh-3.5rem)]">
       <div className="mb-2 flex items-center gap-2.5 px-2 lg:mb-6">
         <LotusMark className="h-7 w-7 text-gold-400" />

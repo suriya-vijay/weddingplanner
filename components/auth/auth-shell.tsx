@@ -35,7 +35,7 @@ export function AuthShell({
 
       {/* Right: branded panel (hidden on small screens) */}
       <div
-        className="texture-paisley on-dark relative hidden w-full overflow-hidden bg-forest-900 lg:block lg:w-[44%]"
+        className="texture-saree relative hidden w-full overflow-hidden bg-forest-900 lg:block lg:w-[44%]"
         style={{
           background:
             "radial-gradient(120% 100% at 70% 10%, rgba(45,106,79,0.95) 0%, rgba(27,67,50,0.97) 55%, #0b2017 100%)",

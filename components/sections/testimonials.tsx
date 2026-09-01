@@ -12,7 +12,7 @@ export function Testimonials() {
   return (
     <>
       <CurveDivider fill="var(--forest-900)" />
-      <section id="about" className="bg-forest-900 py-20 sm:py-28">
+      <section id="about" className="texture-saree relative overflow-hidden bg-forest-900 py-20 sm:py-28">
         <div className="container-luxe">
           <Reveal className="mx-auto max-w-2xl text-center">
             <p className="eyebrow text-gold-400">Loved by couples & families</p>

@@ -60,7 +60,7 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
 
 export function Footer() {
   return (
-    <footer className="texture-paisley on-dark bg-forest-900 text-cream/80">
+    <footer className="texture-saree bg-forest-900 text-cream/80">
       <div className="container-luxe py-16 sm:py-20">
         <PaisleyBorder className="mb-12" />
         <DividerOrnament className="mb-14 [&_span]:via-gold-400/40 [&_svg]:text-gold-400" />

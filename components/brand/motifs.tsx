@@ -102,36 +102,38 @@ export function MandalaBloom({ className }: { className?: string }) {
 export function LotusMark({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 100 100"
       fill="none"
       aria-hidden="true"
       className={cn("h-6 w-6", className)}
     >
       <g
         stroke="currentColor"
-        strokeWidth="1.7"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        fill="none"
       >
-        {/* finial dots above the crown petal */}
-        <circle cx="32" cy="7" r="0.9" fill="currentColor" stroke="none" />
-        <circle cx="32" cy="10.5" r="1.3" fill="currentColor" stroke="none" />
-        {/* crown / central tall petal */}
-        <path d="M32 13c5 6 5 13 0 19-5-6-5-13 0-19Z" />
-        {/* inner flame inside the crown (the diya light) */}
-        <path d="M32 21c2.6 3.4 2.6 7-0 10-2.6-3-2.6-6.6 0-10Z" />
-        {/* upper side petals (inner pair) */}
-        <path d="M32 30c-3-8-9-12-15-13 1 7 6 12 15 13Z" />
-        <path d="M32 30c3-8 9-12 15-13-1 7-6 12-15 13Z" />
-        {/* lower side petals (outer pair, splayed) */}
-        <path d="M32 33c-5-5-12-6-18-4 3 6 10 8 18 4Z" opacity="0.9" />
-        <path d="M32 33c5-5 12-6 18-4-3 6-10 8-18 4Z" opacity="0.9" />
-        {/* diya bowl cradling the base */}
-        <path d="M17 39c2 6 8 10 15 10s13-4 15-10" />
-        <path d="M15 39h34" />
-        {/* small drop finial below the bowl */}
-        <path d="M32 51c1.6 2 1.6 4 0 6-1.6-2-1.6-4 0-6Z" opacity="0.85" />
-        <circle cx="32" cy="59" r="1" fill="currentColor" stroke="none" opacity="0.85" />
+        {/* finial dots above the crown */}
+        <circle cx="50" cy="14" r="1.1" fill="currentColor" stroke="none" />
+        <circle cx="50" cy="18.5" r="1.7" fill="currentColor" stroke="none" />
+        {/* outer side petals (widest, fanning up + out) */}
+        <path d="M50 59 C 33 55, 20 44, 17 33 C 30 36, 44 46, 50 59 Z" />
+        <path d="M50 59 C 67 55, 80 44, 83 33 C 70 36, 56 46, 50 59 Z" />
+        {/* inner side petals (steeper) */}
+        <path d="M50 58 C 40 50, 34 40, 34 30 C 43 35, 49 46, 50 58 Z" />
+        <path d="M50 58 C 60 50, 66 40, 66 30 C 57 35, 51 46, 50 58 Z" />
+        {/* crown petal + inner echo */}
+        <path d="M50 22 C 59 33, 59 48, 50 58 C 41 48, 41 33, 50 22 Z" />
+        <path d="M50 29 C 55 37, 55 48, 50 55 C 45 48, 45 37, 50 29 Z" />
+        {/* central flame (the diya light) */}
+        <path d="M50 39 C 53 44, 53 51, 50 55 C 47 51, 47 44, 50 39 Z" />
+        {/* rim + diya bowl */}
+        <path d="M27 62 H 73" />
+        <path d="M29 63 C 31 74, 39 80, 50 80 C 61 80, 69 74, 71 63" />
+        {/* drop finial below the bowl */}
+        <path d="M50 84 C 52 87, 52 91, 50 93 C 48 91, 48 87, 50 84 Z" />
+        <circle cx="50" cy="96.5" r="1.1" fill="currentColor" stroke="none" />
       </g>
     </svg>
   );

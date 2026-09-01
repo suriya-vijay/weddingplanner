@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Marketplace } from "@/components/vendors/marketplace";
 import { DividerOrnament } from "@/components/brand/motifs";
+import { WaveHeader } from "@/components/brand/wave-header";
 import { getPublicVendors } from "@/lib/db/vendors";
 
 export const metadata: Metadata = {
@@ -13,8 +14,11 @@ export default async function VendorsPage() {
   const vendors = await getPublicVendors();
   return (
     <>
-      <section className="bg-forest-900 pb-16 pt-36 text-center">
-        <div className="container-luxe">
+      <section className="texture-saree relative overflow-hidden bg-forest-900 pb-16 pt-36 text-center">
+        {/* Interactive shimmering waves (crash-safe: paused off-screen, ~30fps,
+            static under reduced-motion). Move the cursor to ripple the surface. */}
+        <WaveHeader />
+        <div className="container-luxe relative z-10">
           <p className="eyebrow text-gold-400">The marketplace</p>
           <h1 className="mt-4 font-serif text-h1 text-cream">
             The finest wedding

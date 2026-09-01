@@ -22,7 +22,7 @@ export default async function InspirationPage() {
   return (
     <>
       {/* Page header */}
-      <section className="bg-forest-900 pb-16 pt-36 text-center">
+      <section className="texture-saree relative overflow-hidden bg-forest-900 pb-16 pt-36 text-center">
         <div className="container-luxe">
           <p className="eyebrow text-gold-400">Real weddings · Curated</p>
           <h1 className="mt-4 font-serif text-h1 text-cream">

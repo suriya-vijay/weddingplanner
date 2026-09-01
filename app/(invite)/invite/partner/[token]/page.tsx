@@ -24,7 +24,7 @@ export default async function PartnerInvitePage({
   const inviter = invite?.coupleNames?.trim() || "Your partner";
 
   return (
-    <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-forest-900 px-6 py-16 text-center">
+    <main className="relative flex min-h-dvh flex-col items-center justify-center texture-saree overflow-hidden bg-forest-900 px-6 py-16 text-center">
       <div className="relative mx-auto max-w-lg">
         <LotusMark className="draw mx-auto mb-6 h-12 w-12 text-gold-400" />
         {valid ? (

@@ -20,7 +20,7 @@ export function Hero() {
       as="section"
       /* min-h clamped below 100dvh + tighter top padding: at desktop widths a
          full-height centred box left ~650px of empty ground above the headline. */
-      className="texture-paisley on-dark relative flex min-h-[min(88dvh,52rem)] flex-col justify-center overflow-hidden bg-forest-900 pt-28 pb-20"
+      className="texture-saree relative flex min-h-[min(88dvh,52rem)] flex-col justify-center overflow-hidden bg-forest-900 pt-28 pb-20"
     >
       {/* Ambient ground (over the paisley texture via gradient transparency) */}
       <div

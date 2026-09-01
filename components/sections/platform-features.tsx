@@ -27,7 +27,7 @@ export function PlatformFeatures() {
 
       <section
         id="features"
-        className="section texture-paisley on-dark-rich relative overflow-hidden bg-forest-900"
+        className="section texture-saree relative overflow-hidden bg-forest-900"
       >
         {/* Refined gold corner flourishes, drifting gently with scroll. */}
         <ParallaxLayer speed={0.04} className="pointer-events-none absolute -left-8 -top-8">
