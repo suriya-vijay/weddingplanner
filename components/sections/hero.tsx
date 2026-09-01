@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { MandalaBloom } from "@/components/brand/motifs";
 import { MandalaCornerSoft } from "@/components/brand/patterns";
 import { AmbientZone } from "@/components/ui/ambient-zone";
 import { ParallaxLayer } from "@/components/ui/parallax-layer";
@@ -61,9 +60,17 @@ export function Hero() {
         className="pointer-events-none absolute -right-32 top-1/2 hidden md:block"
       >
         <div className="-translate-y-1/2">
-          <div className="ambient-spin h-[42rem] w-[42rem]" style={{ transformOrigin: "center" }}>
-            <MandalaBloom />
-          </div>
+          {/* The real detailed gold mandala (extracted onto transparency),
+              slowly spinning. Subtle opacity so it's a rich ornament, not
+              overpowering. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/mandala-gold.png"
+            alt=""
+            aria-hidden="true"
+            className="ambient-spin h-[46rem] w-[46rem] opacity-70"
+            style={{ transformOrigin: "center" }}
+          />
         </div>
       </ParallaxLayer>
 
