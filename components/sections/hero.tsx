@@ -79,8 +79,11 @@ export function Hero() {
             {/* Gradient-filled text with a slow traveling shimmer — the gold
                 "wave" sweeps across the word (paused off-screen, static under
                 reduced-motion). The repeating gradient makes the sweep seamless. */}
+            {/* Small horizontal padding + matching negative margin so the
+                italic glyphs' overhang isn't clipped by bg-clip-text, without
+                shifting the layout. */}
             <span
-              className="text-shimmer bg-clip-text italic text-transparent"
+              className="text-shimmer -mx-[0.12em] inline-block bg-clip-text px-[0.12em] italic text-transparent"
               style={{
                 backgroundImage:
                   "linear-gradient(100deg, var(--gold-500) 0%, var(--blush-300) 20%, var(--gold-400) 40%, var(--gold-200) 50%, var(--gold-400) 60%, var(--blush-300) 80%, var(--gold-500) 100%)",

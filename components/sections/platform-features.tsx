@@ -2,7 +2,6 @@ import { Reveal } from "@/components/ui/reveal";
 import {
   KalashDivider,
   MandalaCornerSoft,
-  TempleArch,
   LeafVine,
   DiyaRow,
 } from "@/components/brand/patterns";
@@ -12,8 +11,8 @@ import { features } from "@/lib/mock-data";
 
 /**
  * Platform Features — the 10 core features on a deep-forest "gold on green"
- * ground (old-India luxury): a richer paisley fabric, a temple-arch behind the
- * heading, a gold leaf-vine + diya row, and gold-on-forest cards. Flows in/out
+ * ground (old-India luxury): the woven saree brocade, a gold leaf-vine + diya
+ * row, and gold-on-forest cards. Flows in/out
  * of the surrounding light sections via CurveDividers (same pattern as the
  * testimonials section). All depth is STATIC (tiled SVG + inline line-art) plus
  * the existing one-shot Reveal staggers + parallax corners — no new continuous
@@ -38,9 +37,7 @@ export function PlatformFeatures() {
         </ParallaxLayer>
 
         <div className="container-luxe relative">
-          {/* Temple arch behind the heading — the "old India" focal ornament. */}
           <div className="relative">
-            <TempleArch className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-72 -translate-x-1/2 -translate-y-[54%] text-gold-400/25" />
             <Reveal className="relative mx-auto max-w-2xl text-center">
               <p className="eyebrow text-gold-400">Everything, gathered</p>
               <h2 className="mt-4 font-serif text-h2 text-cream">
