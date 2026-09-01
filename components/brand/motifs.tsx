@@ -93,31 +93,45 @@ export function MandalaBloom({ className }: { className?: string }) {
   );
 }
 
-/** Eight-petal lotus, line-art. The Kalyanam mark. */
+/**
+ * LotusMark — the Kalyanam brand mark: a lotus-diya (lotus cradling a sacred
+ * flame in a bowl), drawn as line-art so it inherits `currentColor` and stays
+ * crisp at any size. Modelled on the gold lotus-diya identity. Symmetric about
+ * x=32 in a 64×64 box.
+ */
 export function LotusMark({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 48 48"
+      viewBox="0 0 64 64"
       fill="none"
       aria-hidden="true"
       className={cn("h-6 w-6", className)}
     >
       <g
         stroke="currentColor"
-        strokeWidth="1.4"
+        strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        {/* center petal */}
-        <path d="M24 7c3.4 4 3.4 12 0 17-3.4-5-3.4-13 0-17Z" />
-        {/* inner side petals */}
-        <path d="M24 24c-4-3-9-3.5-13-2 2.6 3.4 7.6 5 13 2Z" />
-        <path d="M24 24c4-3 9-3.5 13-2-2.6 3.4-7.6 5-13 2Z" />
-        {/* outer side petals */}
-        <path d="M24 24c-5.5-1-11 .5-15 4 4 2.4 10 2.4 15-4Z" opacity="0.7" />
-        <path d="M24 24c5.5-1 11 .5 15 4-4 2.4-10 2.4-15-4Z" opacity="0.7" />
-        {/* base */}
-        <path d="M9 30c4 4 11 5 15 5s11-1 15-5" opacity="0.55" />
+        {/* finial dots above the crown petal */}
+        <circle cx="32" cy="7" r="0.9" fill="currentColor" stroke="none" />
+        <circle cx="32" cy="10.5" r="1.3" fill="currentColor" stroke="none" />
+        {/* crown / central tall petal */}
+        <path d="M32 13c5 6 5 13 0 19-5-6-5-13 0-19Z" />
+        {/* inner flame inside the crown (the diya light) */}
+        <path d="M32 21c2.6 3.4 2.6 7-0 10-2.6-3-2.6-6.6 0-10Z" />
+        {/* upper side petals (inner pair) */}
+        <path d="M32 30c-3-8-9-12-15-13 1 7 6 12 15 13Z" />
+        <path d="M32 30c3-8 9-12 15-13-1 7-6 12-15 13Z" />
+        {/* lower side petals (outer pair, splayed) */}
+        <path d="M32 33c-5-5-12-6-18-4 3 6 10 8 18 4Z" opacity="0.9" />
+        <path d="M32 33c5-5 12-6 18-4-3 6-10 8-18 4Z" opacity="0.9" />
+        {/* diya bowl cradling the base */}
+        <path d="M17 39c2 6 8 10 15 10s13-4 15-10" />
+        <path d="M15 39h34" />
+        {/* small drop finial below the bowl */}
+        <path d="M32 51c1.6 2 1.6 4 0 6-1.6-2-1.6-4 0-6Z" opacity="0.85" />
+        <circle cx="32" cy="59" r="1" fill="currentColor" stroke="none" opacity="0.85" />
       </g>
     </svg>
   );
