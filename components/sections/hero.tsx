@@ -102,7 +102,7 @@ export function Hero() {
             <span className="text-gold-400">.</span>
           </h1>
 
-          <p className="lede mt-7 max-w-xl text-cream/75">
+          <p className="lede mt-7 max-w-xl !text-cream">
             Inspiration, trusted vendors, planning tools and AI assistance —
             gathered into one elegant platform, for celebrations as singular as
             your story.
