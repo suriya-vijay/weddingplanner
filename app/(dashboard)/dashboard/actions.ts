@@ -256,20 +256,23 @@ export async function invitePartnerAction(
 
 // ── Events + guest assignment ───────────────────────────────────
 export async function addEventAction(
-  name: string,
-  date: string | null,
+  details: eventsDb.EventDetails,
   sort: number,
 ): Promise<eventsDb.WeddingEvent | null> {
   const weddingId = await myWeddingId();
   if (!weddingId) return null;
-  const ev = await eventsDb.addEvent(weddingId, { name: name.trim(), date, sort });
+  const ev = await eventsDb.addEvent(weddingId, {
+    ...details,
+    name: details.name.trim(),
+    sort,
+  });
   revalidatePath("/dashboard/events");
   return ev;
 }
 
 export async function updateEventAction(
   id: string,
-  patch: { name?: string; date?: string | null; sort?: number },
+  patch: Partial<eventsDb.EventDetails & { sort: number }>,
 ): Promise<void> {
   await eventsDb.updateEvent(id, patch);
   revalidatePath("/dashboard/events");

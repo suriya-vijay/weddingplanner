@@ -8,6 +8,10 @@ import {
   CalendarHeart,
   ChevronDown,
   Users,
+  Pencil,
+  Clock,
+  MapPin,
+  Shirt,
 } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
 import { Button } from "@/components/ui/button";
@@ -15,15 +19,26 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { Guest } from "@/lib/mock-data";
-import type { WeddingEvent } from "@/lib/db/events";
+import type { WeddingEvent, EventDetails } from "@/lib/db/events";
 import {
   addEventAction,
+  updateEventAction,
   deleteEventAction,
   setEventGuestAction,
 } from "@/app/(dashboard)/dashboard/actions";
 
 // A few common Indian-wedding functions to offer as quick-adds.
 const SUGGESTIONS = ["Haldi", "Mehendi", "Sangeet", "Ceremony", "Reception"];
+
+const EMPTY: EventDetails = {
+  name: "",
+  date: null,
+  time: "",
+  venue: "",
+  address: "",
+  dressCode: "",
+  notes: "",
+};
 
 export function EventsView({
   initialGuests,
@@ -45,9 +60,9 @@ export function EventsView({
     return m;
   });
   const [open, setOpen] = useState<string | null>(null);
-  const [adding, setAdding] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newDate, setNewDate] = useState("");
+  // The dialog: `null` = closed, `{ id: null }` = adding, `{ id }` = editing.
+  const [dialog, setDialog] = useState<{ id: string | null } | null>(null);
+  const [form, setForm] = useState<EventDetails>(EMPTY);
   const [busy, setBusy] = useState(false);
 
   const guestById = useMemo(
@@ -63,20 +78,54 @@ export function EventsView({
     return n;
   }
 
-  async function addEvent(name: string, date: string | null) {
-    const trimmed = name.trim();
-    if (!trimmed || busy) return;
+  function openAdd(prefillName = "") {
+    setForm({ ...EMPTY, name: prefillName });
+    setDialog({ id: null });
+  }
+  function openEdit(ev: WeddingEvent) {
+    setForm({
+      name: ev.name,
+      date: ev.date,
+      time: ev.time,
+      venue: ev.venue,
+      address: ev.address,
+      dressCode: ev.dressCode,
+      notes: ev.notes,
+    });
+    setDialog({ id: ev.id });
+  }
+
+  const upd = (patch: Partial<EventDetails>) =>
+    setForm((f) => ({ ...f, ...patch }));
+
+  async function save() {
+    if (!form.name.trim() || busy) return;
     setBusy(true);
-    const sort = events.length;
-    const created = await addEventAction(trimmed, date, sort);
-    setBusy(false);
-    if (!created) return;
-    setEvents((e) => [...e, created]);
-    setAttend((a) => ({ ...a, [created.id]: new Set() }));
-    setAdding(false);
-    setNewName("");
-    setNewDate("");
-    setOpen(created.id);
+    const details: EventDetails = { ...form, name: form.name.trim() };
+
+    if (dialog?.id) {
+      // EDIT — optimistic update, then persist.
+      const id = dialog.id;
+      const prev = events;
+      setEvents((e) => e.map((x) => (x.id === id ? { ...x, ...details } : x)));
+      setDialog(null);
+      setBusy(false);
+      try {
+        await updateEventAction(id, details);
+      } catch {
+        setEvents(prev); // rollback
+      }
+    } else {
+      // ADD
+      const sort = events.length;
+      const created = await addEventAction(details, sort);
+      setBusy(false);
+      if (!created) return;
+      setEvents((e) => [...e, created]);
+      setAttend((a) => ({ ...a, [created.id]: new Set() }));
+      setDialog(null);
+      setOpen(created.id);
+    }
   }
 
   async function removeEvent(id: string) {
@@ -115,8 +164,8 @@ export function EventsView({
         <p className="eyebrow text-gold-600">Planning</p>
         <h1 className="mt-2 font-serif text-h1 text-ink">Events</h1>
         <p className="mt-1 text-ink-soft">
-          Create each function and choose who&rsquo;s invited — with a live
-          headcount per event.
+          Create each function with all its details, choose who&rsquo;s invited,
+          and it&rsquo;s ready for your wedding invitation.
         </p>
       </header>
 
@@ -130,7 +179,7 @@ export function EventsView({
               key={s}
               type="button"
               disabled={busy}
-              onClick={() => addEvent(s, null)}
+              onClick={() => openAdd(s)}
               className="rounded-full border border-border-strong bg-ivory px-3.5 py-1.5 text-sm text-ink-soft transition-colors duration-[var(--dur-fast)] hover:border-gold-400 hover:text-forest-700 disabled:opacity-50"
             >
               + {s}
@@ -141,7 +190,7 @@ export function EventsView({
           variant="primary"
           size="md"
           className="shrink-0"
-          onClick={() => setAdding(true)}
+          onClick={() => openAdd()}
         >
           <Plus className="h-4 w-4" /> Add event
         </Button>
@@ -154,13 +203,14 @@ export function EventsView({
             icon={<CalendarHeart className="h-6 w-6" />}
             title="No events yet"
             action={
-              <Button variant="primary" size="md" onClick={() => setAdding(true)}>
+              <Button variant="primary" size="md" onClick={() => openAdd()}>
                 <Plus className="h-4 w-4" /> Add your first event
               </Button>
             }
           >
             Add each function — Haldi, Mehendi, Sangeet, the ceremony, the
-            reception — then check off who&rsquo;s invited to each.
+            reception — with its date, time, venue and dress code, then check off
+            who&rsquo;s invited to each.
           </EmptyState>
         </Panel>
       ) : (
@@ -169,6 +219,7 @@ export function EventsView({
             const isOpen = open === ev.id;
             const count = headcount(ev.id);
             const attending = attend[ev.id] ?? new Set<string>();
+            const meta = [ev.date, ev.time, ev.venue].filter(Boolean).join(" · ");
             return (
               <Panel key={ev.id} className="overflow-hidden p-0">
                 {/* Event header row */}
@@ -188,7 +239,7 @@ export function EventsView({
                       <span className="flex items-center gap-1.5 text-sm text-ink-soft">
                         <Users className="h-3.5 w-3.5" />
                         {count} {count === 1 ? "guest" : "guests"} invited
-                        {ev.date ? ` · ${ev.date}` : ""}
+                        {meta ? ` · ${meta}` : ""}
                       </span>
                     </span>
                     <ChevronDown
@@ -201,6 +252,14 @@ export function EventsView({
                   </button>
                   <button
                     type="button"
+                    onClick={() => openEdit(ev)}
+                    aria-label={`Edit ${ev.name}`}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-faint transition-colors hover:bg-cream-deep hover:text-forest-700"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => removeEvent(ev.id)}
                     aria-label={`Delete ${ev.name}`}
                     className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-faint transition-colors hover:bg-destructive/10 hover:text-destructive"
@@ -209,46 +268,97 @@ export function EventsView({
                   </button>
                 </div>
 
-                {/* Guest checklist */}
                 {isOpen && (
                   <div className="border-t border-border">
-                    {noGuests ? (
-                      <p className="px-5 py-6 text-center text-sm text-ink-soft">
-                        Add guests on the{" "}
-                        <a
-                          href="/dashboard/guests"
-                          className="font-medium text-gold-600 hover:underline"
-                        >
-                          Guests
-                        </a>{" "}
-                        page first, then check who&rsquo;s coming here.
-                      </p>
-                    ) : (
-                      <ul className="divide-y divide-border">
-                        {guests.map((g) => {
-                          const on = attending.has(g.id);
-                          return (
-                            <li key={g.id}>
-                              <label className="flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors hover:bg-cream-deep/40">
-                                <input
-                                  type="checkbox"
-                                  checked={on}
-                                  onChange={() => toggleGuest(ev.id, g.id)}
-                                  className="h-4 w-4 shrink-0 accent-forest-700"
-                                />
-                                <span className="flex-1 text-sm text-ink">
-                                  {g.name}
-                                </span>
-                                <span className="text-xs text-ink-faint">
-                                  {g.side} · {g.count}{" "}
-                                  {g.count === 1 ? "person" : "people"}
-                                </span>
-                              </label>
-                            </li>
-                          );
-                        })}
-                      </ul>
+                    {/* Invitation details (the source-of-truth for the digital
+                        invite later). Only show what's filled in. */}
+                    {(ev.venue ||
+                      ev.address ||
+                      ev.dressCode ||
+                      ev.time ||
+                      ev.notes) && (
+                      <dl className="grid gap-x-8 gap-y-3 px-5 py-4 text-sm sm:grid-cols-2">
+                        {ev.time && (
+                          <Detail icon={<Clock className="h-4 w-4" />} label="Time">
+                            {ev.time}
+                          </Detail>
+                        )}
+                        {(ev.venue || ev.address) && (
+                          <Detail
+                            icon={<MapPin className="h-4 w-4" />}
+                            label="Location"
+                          >
+                            {ev.venue && <span className="block">{ev.venue}</span>}
+                            {ev.address && (
+                              <span className="block text-ink-soft">
+                                {ev.address}
+                              </span>
+                            )}
+                          </Detail>
+                        )}
+                        {ev.dressCode && (
+                          <Detail
+                            icon={<Shirt className="h-4 w-4" />}
+                            label="Dress code"
+                          >
+                            {ev.dressCode}
+                          </Detail>
+                        )}
+                        {ev.notes && (
+                          <Detail
+                            icon={<CalendarHeart className="h-4 w-4" />}
+                            label="Notes"
+                            className="sm:col-span-2"
+                          >
+                            {ev.notes}
+                          </Detail>
+                        )}
+                      </dl>
                     )}
+
+                    {/* Guest checklist */}
+                    <div className="border-t border-border">
+                      <p className="px-5 pt-4 text-xs font-semibold uppercase tracking-wider text-ink-faint">
+                        Who&rsquo;s invited
+                      </p>
+                      {noGuests ? (
+                        <p className="px-5 py-6 text-center text-sm text-ink-soft">
+                          Add guests on the{" "}
+                          <a
+                            href="/dashboard/guests"
+                            className="font-medium text-gold-600 hover:underline"
+                          >
+                            Guests
+                          </a>{" "}
+                          page first, then check who&rsquo;s coming here.
+                        </p>
+                      ) : (
+                        <ul className="mt-1 divide-y divide-border">
+                          {guests.map((g) => {
+                            const on = attending.has(g.id);
+                            return (
+                              <li key={g.id}>
+                                <label className="flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors hover:bg-cream-deep/40">
+                                  <input
+                                    type="checkbox"
+                                    checked={on}
+                                    onChange={() => toggleGuest(ev.id, g.id)}
+                                    className="h-4 w-4 shrink-0 accent-forest-700"
+                                  />
+                                  <span className="flex-1 text-sm text-ink">
+                                    {g.name}
+                                  </span>
+                                  <span className="text-xs text-ink-faint">
+                                    {g.side} · {g.count}{" "}
+                                    {g.count === 1 ? "person" : "people"}
+                                  </span>
+                                </label>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
                   </div>
                 )}
               </Panel>
@@ -257,60 +367,144 @@ export function EventsView({
         </div>
       )}
 
-      {/* Add-event dialog */}
-      {adding && (
+      {/* Add / Edit dialog — all invitation fields */}
+      {dialog && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-forest-900/45 p-4">
-          <div className="w-full max-w-md rounded-3xl bg-cream p-6 shadow-[var(--shadow-lg)]">
+          <div className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-3xl bg-cream p-6 shadow-[var(--shadow-lg)]">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-xl text-ink">Add an event</h2>
+              <h2 className="font-serif text-xl text-ink">
+                {dialog.id ? "Edit event" : "Add an event"}
+              </h2>
               <button
                 type="button"
-                onClick={() => setAdding(false)}
+                onClick={() => setDialog(null)}
                 aria-label="Close"
                 className="grid h-8 w-8 place-items-center rounded-lg text-ink-faint hover:bg-cream-deep"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="mt-5 space-y-4">
-              <label className="block">
-                <span className="mb-1.5 block text-sm font-medium text-ink">
-                  Event name
-                </span>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <Field label="Event name" className="sm:col-span-2">
                 <Input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
+                  value={form.name}
+                  onChange={(e) => upd({ name: e.target.value })}
                   placeholder="e.g. Sangeet"
                   autoFocus
                 />
-              </label>
-              <label className="block">
-                <span className="mb-1.5 block text-sm font-medium text-ink">
-                  Date (optional)
-                </span>
+              </Field>
+              <Field label="Date">
                 <Input
                   type="date"
-                  value={newDate}
-                  onChange={(e) => setNewDate(e.target.value)}
+                  value={form.date ?? ""}
+                  onChange={(e) => upd({ date: e.target.value || null })}
                 />
-              </label>
+              </Field>
+              <Field label="Start time">
+                <Input
+                  value={form.time}
+                  onChange={(e) => upd({ time: e.target.value })}
+                  placeholder="e.g. 4:00 PM"
+                />
+              </Field>
+              <Field label="Venue name" className="sm:col-span-2">
+                <Input
+                  value={form.venue}
+                  onChange={(e) => upd({ venue: e.target.value })}
+                  placeholder="e.g. The Grand Ballroom"
+                />
+              </Field>
+              <Field label="Address" className="sm:col-span-2">
+                <textarea
+                  value={form.address}
+                  onChange={(e) => upd({ address: e.target.value })}
+                  placeholder="Street, City, State ZIP"
+                  rows={2}
+                  className="w-full rounded-xl border border-border-strong bg-ivory px-4 py-2.5 text-[0.95rem] text-ink placeholder:text-ink-faint transition-colors duration-[var(--dur-fast)] focus:border-gold-400 focus:outline-2 focus:outline-offset-2 focus:outline-gold-500"
+                />
+              </Field>
+              <Field label="Dress code" className="sm:col-span-2">
+                <Input
+                  value={form.dressCode}
+                  onChange={(e) => upd({ dressCode: e.target.value })}
+                  placeholder="e.g. Traditional Indian · Festive"
+                />
+              </Field>
+              <Field label="Additional notes" className="sm:col-span-2">
+                <textarea
+                  value={form.notes}
+                  onChange={(e) => upd({ notes: e.target.value })}
+                  placeholder="Anything guests should know (parking, gifts, timing…)"
+                  rows={3}
+                  className="w-full rounded-xl border border-border-strong bg-ivory px-4 py-2.5 text-[0.95rem] text-ink placeholder:text-ink-faint transition-colors duration-[var(--dur-fast)] focus:border-gold-400 focus:outline-2 focus:outline-offset-2 focus:outline-gold-500"
+                />
+              </Field>
             </div>
+
             <div className="mt-6 flex justify-end gap-3">
-              <Button variant="ghost" size="md" onClick={() => setAdding(false)}>
+              <Button variant="ghost" size="md" onClick={() => setDialog(null)}>
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 size="md"
                 loading={busy}
-                onClick={() => addEvent(newName, newDate || null)}
+                onClick={save}
               >
-                <Plus className="h-4 w-4" /> Add event
+                {dialog.id ? "Save changes" : (
+                  <>
+                    <Plus className="h-4 w-4" /> Add event
+                  </>
+                )}
               </Button>
             </div>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function Field({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={cn("block", className)}>
+      <span className="mb-1.5 block text-sm font-medium text-ink">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function Detail({
+  icon,
+  label,
+  children,
+  className,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex items-start gap-2.5", className)}>
+      <span className="mt-0.5 shrink-0 text-gold-600" aria-hidden>
+        {icon}
+      </span>
+      <div>
+        <span className="block text-xs uppercase tracking-wider text-ink-faint">
+          {label}
+        </span>
+        <span className="text-ink">{children}</span>
+      </div>
     </div>
   );
 }
