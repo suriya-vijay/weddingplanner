@@ -57,18 +57,19 @@ export function Hero() {
       <ParallaxLayer
         speed={0.08}
         max={16}
-        className="pointer-events-none absolute -right-32 top-1/2 hidden md:block"
+        className="pointer-events-none absolute -right-8 top-1/2 hidden md:block lg:-right-4"
       >
         <div className="-translate-y-1/2">
           {/* The real detailed gold mandala (extracted onto transparency),
-              slowly spinning. Subtle opacity so it's a rich ornament, not
+              slowly spinning. Pulled in from the edge so it reads (mostly) whole
+              rather than hard-cropped. Subtle opacity — a rich ornament, not
               overpowering. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/mandala-gold.png"
             alt=""
             aria-hidden="true"
-            className="ambient-spin h-[46rem] w-[46rem] opacity-70"
+            className="ambient-spin h-[38rem] w-[38rem] opacity-70 lg:h-[42rem] lg:w-[42rem]"
             style={{ transformOrigin: "center" }}
           />
         </div>
@@ -90,7 +91,7 @@ export function Hero() {
                 italic glyphs' overhang isn't clipped by bg-clip-text, without
                 shifting the layout. */}
             <span
-              className="text-shimmer -mx-[0.12em] inline-block bg-clip-text px-[0.12em] italic text-transparent"
+              className="text-shimmer -mx-[0.12em] -my-[0.12em] inline-block bg-clip-text px-[0.12em] py-[0.12em] align-baseline italic leading-[1.15] text-transparent"
               style={{
                 backgroundImage:
                   "linear-gradient(100deg, var(--gold-500) 0%, var(--blush-300) 20%, var(--gold-400) 40%, var(--gold-200) 50%, var(--gold-400) 60%, var(--blush-300) 80%, var(--gold-500) 100%)",
