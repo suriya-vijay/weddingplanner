@@ -16,6 +16,18 @@ import {
  * filters + text search, all client-side. Vendor data is fetched from the DB by
  * the server page and passed in as a prop. Cards link to /vendors/[slug].
  */
+/** Crude stem so "Photographer" finds "Photography" and "caterer" finds
+ *  "Catering" — people type the person, categories name the service. */
+function stem(word: string): string {
+  const w = word.toLowerCase();
+  return w.length > 4 ? w.replace(/(ers|er|ing|ies|y|s)$/, "") : w;
+}
+
+/** Split a query into stemmed words, ignoring punctuation ("Edison, NJ"). */
+function tokens(text: string): string[] {
+  return text.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).map(stem);
+}
+
 export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
   // Seed the filters from the URL so the hero search bar can deep-link here
   // pre-filtered (e.g. /vendors?looking=Photography&where=Edison, NJ).
@@ -27,10 +39,10 @@ export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
   const initialCategory = (() => {
     const raw = (params.get("looking") ?? "").trim();
     if (!raw) return "All";
-    // Case-insensitive match against a real category; else treat as free text.
-    const hit = [...categories].find(
-      (c) => c.toLowerCase() === raw.toLowerCase(),
-    );
+    // Match against a real category (stemmed, so "Photographer" →
+    // "Photography"); else treat as free text.
+    const want = tokens(raw).join(" ");
+    const hit = [...categories].find((c) => tokens(c).join(" ") === want);
     return hit ?? "All";
   })();
   const [category, setCategory] = useState<string>(initialCategory);
@@ -59,20 +71,20 @@ export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
   );
 
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    // Every word must appear somewhere, in any field — the hero joins
+    // where + style + looking into one query, and matching that as a single
+    // phrase ("edison cinematic") found nothing.
+    const words = tokens(query);
     return vendors.filter((v) => {
       if (category !== "All" && v.category !== category) return false;
       if (location !== "All" && !v.serviceAreas.includes(location) && v.location !== location)
         return false;
-      if (
-        q &&
+      if (words.length) {
         // Search the full text of the vendor incl. location + service areas, so
         // typing a city ("Cincinnati") in the hero WHERE box actually resolves.
-        !`${v.name} ${v.category} ${v.tagline} ${v.styles.join(" ")} ${v.location} ${v.serviceAreas.join(" ")}`
-          .toLowerCase()
-          .includes(q)
-      )
-        return false;
+        const hay = `${v.name} ${v.category} ${v.tagline} ${v.styles.join(" ")} ${v.location} ${v.serviceAreas.join(" ")}`.toLowerCase();
+        if (!words.every((w) => hay.includes(w))) return false;
+      }
       return true;
     });
   }, [vendors, category, location, query]);
@@ -188,7 +200,7 @@ export function Marketplace({ vendors }: { vendors: VendorProfile[] }) {
   );
 }
 
-function VendorCard({ vendor }: { vendor: VendorProfile }) {
+export function VendorCard({ vendor }: { vendor: VendorProfile }) {
   return (
     <Link
       href={`/vendors/${vendor.slug}`}

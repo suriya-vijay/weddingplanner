@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import { SessionProvider } from "@/components/auth/session";
 import { getSessionUser } from "@/lib/auth/get-session";
+import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -48,6 +49,7 @@ export default async function RootLayout({
     >
       <body className="min-h-dvh antialiased">
         <SessionProvider initialUser={initialUser}>{children}</SessionProvider>
+        <Toaster />
       </body>
     </html>
   );

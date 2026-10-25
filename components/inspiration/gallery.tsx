@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Heart, X } from "lucide-react";
@@ -81,6 +82,7 @@ export function Gallery({
         if (res.saved === null) throw new Error("not saved");
       })
       .catch(() => {
+        notifyError("Couldn’t update your mood board. Please try again.");
         setSaved((prev) => {
           const next = new Set(prev);
           if (wasSaved) next.add(id);

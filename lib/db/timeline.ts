@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { expectRows } from "@/lib/db/write";
 import type { TimelineMilestone } from "@/lib/mock-data";
 
 type TimelineRow = {
@@ -66,12 +67,12 @@ export async function updateTimelineMilestone(
   // Map "" date → null for the DB.
   const dbPatch: Record<string, unknown> = { ...patch };
   if ("date" in dbPatch) dbPatch.date = (patch.date as string) || null;
-  await supabase.from("timeline_milestones").update(dbPatch).eq("id", id);
+  expectRows(await supabase.from("timeline_milestones").update(dbPatch).eq("id", id).select("id"), "milestone");
 }
 
 export async function deleteTimelineMilestone(id: string): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("timeline_milestones").delete().eq("id", id);
+  expectRows(await supabase.from("timeline_milestones").delete().eq("id", id).select("id"), "milestone");
 }
 
 /** Bulk insert (used by the AI "suggest a timeline" template). */
@@ -108,9 +109,10 @@ export async function addTimelineMilestones(
  */
 export async function reorderTimelineMilestones(ids: string[]): Promise<void> {
   const supabase = await createClient();
-  await Promise.all(
+  const results = await Promise.all(
     ids.map((id, i) =>
-      supabase.from("timeline_milestones").update({ sort: i }).eq("id", id),
+      supabase.from("timeline_milestones").update({ sort: i }).eq("id", id).select("id"),
     ),
   );
+  results.forEach((r) => expectRows(r, "order"));
 }

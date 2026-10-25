@@ -7,6 +7,18 @@
 
 const APP_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://kalyanam.co";
 
+/** Escape user-supplied text (names, reasons) before it goes into HTML —
+ *  otherwise anyone who controls a display name can inject links/markup into
+ *  an email sent from our domain. */
+function esc(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function shell(bodyInner: string): string {
   return `
   <div style="margin:0;padding:0;background:#f4eee3;">
@@ -40,7 +52,7 @@ export function welcomeEmail({
   name: string;
   role: "couple" | "vendor";
 }): { subject: string; html: string } {
-  const first = (name || "there").split(" ")[0];
+  const first = esc((name || "there").split(" ")[0]);
   if (role === "vendor") {
     return {
       subject: "Welcome to Kalyanam & Co. — let's set up your listing",
@@ -74,7 +86,7 @@ export function vendorStatusEmail({
   status: "approved" | "rejected";
   reason?: string;
 }): { subject: string; html: string } {
-  const first = (name || "there").split(" ")[0];
+  const first = esc((name || "there").split(" ")[0]);
   if (status === "approved") {
     return {
       subject: "You're live on Kalyanam & Co. 🎉",
@@ -87,7 +99,7 @@ export function vendorStatusEmail({
     };
   }
   const reasonBlock = reason?.trim()
-    ? `<div style="margin:0 0 16px;padding:12px 16px;background:#fbecec;border-radius:12px;color:#7b2d26;font-size:14px;"><strong>Reason:</strong> ${reason.trim()}</div>`
+    ? `<div style="margin:0 0 16px;padding:12px 16px;background:#fbecec;border-radius:12px;color:#7b2d26;font-size:14px;"><strong>Reason:</strong> ${esc(reason.trim())}</div>`
     : "";
   return {
     subject: "An update on your Kalyanam & Co. listing",
@@ -114,7 +126,7 @@ export function partnerInviteEmail({
     subject: `${who} invited you to plan your wedding on Kalyanam & Co. 💍`,
     html: shell(`
       <h1 style="margin:0 0 12px;font-family:Georgia,serif;font-size:24px;color:#0f2c1f;">You're invited to plan together 💍</h1>
-      <p style="margin:0 0 14px;"><strong>${who}</strong> has invited you to co-plan your wedding on <strong>Kalyanam &amp; Co.</strong> — you'll both share the same dashboard: checklist, budget, guest list, timeline and seating, all in one place.</p>
+      <p style="margin:0 0 14px;"><strong>${esc(who)}</strong> has invited you to co-plan your wedding on <strong>Kalyanam &amp; Co.</strong> — you'll both share the same dashboard: checklist, budget, guest list, timeline and seating, all in one place.</p>
       <p style="margin:0 0 14px;">You'll set up your own private login (no shared passwords) and be linked to the same wedding automatically — perfect for planning together even when you're apart.</p>
       <p style="margin:22px 0;text-align:center;">${button(acceptUrl, "Accept & join the dashboard")}</p>
       <p style="margin:0;color:#66716b;font-size:13px;">If you didn't expect this invitation, you can safely ignore this email.</p>

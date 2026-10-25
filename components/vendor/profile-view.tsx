@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useState } from "react";
 import { Save, X, Plus } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
@@ -45,7 +46,8 @@ export function VendorProfileView({
   // Persist a freshly uploaded image URL immediately (independent of the
   // text-field Save), so a refresh keeps it.
   async function persistImage(patch: { cover_url?: string; logo_url?: string }) {
-    await updateVendorProfileAction(patch);
+    const res = await updateVendorProfileAction(patch);
+    if (!res.ok) notifyError("Your image uploaded but couldn’t be saved to your profile. Please try again.");
   }
 
   const onSave = async (e: React.FormEvent) => {
@@ -65,6 +67,7 @@ export function VendorProfileView({
     });
     setSaving(false);
     setSaved(res.ok);
+    if (!res.ok) notifyError("Couldn’t save your profile. Please try again.");
   };
 
   return (

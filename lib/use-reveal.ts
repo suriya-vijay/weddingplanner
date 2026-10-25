@@ -11,17 +11,20 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(
   options?: IntersectionObserverInit,
 ) {
   const ref = useRef<T>(null);
-  // Lazy initializer runs once on mount — no synchronous setState in an effect.
-  const [visible, setVisible] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return (
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      window.location.hash === "#showall"
-    );
-  });
+  // Always start hidden so server and client render the same markup (reading
+  // window in a useState initializer caused a hydration mismatch for
+  // reduced-motion visitors); the effect then reveals immediately for them.
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (visible) return;
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      window.location.hash === "#showall"
+    ) {
+      queueMicrotask(() => setVisible(true));
+      return;
+    }
     const el = ref.current;
     if (!el) return;
 

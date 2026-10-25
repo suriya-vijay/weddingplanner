@@ -1,4 +1,5 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { roleOf } from "@/lib/auth/role";
 import { toUSDisplay } from "@/lib/utils";
 import type {
   VendorProfile,
@@ -97,14 +98,45 @@ function isApproved(v: { status?: string }): boolean {
  */
 export async function getPublicVendors(): Promise<VendorProfile[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("vendors")
-    .select("*")
-    .order("name");
+  const [{ data, error }, { data: revs }] = await Promise.all([
+    supabase.from("vendors").select("*").order("name"),
+    supabase.from("vendor_reviews").select("vendor_id, rating"),
+  ]);
   if (error || !data) return [];
-  return (data as (VendorRow & { status?: string })[])
+
+  // Rating + count from the ACTUAL reviews, same as the detail page — the
+  // hand-entered vendors.rating/reviews columns hold invented seed figures,
+  // so the grid said "4.9 · 218 reviews" while the profile said "New".
+  const stats = new Map<string, { sum: number; n: number }>();
+  for (const r of (revs ?? []) as { vendor_id: string; rating: number }[]) {
+    const s = stats.get(r.vendor_id) ?? { sum: 0, n: 0 };
+    s.sum += Number(r.rating);
+    s.n += 1;
+    stats.set(r.vendor_id, s);
+  }
+
+  return (data as (VendorRow & { id: string; status?: string })[])
     .filter(isApproved)
-    .map((v) => toProfile(v, [], []));
+    .map((v) => {
+      const p = toProfile(v, [], []);
+      const s = stats.get(v.id);
+      p.reviews = s?.n ?? 0;
+      p.rating = s ? Math.round((s.sum / s.n) * 10) / 10 : 0;
+      return p;
+    });
+}
+
+/** A few approved vendors for the homepage teaser: reviewed + verified first. */
+export async function getFeaturedVendors(limit = 4): Promise<VendorProfile[]> {
+  const all = await getPublicVendors();
+  return all
+    .sort(
+      (a, b) =>
+        b.reviews - a.reviews ||
+        b.rating - a.rating ||
+        Number(b.verified) - Number(a.verified),
+    )
+    .slice(0, limit);
 }
 
 /** All vendors WITH id + status + reason — for the admin manager (approve/reject/delete). */
@@ -153,11 +185,8 @@ export async function getVendorBySlug(
       data: { user },
     } = await supabase.auth.getUser();
     const ownerId = (v as { owner_id?: string | null }).owner_id;
-    const role = (user?.app_metadata?.role ?? user?.user_metadata?.role) as
-      | string
-      | undefined;
     const mayPreview =
-      !!user && (user.id === ownerId || role === "admin");
+      !!user && (user.id === ownerId || roleOf(user) === "admin");
     if (!mayPreview) return null;
   }
 
@@ -165,14 +194,18 @@ export async function getVendorBySlug(
 
   // Count a real profile view (only from the page render, never metadata).
   // Anon visitors can't UPDATE vendors under RLS → use the service client.
-  // Best-effort: a pre-0010 DB (no profile_views column) just no-ops.
+  // Atomic increment via RPC (0017) so concurrent views don't overwrite each
+  // other; falls back to read-then-write on an older DB. Best-effort.
   if (opts.countView) {
     try {
       const admin = createServiceClient();
-      await admin
-        .from("vendors")
-        .update({ profile_views: (row.profile_views ?? 0) + 1 })
-        .eq("id", row.id);
+      const { error } = await admin.rpc("increment_vendor_views", { vid: row.id });
+      if (error) {
+        await admin
+          .from("vendors")
+          .update({ profile_views: (row.profile_views ?? 0) + 1 })
+          .eq("id", row.id);
+      }
     } catch {
       // ignore — view counting must never break the public page
     }

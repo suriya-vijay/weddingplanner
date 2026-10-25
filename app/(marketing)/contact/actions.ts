@@ -12,16 +12,15 @@ export async function sendContactMessageAction(input: {
   interest: string;
   message: string;
 }): Promise<{ ok: boolean }> {
-  const name = input.name.trim();
-  const email = input.email.trim();
-  const message = input.message.trim();
-  if (!name || !email || !message) return { ok: false };
+  // Re-validate here: the form's checks are client-side only, and this action
+  // is a public endpoint. Limits match the 0017 insert policy.
+  const name = String(input.name ?? "").trim().slice(0, 200);
+  const email = String(input.email ?? "").trim().slice(0, 320);
+  const message = String(input.message ?? "").trim().slice(0, 5000);
+  const interest = String(input.interest ?? "").trim().slice(0, 100);
+  if (!name || !message || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+    return { ok: false };
 
-  const ok = await createContactSubmission({
-    name,
-    email,
-    interest: input.interest,
-    message,
-  });
+  const ok = await createContactSubmission({ name, email, interest, message });
   return { ok };
 }

@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { roleOf } from "@/lib/auth/role";
 import { toUSDisplay } from "@/lib/utils";
 import type { VendorProfile, VendorEnquiry } from "@/lib/mock-data";
 
@@ -98,7 +99,7 @@ export const getMyVendor = cache(async function getMyVendor(): Promise<MyVendor 
   let { data: v } = await fetchOwned();
 
   // No row yet: a vendor-role user claims a seeded vendor on first visit.
-  if (!v && user.user_metadata?.role === "vendor") {
+  if (!v && roleOf(user) === "vendor") {
     const displayName =
       (user.user_metadata?.display_name as string | undefined)?.trim() || "";
     await claimVendorForUser(user.id, displayName);

@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useState } from "react";
 import { Plus, Pencil, Trash2, X, Check, Package } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
@@ -23,18 +24,31 @@ export function PackagesView({ seed }: { seed: Pkg[] }) {
   const remove = (id: string) => {
     const snapshot = pkgs;
     setPkgs((prev) => prev.filter((p) => p.id !== id));
-    deletePackageAction(id).catch(() => setPkgs(snapshot));
+    const rollback = () => {
+      setPkgs(snapshot);
+      notifyError("Couldn’t delete that package. Please try again.");
+    };
+    deletePackageAction(id).then((res) => {
+      if (!res.ok) rollback();
+    }, rollback);
   };
 
   const save = async (pkg: Pkg) => {
     const isEdit = pkgs.some((p) => p.id === pkg.id);
     if (isEdit) {
+      const before = pkgs.find((p) => p.id === pkg.id);
       setPkgs((prev) => prev.map((p) => (p.id === pkg.id ? pkg : p)));
+      const rollback = () => {
+        if (before) setPkgs((prev) => prev.map((p) => (p.id === pkg.id ? before : p)));
+        notifyError("Couldn’t save that package. Please try again.");
+      };
       updatePackageAction(pkg.id, {
         name: pkg.name,
         price: pkg.price,
         features: pkg.features,
-      });
+      }).then((res) => {
+        if (!res.ok) rollback();
+      }, rollback);
     } else {
       // Optimistic add, reconcile id from the DB.
       const tempId = pkg.id;
@@ -49,6 +63,7 @@ export function PackagesView({ seed }: { seed: Pkg[] }) {
           ? prev.map((p) => (p.id === tempId ? { ...created } : p))
           : prev.filter((p) => p.id !== tempId),
       );
+      if (!created) notifyError("Couldn’t add that package. Please try again.");
     }
   };
 

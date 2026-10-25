@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { expectRows } from "@/lib/db/write";
 
 /**
  * Wedding events (Haldi, Sangeet, Reception…) and per-event guest assignment.
@@ -128,22 +129,25 @@ export async function updateEvent(
   const supabase = await createClient();
   const { sort, ...details } = patch;
   const row = { ...toRow(details), ...(sort !== undefined ? { sort } : {}) };
-  const { error } = await supabase.from("events").update(row).eq("id", id);
-  if (error) {
+  const res = await supabase.from("events").update(row).eq("id", id).select("id");
+  if (!res.error) return expectRows(res, "event");
+  {
     // pre-0016 DB — retry with only the basic columns.
     const basic: Record<string, unknown> = {};
     if (patch.name !== undefined) basic.name = patch.name;
     if (patch.date !== undefined) basic.date = patch.date;
     if (sort !== undefined) basic.sort = sort;
-    if (Object.keys(basic).length) {
-      await supabase.from("events").update(basic).eq("id", id);
-    }
+    if (!Object.keys(basic).length) throw new Error("Couldn’t save this event.");
+    expectRows(
+      await supabase.from("events").update(basic).eq("id", id).select("id"),
+      "event",
+    );
   }
 }
 
 export async function deleteEvent(id: string): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("events").delete().eq("id", id);
+  expectRows(await supabase.from("events").delete().eq("id", id).select("id"), "event");
 }
 
 /** All (event_id, guest_id) assignment pairs for a wedding's events. */
@@ -175,15 +179,16 @@ export async function setEventGuest(
   attending: boolean,
 ): Promise<void> {
   const supabase = await createClient();
-  if (attending) {
-    await supabase
-      .from("event_guests")
-      .upsert({ event_id: eventId, guest_id: guestId });
-  } else {
-    await supabase
-      .from("event_guests")
-      .delete()
-      .eq("event_id", eventId)
-      .eq("guest_id", guestId);
-  }
+  // Upsert/delete are idempotent, so only a real error counts as failure
+  // (deleting an assignment that's already gone is fine).
+  const { error } = attending
+    ? await supabase
+        .from("event_guests")
+        .upsert({ event_id: eventId, guest_id: guestId })
+    : await supabase
+        .from("event_guests")
+        .delete()
+        .eq("event_id", eventId)
+        .eq("guest_id", guestId);
+  if (error) throw new Error("Couldn’t update the guest list for this event.");
 }

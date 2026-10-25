@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getSessionUser } from "@/lib/auth/get-session";
+import { requireRole } from "@/lib/auth/get-session";
 import { logModeration } from "@/lib/db/admin-moderation";
 import { setContactHandled } from "@/lib/db/contact";
 import { sendEmail } from "@/lib/email/client";
@@ -13,6 +13,10 @@ import type { GalleryItem } from "@/lib/db/inspiration";
  * Admin inspiration CRUD. RLS restricts writes to admins; these actions run in
  * the admin's session so the policy applies. Returns the saved row (with its DB
  * id) for creates.
+ *
+ * Every action re-checks the admin role itself: server actions are public
+ * endpoints, and some steps below (audit log, vendor emails, contact inbox)
+ * use the service-role client, which RLS can't protect.
  */
 
 type Draft = Omit<GalleryItem, "id">;
@@ -20,6 +24,7 @@ type Draft = Omit<GalleryItem, "id">;
 export async function addInspirationAction(
   draft: Draft,
 ): Promise<GalleryItem | null> {
+  if (!(await requireRole("admin"))) return null;
   const supabase = await createClient();
   const { data } = await supabase
     .from("inspiration_items")
@@ -57,9 +62,10 @@ export async function addInspirationAction(
 export async function updateInspirationAction(
   id: string,
   draft: Draft,
-): Promise<void> {
+): Promise<{ ok: boolean }> {
+  if (!(await requireRole("admin"))) return { ok: false };
   const supabase = await createClient();
-  await supabase
+  const { data, error } = await supabase
     .from("inspiration_items")
     .update({
       title: draft.title,
@@ -73,12 +79,20 @@ export async function updateInspirationAction(
       image_url: draft.imageUrl,
       vendors: draft.vendors,
     })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
+  return { ok: !error && !!data?.length };
 }
 
-export async function deleteInspirationAction(id: string): Promise<void> {
+export async function deleteInspirationAction(id: string): Promise<{ ok: boolean }> {
+  if (!(await requireRole("admin"))) return { ok: false };
   const supabase = await createClient();
-  await supabase.from("inspiration_items").delete().eq("id", id);
+  const { data, error } = await supabase
+    .from("inspiration_items")
+    .delete()
+    .eq("id", id)
+    .select("id");
+  return { ok: !error && !!data?.length };
 }
 
 /**
@@ -90,24 +104,27 @@ export async function setVendorVerifiedAction(
   id: string,
   verified: boolean,
 ): Promise<{ ok: boolean }> {
+  if (!(await requireRole("admin"))) return { ok: false };
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("vendors")
     .update({ verified })
-    .eq("id", id);
-  return { ok: !error };
+    .eq("id", id)
+    .select("id");
+  return { ok: !error && !!data?.length };
 }
 
 export async function deleteVendorAction(
   id: string,
 ): Promise<{ ok: boolean }> {
+  const actor = await requireRole("admin");
+  if (!actor) return { ok: false };
   const supabase = await createClient();
-  // Log BEFORE deleting: the log row FKs to vendors with on-delete cascade,
-  // so an entry written afterwards would be removed with the vendor.
-  const actor = await getSessionUser();
+  // Log BEFORE deleting: logModeration reads the vendor's name to denormalise
+  // it into the entry, which it can't do once the row is gone.
   await logModeration({
     vendorId: id,
-    actorName: actor?.name ?? "admin",
+    actorName: actor.name,
     action: "deleted",
   });
   const { error } = await supabase.from("vendors").delete().eq("id", id);
@@ -126,34 +143,47 @@ export async function setVendorStatusAction(
   status: "pending" | "approved" | "rejected",
   reason = "",
 ): Promise<{ ok: boolean }> {
+  const actor = await requireRole("admin");
+  if (!actor) return { ok: false };
+  if (!["pending", "approved", "rejected"].includes(status)) return { ok: false };
   const supabase = await createClient();
+  // The Verified badge means "an admin approved this listing" — it must not
+  // survive a later rejection or a move back to pending.
   const patch: {
     status: string;
-    verified?: boolean;
+    verified: boolean;
     rejection_reason?: string;
-  } = { status, rejection_reason: status === "rejected" ? reason.trim() : "" };
-  if (status === "approved") patch.verified = true;
+  } = {
+    status,
+    verified: status === "approved",
+    rejection_reason: status === "rejected" ? reason.trim() : "",
+  };
 
-  const { error } = await supabase.from("vendors").update(patch).eq("id", id);
+  let { data, error } = await supabase
+    .from("vendors")
+    .update(patch)
+    .eq("id", id)
+    .select("id");
   if (error) {
     // Pre-0009 DB (no rejection_reason column): retry without it so status
     // moderation still works.
     const { rejection_reason: _omit, ...rest } = patch;
     void _omit;
-    const { error: e2 } = await supabase
+    ({ data, error } = await supabase
       .from("vendors")
       .update(rest)
-      .eq("id", id);
-    if (e2) return { ok: false };
+      .eq("id", id)
+      .select("id"));
   }
+  // No error but no row = the vendor no longer exists (or RLS hid it).
+  if (error || !data?.length) return { ok: false };
 
   // Append to the audit trail. `rejection_reason` is overwritten on approve
   // and cleared when the vendor resubmits, so without this the reason — and
   // any record of who acted — is lost.
-  const actor = await getSessionUser();
   await logModeration({
     vendorId: id,
-    actorName: actor?.name ?? "admin",
+    actorName: actor.name,
     action: status,
     reason,
   });
@@ -202,15 +232,26 @@ export async function updateVendorAsAdminAction(
     cover_url?: string | null;
   },
 ): Promise<{ ok: boolean }> {
+  const actor = await requireRole("admin");
+  if (!actor) return { ok: false };
+  // Only the editable fields — never let the payload carry status/owner etc.
+  const clean = Object.fromEntries(
+    Object.entries(patch).filter(([k]) =>
+      ["name", "category", "location", "tagline", "cover_url"].includes(k),
+    ),
+  );
   const supabase = await createClient();
-  const { error } = await supabase.from("vendors").update(patch).eq("id", id);
-  if (error) return { ok: false };
-  const actor = await getSessionUser();
+  const { data, error } = await supabase
+    .from("vendors")
+    .update(clean)
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) return { ok: false };
   await logModeration({
     vendorId: id,
-    actorName: actor?.name ?? "admin",
+    actorName: actor.name,
     action: "edited",
-    reason: Object.keys(patch).join(", "),
+    reason: Object.keys(clean).join(", "),
   });
   return { ok: true };
 }
@@ -220,6 +261,7 @@ export async function setContactHandledAction(
   id: string,
   handled: boolean,
 ): Promise<{ ok: boolean }> {
+  if (!(await requireRole("admin"))) return { ok: false };
   const ok = await setContactHandled(id, handled);
   return { ok };
 }

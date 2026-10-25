@@ -64,9 +64,14 @@ export async function saveVenueLayout(
   data: VenueData,
 ): Promise<{ ok: boolean }> {
   const supabase = await createClient();
-  const { error } = await supabase
+  // Upsert, not update: if the seed row was never created, an update matches
+  // nothing and "succeeds" — the canvas said Saved while nothing was stored.
+  const { data: rows, error } = await supabase
     .from("venue_layouts")
-    .update({ data, updated_at: new Date().toISOString() })
-    .eq("wedding_id", weddingId);
-  return { ok: !error };
+    .upsert(
+      { wedding_id: weddingId, data, updated_at: new Date().toISOString() },
+      { onConflict: "wedding_id" },
+    )
+    .select("id");
+  return { ok: !error && !!rows?.length };
 }

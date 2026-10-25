@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useState } from "react";
 import { Check, Undo2 } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
@@ -26,7 +27,10 @@ export function MessagesInbox({
       prev.map((r) => (r.id === id ? { ...r, handled } : r)),
     );
     setContactHandledAction(id, handled).then((res) => {
-      if (!res.ok) setRows(snapshot);
+      if (!res.ok) {
+        setRows(snapshot);
+        notifyError();
+      }
     });
   }
 

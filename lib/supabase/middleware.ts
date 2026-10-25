@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { roleOf } from "@/lib/auth/role";
 
 /** Panels that require a signed-in user, and the role each requires. */
 const ROLE_GATES: { prefix: string; role: "couple" | "admin" | "vendor" }[] = [
@@ -68,11 +69,10 @@ export async function updateSession(request: NextRequest) {
     // which FAILED OPEN: a signed-in user with no role in their metadata (e.g.
     // an account created outside signUpAction) matched nothing and was allowed
     // straight into /admin.
-    const role = (user.app_metadata?.role ??
-      user.user_metadata?.role) as string | undefined;
+    const role = roleOf(user);
     if (role !== gate.role) {
       const url = request.nextUrl.clone();
-      url.pathname = (role && HOME_FOR[role]) || "/";
+      url.pathname = HOME_FOR[role] || "/";
       return NextResponse.redirect(url);
     }
   }

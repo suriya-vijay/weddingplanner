@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import type { Role } from "@/components/auth/session";
+import { roleOf } from "@/lib/auth/role";
 import { AuthField, AuthSwitch } from "./auth-shell";
 
 /** Which panel each role lands on after sign-in. */
@@ -75,9 +76,12 @@ export function LoginForm() {
       return;
     }
 
-    const role = ((data?.user?.user_metadata?.role as string) ?? "couple") as Role;
+    const role: Role = roleOf(data?.user);
+    // Only same-site paths: "/x" but not "//evil.com" or "/\evil.com", which
+    // browsers treat as protocol-relative URLs to another host.
     const next = searchParams.get("next");
-    router.push(next || PANEL_FOR[role]);
+    const safeNext = next && /^\/(?![/\\])/.test(next) ? next : null;
+    router.push(safeNext || PANEL_FOR[role]);
     router.refresh();
   }
 

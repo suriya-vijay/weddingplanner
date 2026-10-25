@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useState } from "react";
 import { Plus, Trash2, X, Wallet, Pencil } from "lucide-react";
 import { Panel, StatTile, ProgressBar } from "@/components/dashboard/ui";
@@ -33,10 +34,15 @@ export function BudgetView({
 
   /** Correct an item in place. `updateBudgetItem` existed but was never wired. */
   const saveEdit = (id: string, patch: Omit<BudgetItem, "id">) => {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const snapshot = items;
     setEditing(null);
     setItems((prev) => prev.map((b) => (b.id === id ? { ...patch, id } : b)));
-    updateBudgetItemAction(id, patch).catch(() => setItems(snapshot));
+    updateBudgetItemAction(id, patch).catch(() => {
+      notifyError();
+      setItems(snapshot);
+    });
   };
 
   const totalEstimated = items.reduce((s, b) => s + b.estimated, 0);
@@ -62,9 +68,14 @@ export function BudgetView({
   })();
 
   const remove = (id: string) => {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const snapshot = items;
     setItems((prev) => prev.filter((b) => b.id !== id));
-    deleteBudgetItemAction(id).catch(() => setItems(snapshot));
+    deleteBudgetItemAction(id).catch(() => {
+      notifyError();
+      setItems(snapshot);
+    });
   };
 
   const add = async (item: Omit<BudgetItem, "id">) => {
@@ -76,6 +87,7 @@ export function BudgetView({
         ? prev.map((b) => (b.id === tempId ? saved : b))
         : prev.filter((b) => b.id !== tempId),
     );
+    if (!saved) notifyError("Couldn’t add that. Please try again.");
   };
 
   return (

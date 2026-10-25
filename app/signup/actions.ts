@@ -2,7 +2,7 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import { claimVendorForUser } from "@/lib/db/vendor-portal";
-import { acceptInvite } from "@/lib/db/collaborators";
+import { acceptInvite, getInviteByToken, maskEmail } from "@/lib/db/collaborators";
 import { sendEmail } from "@/lib/email/client";
 import { welcomeEmail } from "@/lib/email/templates";
 import type { Role } from "@/components/auth/session";
@@ -27,12 +27,31 @@ type SignupInput = {
 export async function signUpAction(input: SignupInput): Promise<
   { ok: true } | { ok: false; error: string }
 > {
-  const { email, password, role, displayName, inviteToken } = input;
+  const { email, password, displayName, inviteToken } = input;
+  // Server actions are public endpoints — the TS type above isn't enforced at
+  // runtime, so anything other than "vendor" (including "admin") is a couple.
+  const role = input.role === "vendor" ? "vendor" : "couple";
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     return { ok: false, error: "Please enter a valid email address." };
   if (password.length < 8)
     return { ok: false, error: "Password must be at least 8 characters." };
+
+  // Check a partner invite BEFORE creating the account, so a mismatched email
+  // gets a clear error instead of an account that silently isn't linked.
+  if (inviteToken) {
+    const invite = await getInviteByToken(inviteToken);
+    if (!invite || invite.status !== "pending")
+      return {
+        ok: false,
+        error: "This invite has expired or was already used. Ask your partner to send a new one.",
+      };
+    if (invite.invitedEmail && invite.invitedEmail !== email.trim().toLowerCase())
+      return {
+        ok: false,
+        error: `This invite was sent to ${maskEmail(invite.invitedEmail)} — please sign up with that email.`,
+      };
+  }
 
   const admin = createServiceClient();
   const { data, error } = await admin.auth.admin.createUser({
@@ -40,6 +59,8 @@ export async function signUpAction(input: SignupInput): Promise<
     password,
     email_confirm: true,
     user_metadata: { role, display_name: displayName.trim() },
+    // The trusted copy: only the service role can write app_metadata.
+    app_metadata: { role },
   });
 
   if (error) {
@@ -58,7 +79,7 @@ export async function signUpAction(input: SignupInput): Promise<
   // Partner invite: link this new account as a collaborator on the shared
   // wedding, so getOrCreateWedding() resolves the inviter's wedding for them.
   if (inviteToken && role === "couple" && data.user) {
-    await acceptInvite(inviteToken, data.user.id);
+    await acceptInvite(inviteToken, data.user.id, email);
   }
 
   // Welcome email — best-effort: the account is already created, so a mail

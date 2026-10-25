@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { roleOf } from "@/lib/auth/role";
 import { STARTER_CHECKLIST, STARTER_TIMELINE } from "@/lib/db/starter-data";
 
 export type Wedding = {
@@ -57,39 +58,39 @@ export const getOrCreateWedding = cache(async function getOrCreateWedding(): Pro
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
+  // Weddings belong to couples. Without this, a vendor or admin calling a
+  // couple action (enquire, save to mood board) got a wedding provisioned.
+  if (roleOf(user) !== "couple") return null;
 
   const displayName =
     (user.user_metadata?.display_name as string | undefined)?.trim() || "";
 
-  // Existing (as owner)?
-  const { data: existing } = await supabase
-    .from("weddings")
-    .select("*")
-    .eq("owner_id", user.id)
-    .maybeSingle();
-  if (existing) return toWedding(existing as WeddingRow);
-
-  // Collaborator? A partner invited to someone else's wedding co-edits THAT
-  // wedding — never gets a new empty one. (Guarded: if the table doesn't exist
-  // yet — pre-0014 — this returns null and we fall through to create.)
-  try {
-    const { data: collab } = await supabase
-      .from("wedding_collaborators")
-      .select("wedding_id")
-      .eq("user_id", user.id)
-      .eq("status", "accepted")
+  // Collaborator FIRST: a partner who accepted an invite co-edits THAT
+  // wedding — even if they'd opened /dashboard earlier and got an empty one
+  // auto-created for them. (Pre-0014 there's no collaborators table; the
+  // query just errors and we fall through.)
+  const { data: collabs } = await supabase
+    .from("wedding_collaborators")
+    .select("wedding_id")
+    .eq("user_id", user.id)
+    .eq("status", "accepted")
+    .order("accepted_at", { ascending: false })
+    .limit(1);
+  const collabWeddingId = (collabs as { wedding_id: string }[] | null)?.[0]?.wedding_id;
+  if (collabWeddingId) {
+    const { data: shared } = await supabase
+      .from("weddings")
+      .select("*")
+      .eq("id", collabWeddingId)
       .maybeSingle();
-    if (collab?.wedding_id) {
-      const { data: shared } = await supabase
-        .from("weddings")
-        .select("*")
-        .eq("id", collab.wedding_id)
-        .maybeSingle();
-      if (shared) return toWedding(shared as WeddingRow);
-    }
-  } catch {
-    /* pre-0014 DB — no collaborators table; fall through */
+    if (shared) return toWedding(shared as WeddingRow);
   }
+
+  // Existing (as owner)?
+  const fetchOwned = () =>
+    supabase.from("weddings").select("*").eq("owner_id", user.id).maybeSingle();
+  const { data: existing } = await fetchOwned();
+  if (existing) return toWedding(existing as WeddingRow);
 
   // Create the wedding row (owner_id defaults enforced by RLS with-check).
   const { data: created, error } = await supabase
@@ -97,7 +98,12 @@ export const getOrCreateWedding = cache(async function getOrCreateWedding(): Pro
     .insert({ owner_id: user.id, couple_names: displayName })
     .select("*")
     .single();
-  if (error || !created) return null;
+  if (error || !created) {
+    // Two first-visit requests raced (React.cache only dedupes within one
+    // request): the other one won the unique(owner_id) insert — use its row.
+    const { data: raced } = await fetchOwned();
+    return raced ? toWedding(raced as WeddingRow) : null;
+  }
 
   const weddingId = (created as WeddingRow).id;
 
@@ -141,7 +147,12 @@ export async function updateWedding(
     guest_estimate: number;
     total_budget: number;
   }>,
-): Promise<void> {
+): Promise<boolean> {
   const supabase = await createClient();
-  await supabase.from("weddings").update(patch).eq("id", weddingId);
+  const { data, error } = await supabase
+    .from("weddings")
+    .update(patch)
+    .eq("id", weddingId)
+    .select("id");
+  return !error && !!data?.length;
 }

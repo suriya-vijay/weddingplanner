@@ -47,6 +47,31 @@ export function AmbientMusic() {
   const [playing, setPlaying] = useState(false);
   const [index, setIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Live mirrors of index/playing. The "ended" listener is attached once, so
+  // reading state there would see first-render values forever (auto-advance
+  // got stuck replaying track 2).
+  const indexRef = useRef(0);
+  const playingRef = useRef(false);
+  useEffect(() => {
+    indexRef.current = index;
+    playingRef.current = playing;
+  }, [index, playing]);
+
+  // Stop and release the audio when the player unmounts (leaving the public
+  // site for login/dashboard) — otherwise it kept playing with no control left
+  // to pause it. The saved "on" choice resumes it when they come back.
+  useEffect(
+    () => () => {
+      const el = audioRef.current;
+      if (el) {
+        el.pause();
+        el.removeAttribute("src");
+        el.load();
+      }
+      audioRef.current = null;
+    },
+    [],
+  );
 
   // Probe the first track once on mount. 200 → the playlist is present.
   useEffect(() => {
@@ -114,10 +139,11 @@ export function AmbientMusic() {
     persist(false, index);
   }
 
-  function next(keepPlaying = playing) {
-    const i = (index + 1) % TRACKS.length;
+  function next(keepPlaying = playingRef.current) {
+    const i = (indexRef.current + 1) % TRACKS.length;
+    indexRef.current = i;
     setIndex(i);
-    persist(playing, i);
+    persist(keepPlaying, i);
     if (keepPlaying) {
       const el = ensureAudio();
       el.src = TRACKS[i].src;

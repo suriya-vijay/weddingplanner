@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useMemo, useState } from "react";
 import { Plus, Trash2, X, Users, Check, Clock, Pencil } from "lucide-react";
 import { Panel, StatTile } from "@/components/dashboard/ui";
@@ -37,10 +38,15 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
 
   /** Correct a guest in place (misspelled name, wrong party size, etc.). */
   const saveEdit = (id: string, patch: Omit<Guest, "id">) => {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const snapshot = rows;
     setEditing(null);
     setRows((prev) => prev.map((g) => (g.id === id ? { ...patch, id } : g)));
-    updateGuestAction(id, patch).catch(() => setRows(snapshot));
+    updateGuestAction(id, patch).catch(() => {
+      notifyError();
+      setRows(snapshot);
+    });
   };
 
   const visible = useMemo(
@@ -66,20 +72,28 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
   }, [visible]);
 
   const cycleRsvp = (id: string) => {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const g = rows.find((r) => r.id === id);
     if (!g) return;
     const next =
       RSVP_ORDER[(RSVP_ORDER.indexOf(g.rsvp) + 1) % RSVP_ORDER.length];
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, rsvp: next } : r)));
-    updateGuestAction(id, { rsvp: next }).catch(() =>
-      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, rsvp: g.rsvp } : r))),
-    );
+    updateGuestAction(id, { rsvp: next }).catch(() => {
+      notifyError();
+      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, rsvp: g.rsvp } : r)));
+    });
   };
 
   const remove = (id: string) => {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const snapshot = rows;
     setRows((prev) => prev.filter((g) => g.id !== id));
-    deleteGuestAction(id).catch(() => setRows(snapshot));
+    deleteGuestAction(id).catch(() => {
+      notifyError();
+      setRows(snapshot);
+    });
   };
 
   const add = async (guest: Omit<Guest, "id">) => {
@@ -92,6 +106,7 @@ export function GuestsView({ initialGuests }: { initialGuests: Guest[] }) {
         ? prev.map((g) => (g.id === tempId ? saved : g))
         : prev.filter((g) => g.id !== tempId),
     );
+    if (!saved) notifyError("Couldn’t add that. Please try again.");
   };
 
   return (

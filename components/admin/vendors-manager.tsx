@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useMemo, useState } from "react";
 import { BadgeCheck, Trash2, Check, X, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ export function VendorsManager({
   function setStatus(v: AdminVendor, status: "approved" | "rejected", reason = "") {
     const prev = v.status;
     const prevReason = v.rejectionReason;
+    const prevVerified = v.verified;
     setVendors((cur) =>
       cur.map((x) =>
         x.id === v.id
@@ -52,21 +54,24 @@ export function VendorsManager({
               ...x,
               status,
               rejectionReason: status === "rejected" ? reason : "",
-              verified: status === "approved" ? true : x.verified,
+              verified: status === "approved",
             }
           : x,
       ),
     );
+    const rollback = () => {
+      setVendors((cur) =>
+        cur.map((x) =>
+          x.id === v.id
+            ? { ...x, status: prev, rejectionReason: prevReason, verified: prevVerified }
+            : x,
+        ),
+      );
+      notifyError(`Couldn’t update “${v.name}”. Please refresh and try again.`);
+    };
     setVendorStatusAction(v.id, status, reason).then((res) => {
-      if (!res.ok)
-        setVendors((cur) =>
-          cur.map((x) =>
-            x.id === v.id
-              ? { ...x, status: prev, rejectionReason: prevReason }
-              : x,
-          ),
-        );
-    });
+      if (!res.ok) rollback();
+    }, rollback);
   }
 
   function remove(v: AdminVendor) {
@@ -78,9 +83,13 @@ export function VendorsManager({
       return;
     const snapshot = vendors;
     setVendors((cur) => cur.filter((x) => x.id !== v.id));
+    const rollback = () => {
+      setVendors(snapshot);
+      notifyError(`Couldn’t delete “${v.name}”. Please try again.`);
+    };
     deleteVendorAction(v.id).then((res) => {
-      if (!res.ok) setVendors(snapshot);
-    });
+      if (!res.ok) rollback();
+    }, rollback);
   }
 
   const pending = vendors.filter((v) => v.status === "pending").length;

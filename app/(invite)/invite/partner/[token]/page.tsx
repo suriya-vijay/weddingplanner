@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LotusMark, DividerOrnament } from "@/components/brand/motifs";
-import { getInviteByToken } from "@/lib/db/collaborators";
+import { getInviteByToken, maskEmail } from "@/lib/db/collaborators";
+import { createClient } from "@/lib/supabase/server";
+import { roleOf } from "@/lib/auth/role";
+import { AcceptInviteButton } from "./accept-button";
 
 export const metadata = {
   title: "You're invited · Kalyanam & Co.",
@@ -20,8 +23,20 @@ export default async function PartnerInvitePage({
   const { token } = await params;
   const invite = await getInviteByToken(token);
 
-  const valid = invite && invite.status !== "expired";
+  // Only a pending invite can be accepted. (This checked `!== "expired"`, a
+  // status nothing ever sets — so used links still said "You're invited".)
+  const valid = invite?.status === "pending";
   const inviter = invite?.coupleNames?.trim() || "Your partner";
+
+  // Already signed in? Let them join with that account instead of signing up.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const signedInEmail = user?.email?.toLowerCase() ?? null;
+  const emailMatches =
+    !!signedInEmail && (!invite?.invitedEmail || invite.invitedEmail === signedInEmail);
+  const canJoin = valid && emailMatches && roleOf(user) === "couple";
 
   return (
     <main className="relative flex min-h-dvh flex-col items-center justify-center texture-saree overflow-hidden bg-forest-900 px-6 py-16 text-center">
@@ -41,21 +56,32 @@ export default async function PartnerInvitePage({
               timeline and seating — no passwords shared.
             </p>
             <DividerOrnament className="mx-auto my-9 text-gold-400" />
-            <div className="flex flex-col items-center gap-4">
-              <Button
-                href={`/signup?invite=${encodeURIComponent(token)}`}
-                variant="primary"
-                size="lg"
-              >
-                Accept &amp; create your account
-              </Button>
-              <Link
-                href={`/login?next=/dashboard`}
-                className="text-sm text-cream/70 underline-offset-4 hover:text-gold-400 hover:underline"
-              >
-                Already have an account? Log in
-              </Link>
-            </div>
+            {canJoin ? (
+              <AcceptInviteButton token={token} />
+            ) : signedInEmail ? (
+              <p className="mx-auto max-w-sm text-sm text-cream/75">
+                You&rsquo;re signed in as {signedInEmail}
+                {invite?.invitedEmail && !emailMatches
+                  ? `, but this invite was sent to ${maskEmail(invite.invitedEmail)}. Log out and use that account to accept it.`
+                  : ", which isn’t a couple account. Log out and sign in with your couple account to accept."}
+              </p>
+            ) : (
+              <div className="flex flex-col items-center gap-4">
+                <Button
+                  href={`/signup?invite=${encodeURIComponent(token)}`}
+                  variant="primary"
+                  size="lg"
+                >
+                  Accept &amp; create your account
+                </Button>
+                <Link
+                  href={`/login?next=${encodeURIComponent(`/invite/partner/${token}`)}`}
+                  className="text-sm text-cream/70 underline-offset-4 hover:text-gold-400 hover:underline"
+                >
+                  Already have an account? Log in
+                </Link>
+              </div>
+            )}
           </>
         ) : (
           <>

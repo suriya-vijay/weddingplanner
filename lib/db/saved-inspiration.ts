@@ -45,12 +45,13 @@ export async function toggleSavedInspiration(
     .maybeSingle();
 
   if (existing) {
-    await supabase
+    const { error } = await supabase
       .from("saved_inspiration")
       .delete()
       .eq("wedding_id", wedding.id)
       .eq("inspiration_id", inspirationId);
-    return false;
+    // null = "didn't work"; the gallery rolls the heart back.
+    return error ? null : false;
   }
 
   const { error } = await supabase

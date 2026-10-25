@@ -214,10 +214,10 @@ export async function updateWeddingAction(patch: {
 }): Promise<{ ok: boolean }> {
   const weddingId = await myWeddingId();
   if (!weddingId) return { ok: false };
-  await updateWedding(weddingId, patch);
+  const ok = await updateWedding(weddingId, patch);
   // Refresh every dashboard page so the countdown/budget/name update.
   revalidatePath("/dashboard", "layout");
-  return { ok: true };
+  return { ok };
 }
 
 // ── Couple collaboration (invite a partner) ─────────────────────

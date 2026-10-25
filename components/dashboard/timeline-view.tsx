@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useMemo, useState } from "react";
 import {
   Check,
@@ -50,6 +51,8 @@ export function TimelineView({
 
   /** Fix a milestone's title/detail/date in place. */
   function saveEdit(id: string, patch: Omit<TimelineMilestone, "id">) {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const snapshot = items;
     setEditing(null);
     setItems((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
@@ -57,7 +60,10 @@ export function TimelineView({
       title: patch.title,
       detail: patch.detail,
       date: patch.date,
-    }).catch(() => setItems(snapshot));
+    }).catch(() => {
+      notifyError();
+      setItems(snapshot);
+    });
   }
 
   const doneCount = items.filter((m) => m.status === "done").length;
@@ -72,6 +78,8 @@ export function TimelineView({
    * undated) — we swap their `sort` values and persist the whole new order.
    */
   function move(id: string, dir: -1 | 1) {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const i = ordered.findIndex((m) => m.id === id);
     const j = i + dir;
     if (i < 0 || j < 0 || j >= ordered.length) return;
@@ -85,9 +93,10 @@ export function TimelineView({
     next[j] = a;
     const resorted = next.map((m, k) => ({ ...m, sort: k }));
     setItems(resorted);
-    reorderTimelineAction(resorted.map((m) => m.id)).catch(() =>
-      setItems(items),
-    );
+    reorderTimelineAction(resorted.map((m) => m.id)).catch(() => {
+      notifyError();
+      setItems(items);
+    });
   }
 
   /** Can this row move within its tie-group? (dates otherwise decide order) */
@@ -99,28 +108,42 @@ export function TimelineView({
   }
 
   function toggle(id: string) {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const item = items.find((m) => m.id === id);
     if (!item) return;
     const next = item.status === "done" ? "upcoming" : "done";
     setItems((prev) =>
       prev.map((m) => (m.id === id ? { ...m, status: next } : m)),
     );
-    updateTimelineAction(id, { status: next }).catch(() =>
+    updateTimelineAction(id, { status: next }).catch(() => {
+      notifyError();
       setItems((prev) =>
         prev.map((m) => (m.id === id ? { ...m, status: item.status } : m)),
-      ),
-    );
+      );
+    });
   }
 
   function setDate(id: string, date: string) {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
+    const before = items.find((m) => m.id === id)?.date ?? "";
     setItems((prev) => prev.map((m) => (m.id === id ? { ...m, date } : m)));
-    updateTimelineAction(id, { date });
+    updateTimelineAction(id, { date }).catch(() => {
+      notifyError();
+      setItems((prev) => prev.map((m) => (m.id === id ? { ...m, date: before } : m)));
+    });
   }
 
   function remove(id: string) {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const snapshot = items;
     setItems((prev) => prev.filter((m) => m.id !== id));
-    deleteTimelineAction(id).catch(() => setItems(snapshot));
+    deleteTimelineAction(id).catch(() => {
+      notifyError();
+      setItems(snapshot);
+    });
   }
 
   async function add(draft: Omit<TimelineMilestone, "id">) {
@@ -133,6 +156,7 @@ export function TimelineView({
         ? prev.map((m) => (m.id === tempId ? saved : m))
         : prev.filter((m) => m.id !== tempId),
     );
+    if (!saved) notifyError("Couldn’t add that. Please try again.");
   }
 
   async function suggest() {

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { expectRows } from "@/lib/db/write";
 import type { ChecklistItem } from "@/lib/mock-data";
 
 type ChecklistRow = {
@@ -32,7 +33,7 @@ export async function setChecklistDone(
   done: boolean,
 ): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("checklist_items").update({ done }).eq("id", id);
+  expectRows(await supabase.from("checklist_items").update({ done }).eq("id", id).select("id"), "task");
 }
 
 export async function addChecklistItem(
@@ -69,10 +70,10 @@ export async function updateChecklistItem(
   patch: Partial<Pick<ChecklistItem, "task" | "phase" | "category" | "done">>,
 ): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("checklist_items").update(patch).eq("id", id);
+  expectRows(await supabase.from("checklist_items").update(patch).eq("id", id).select("id"), "task");
 }
 
 export async function deleteChecklistItem(id: string): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("checklist_items").delete().eq("id", id);
+  expectRows(await supabase.from("checklist_items").delete().eq("id", id).select("id"), "task");
 }

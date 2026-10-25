@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Role } from "@/components/auth/session";
+import { roleOf } from "@/lib/auth/role";
 
 export type SessionUser = { name: string; role: Role };
 
@@ -20,9 +21,7 @@ export const getSessionUser = cache(async function getSessionUser(): Promise<Ses
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const role = (user.app_metadata?.role ??
-    user.user_metadata?.role ??
-    "couple") as Role;
+  const role: Role = roleOf(user);
   const name =
     (user.user_metadata?.display_name as string | undefined)?.trim() ||
     user.email ||
@@ -30,3 +29,13 @@ export const getSessionUser = cache(async function getSessionUser(): Promise<Ses
 
   return { name, role };
 });
+
+/**
+ * Server-action guard: the signed-in user if they have `role`, else null.
+ * Layouts gate pages, but server actions are public endpoints — every
+ * privileged action must check for itself.
+ */
+export async function requireRole(role: Role): Promise<SessionUser | null> {
+  const user = await getSessionUser();
+  return user?.role === role ? user : null;
+}

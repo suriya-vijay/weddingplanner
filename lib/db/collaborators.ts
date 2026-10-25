@@ -63,15 +63,17 @@ export async function createInvite(
   const supabase = await createClient();
   try {
     // Reuse a pending invite for the same email if present.
+    // (limit, not maybeSingle: an earlier accepted row for the same email
+    // made maybeSingle error, so every re-invite failed.)
     const { data: existing } = await supabase
       .from("wedding_collaborators")
-      .select("token, status")
+      .select("token")
       .eq("wedding_id", weddingId)
       .eq("invited_email", email.toLowerCase())
-      .maybeSingle();
-    if (existing?.token && existing.status === "pending") {
-      return { token: existing.token as string };
-    }
+      .eq("status", "pending")
+      .limit(1);
+    const reuse = (existing as { token: string }[] | null)?.[0]?.token;
+    if (reuse) return { token: reuse };
 
     const token = randomToken();
     const { error } = await supabase.from("wedding_collaborators").insert({
@@ -87,17 +89,18 @@ export async function createInvite(
   }
 }
 
-/** Public: resolve a pending invite by token (service client — pre-auth). */
+/** Public: resolve an invite by token (service client — pre-auth). */
 export async function getInviteByToken(token: string): Promise<{
   weddingId: string;
   coupleNames: string;
   status: string;
+  invitedEmail: string;
 } | null> {
   const admin = createServiceClient();
   try {
     const { data, error } = await admin
       .from("wedding_collaborators")
-      .select("wedding_id, status, weddings(couple_names)")
+      .select("wedding_id, status, invited_email, weddings(couple_names)")
       .eq("token", token)
       .maybeSingle();
     if (error || !data) return null;
@@ -106,23 +109,43 @@ export async function getInviteByToken(token: string): Promise<{
       weddingId: data.wedding_id as string,
       coupleNames: w?.couple_names ?? "your partner",
       status: (data.status as string) ?? "pending",
+      invitedEmail: ((data.invited_email as string) ?? "").toLowerCase(),
     };
   } catch {
     return null;
   }
 }
 
+/** "jane@example.com" → "ja•••@example.com" — enough to recognise, without
+ *  revealing the full address to whoever holds the link. */
+export function maskEmail(email: string): string {
+  const [user, domain] = email.split("@");
+  if (!domain) return email;
+  return `${user.slice(0, 2)}•••@${domain}`;
+}
+
 /**
- * Link a pending invite to a newly-created user (service client, called right
- * after signup). Sets user_id + status 'accepted'. Safe if already accepted.
+ * Link a PENDING invite to a user (service client). The invite only works for
+ * the address it was sent to — a forwarded or leaked link can't be used to
+ * join someone's wedding (and read their guest list) from another account.
  */
 export async function acceptInvite(
   token: string,
   userId: string,
-): Promise<boolean> {
+  userEmail: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const invite = await getInviteByToken(token);
+  if (!invite || invite.status !== "pending")
+    return { ok: false, error: "This invite has expired or was already used." };
+  if (invite.invitedEmail && invite.invitedEmail !== userEmail.trim().toLowerCase())
+    return {
+      ok: false,
+      error: `This invite was sent to ${maskEmail(invite.invitedEmail)}. Please use that email address.`,
+    };
+
   const admin = createServiceClient();
   try {
-    const { error } = await admin
+    const { data, error } = await admin
       .from("wedding_collaborators")
       .update({
         user_id: userId,
@@ -130,9 +153,12 @@ export async function acceptInvite(
         accepted_at: new Date().toISOString(),
       })
       .eq("token", token)
-      .eq("status", "pending");
-    return !error;
+      .eq("status", "pending")
+      .select("id");
+    if (error || !data?.length)
+      return { ok: false, error: "We couldn’t accept this invite. Please try again." };
+    return { ok: true };
   } catch {
-    return false;
+    return { ok: false, error: "We couldn’t accept this invite. Please try again." };
   }
 }

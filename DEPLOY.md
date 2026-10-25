@@ -73,7 +73,13 @@ To email real users (welcome + vendor approval emails):
 
 ## Notes
 
-- **Migrations** (all 13 in `supabase/migrations/`) are already applied to the
-  live project. New migrations must be run manually in the Supabase SQL editor.
+- **Migrations** in `supabase/migrations/` must be run manually, in order, in
+  the Supabase SQL editor. `0017_security_hardening.sql` must be applied
+  for the role/RLS protections to take effect — its final query lists every
+  admin account; demote any you don't recognise.
+- **Roles** are read from auth `app_metadata` (only the service role can write
+  it), never from user-editable `user_metadata`. To make someone an admin, run
+  `update public.profiles set role = 'admin' where id = '<uuid>';` — a trigger
+  copies it into `app_metadata`. They take effect on the user's next request.
 - **Secrets never ship to the browser** — verified: the client bundle contains
   none of the service-role / Gemini / Resend key values.

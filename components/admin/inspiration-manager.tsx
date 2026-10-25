@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,18 @@ export function InspirationManager({
   function remove(id: string) {
     const snapshot = items;
     setItems((prev) => prev.filter((i) => i.id !== id));
-    deleteInspirationAction(id).catch(() => setItems(snapshot));
+    deleteInspirationAction(id).then(
+      (res) => {
+        if (!res.ok) {
+          setItems(snapshot);
+          notifyError("Couldn’t delete that item. Please try again.");
+        }
+      },
+      () => {
+        setItems(snapshot);
+        notifyError();
+      },
+    );
   }
 
   async function save(draft: InspirationItem) {
@@ -58,8 +70,13 @@ export function InspirationManager({
     setCreating(false);
     const { id: draftId, ...rest } = draft;
     if (isEdit) {
+      const before = items.find((i) => i.id === draftId);
       setItems((prev) => prev.map((i) => (i.id === draftId ? draft : i)));
-      await updateInspirationAction(draftId, rest);
+      const res = await updateInspirationAction(draftId, rest).catch(() => ({ ok: false }));
+      if (!res.ok) {
+        if (before) setItems((prev) => prev.map((i) => (i.id === draftId ? before : i)));
+        notifyError();
+      }
     } else {
       setItems((prev) => [draft, ...prev]);
       const created = await addInspirationAction(rest);
@@ -68,6 +85,7 @@ export function InspirationManager({
           ? prev.map((i) => (i.id === draftId ? created : i))
           : prev.filter((i) => i.id !== draftId),
       );
+      if (!created) notifyError("Couldn’t add that item. Please try again.");
     }
   }
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
+import { notifyError } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { EnquiryMessage } from "@/lib/db/enquiry-chat";
@@ -23,6 +25,7 @@ export function EnquiryThread({
   const [messages, setMessages] = useState<EnquiryMessage[]>(initialMessages);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
+  const router = useRouter();
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,11 +46,19 @@ export function EnquiryThread({
       createdAt: "",
     };
     setMessages((m) => [...m, temp]);
-    const saved = await onSend(text);
+    const saved = await onSend(text).catch(() => null);
     setSending(false);
     setMessages((m) =>
       saved ? m.map((x) => (x.id === temp.id ? saved : x)) : m.filter((x) => x.id !== temp.id),
     );
+    if (saved) {
+      // The parent list hands threads their messages as props; refresh them so
+      // collapsing and reopening the thread doesn't drop what was just sent.
+      router.refresh();
+    } else {
+      setBody(text); // give them their message back to retry
+      notifyError("Your message didn’t send. Please try again.");
+    }
   }
 
   return (

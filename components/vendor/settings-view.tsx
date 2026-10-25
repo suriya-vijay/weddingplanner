@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useState } from "react";
 import { Save } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
@@ -36,6 +37,7 @@ export function VendorSettingsView({ vendor }: { vendor: VendorProfile }) {
     });
     setSaving(false);
     setSaved(res.ok);
+    if (!res.ok) notifyError("Couldn’t save your settings. Please try again.");
   }
 
   return (

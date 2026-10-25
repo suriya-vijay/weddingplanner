@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useMemo, useState } from "react";
 import {
   Plus,
@@ -113,6 +114,7 @@ export function EventsView({
       try {
         await updateEventAction(id, details);
       } catch {
+        notifyError();
         setEvents(prev); // rollback
       }
     } else {
@@ -120,7 +122,11 @@ export function EventsView({
       const sort = events.length;
       const created = await addEventAction(details, sort);
       setBusy(false);
-      if (!created) return;
+      if (!created) {
+        // Keep the dialog open with their details so nothing is lost.
+        notifyError("Couldn’t add this event. Please try again.");
+        return;
+      }
       setEvents((e) => [...e, created]);
       setAttend((a) => ({ ...a, [created.id]: new Set() }));
       setDialog(null);
@@ -135,6 +141,7 @@ export function EventsView({
     try {
       await deleteEventAction(id);
     } catch {
+      notifyError();
       setEvents(prev); // rollback
     }
   }
@@ -147,6 +154,7 @@ export function EventsView({
     setAttend((a) => ({ ...a, [eventId]: set }));
     // fire-and-forget; on failure, revert this one toggle
     setEventGuestAction(eventId, guestId, nowAttending).catch(() => {
+      notifyError();
       setAttend((a) => {
         const s = new Set(a[eventId] ?? []);
         if (nowAttending) s.delete(guestId);

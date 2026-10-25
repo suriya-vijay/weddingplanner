@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useMemo, useState } from "react";
 import { Check, Plus, Trash2, X, ListChecks, Pencil } from "lucide-react";
 import { Panel, ProgressBar } from "@/components/dashboard/ui";
@@ -34,13 +35,20 @@ export function ChecklistView({
     id: string,
     patch: Pick<ChecklistItem, "task" | "phase" | "category">,
   ) => {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const snapshot = items;
     setEditing(null);
     setItems((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
-    updateChecklistItemAction(id, patch).catch(() => setItems(snapshot));
+    updateChecklistItemAction(id, patch).catch(() => {
+      notifyError();
+      setItems(snapshot);
+    });
   };
 
   const toggle = (id: string) => {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const item = items.find((c) => c.id === id);
     if (!item) return;
     const next = !item.done;
@@ -49,6 +57,7 @@ export function ChecklistView({
       prev.map((c) => (c.id === id ? { ...c, done: next } : c)),
     );
     setChecklistDoneAction(id, next).catch(() => {
+      notifyError();
       // Revert on failure.
       setItems((prev) =>
         prev.map((c) => (c.id === id ? { ...c, done: !next } : c)),
@@ -57,9 +66,14 @@ export function ChecklistView({
   };
 
   const remove = (id: string) => {
+    // Still saving (optimistic row with a temp id) — nothing to update yet.
+    if (id.startsWith("temp-")) return;
     const snapshot = items;
     setItems((prev) => prev.filter((c) => c.id !== id));
-    deleteChecklistItemAction(id).catch(() => setItems(snapshot));
+    deleteChecklistItemAction(id).catch(() => {
+      notifyError();
+      setItems(snapshot);
+    });
   };
 
   const add = async (draft: Pick<ChecklistItem, "task" | "phase" | "category">) => {
@@ -73,6 +87,7 @@ export function ChecklistView({
         ? prev.map((c) => (c.id === tempId ? saved : c))
         : prev.filter((c) => c.id !== tempId),
     );
+    if (!saved) notifyError("Couldn’t add that. Please try again.");
   };
 
   const doneCount = items.filter((c) => c.done).length;

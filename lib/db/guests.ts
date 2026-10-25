@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { expectRows } from "@/lib/db/write";
 import type { Guest } from "@/lib/mock-data";
 
 type GuestRow = {
@@ -65,10 +66,10 @@ export async function updateGuest(
   patch: Partial<Omit<Guest, "id">>,
 ): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("guests").update(patch).eq("id", id);
+  expectRows(await supabase.from("guests").update(patch).eq("id", id).select("id"), "guest");
 }
 
 export async function deleteGuest(id: string): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("guests").delete().eq("id", id);
+  expectRows(await supabase.from("guests").delete().eq("id", id).select("id"), "guest");
 }

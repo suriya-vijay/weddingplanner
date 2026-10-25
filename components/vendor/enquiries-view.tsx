@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Inbox } from "lucide-react";
@@ -66,11 +67,15 @@ export function EnquiriesView({
     const next =
       STATUS_ORDER[(STATUS_ORDER.indexOf(e.status) + 1) % STATUS_ORDER.length];
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status: next } : r)));
-    setEnquiryStatusAction(id, next).catch(() =>
+    const rollback = () => {
       setRows((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status: e.status } : r)),
-      ),
-    );
+      );
+      notifyError("Couldn’t update that enquiry’s status. Please try again.");
+    };
+    setEnquiryStatusAction(id, next).then((res) => {
+      if (!res.ok) rollback();
+    }, rollback);
   };
 
   return (

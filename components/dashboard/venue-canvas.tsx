@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Circle,
@@ -86,6 +87,10 @@ export function VenueCanvas({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRender = useRef(true);
 
+  // The layout waiting on the debounce — flushed on unmount so a drag made
+  // just before navigating away isn't dropped.
+  const pending = useRef<{ shapes: VenueShape[]; seats: typeof seats } | null>(null);
+
   // Debounced autosave whenever the layout changes (skip the first render).
   useEffect(() => {
     if (firstRender.current) {
@@ -94,15 +99,26 @@ export function VenueCanvas({
     }
     if (!migrationReady) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
+    pending.current = { shapes, seats };
     saveTimer.current = setTimeout(async () => {
+      saveTimer.current = null;
+      const data = pending.current;
+      pending.current = null;
+      if (!data) return;
       setSaveState("saving");
-      const res = await saveVenueAction({ shapes, seats });
+      const res = await saveVenueAction(data).catch(() => ({ ok: false }));
       setSaveState(res.ok ? "saved" : "idle");
+      if (!res.ok) notifyError("Couldn’t save your seating layout. Please try again.");
     }, 700);
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    };
   }, [shapes, seats, migrationReady]);
+
+  useEffect(
+    () => () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (pending.current) void saveVenueAction(pending.current);
+    },
+    [],
+  );
 
   const addShape = (p: PaletteItem) => {
     const shape: VenueShape = {

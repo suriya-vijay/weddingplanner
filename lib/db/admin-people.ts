@@ -8,6 +8,20 @@ import { createServiceClient } from "@/lib/supabase/server";
  *
  * Server-only; the /admin routes are role-gated in the layout and the proxy.
  */
+
+/** Every auth user, page by page — a single 200-user page left everyone
+ *  past the first 200 showing "—" for their email. */
+async function listAllUsers(admin: ReturnType<typeof createServiceClient>) {
+  const users: { id: string; email?: string }[] = [];
+  for (let page = 1; page <= 50; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error || !data?.users.length) break;
+    users.push(...data.users);
+    if (data.users.length < 1000) break;
+  }
+  return users;
+}
+
 export type Person = {
   id: string;
   name: string;
@@ -24,13 +38,13 @@ export async function getPeople(): Promise<Person[]> {
   const [{ data: profiles }, authRes, { data: weddings }, { data: vendors }] =
     await Promise.all([
       admin.from("profiles").select("id, role, display_name, created_at"),
-      admin.auth.admin.listUsers({ page: 1, perPage: 200 }),
+      listAllUsers(admin),
       admin.from("weddings").select("owner_id, couple_names"),
       admin.from("vendors").select("owner_id, name"),
     ]);
 
   const emailById = new Map<string, string>();
-  for (const u of authRes.data?.users ?? []) {
+  for (const u of authRes) {
     if (u.id) emailById.set(u.id, u.email ?? "");
   }
   const weddingByOwner = new Map<string, string>();

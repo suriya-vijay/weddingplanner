@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { expectRows } from "@/lib/db/write";
 import type { BudgetItem } from "@/lib/mock-data";
 
 type BudgetRow = {
@@ -47,10 +48,10 @@ export async function updateBudgetItem(
   patch: Partial<Omit<BudgetItem, "id">>,
 ): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("budget_items").update(patch).eq("id", id);
+  expectRows(await supabase.from("budget_items").update(patch).eq("id", id).select("id"), "budget item");
 }
 
 export async function deleteBudgetItem(id: string): Promise<void> {
   const supabase = await createClient();
-  await supabase.from("budget_items").delete().eq("id", id);
+  expectRows(await supabase.from("budget_items").delete().eq("id", id).select("id"), "budget item");
 }

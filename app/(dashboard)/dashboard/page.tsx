@@ -179,17 +179,20 @@ export default async function DashboardOverview() {
                 </div>
                 <div>
                   <div className="mb-1.5 flex items-baseline justify-between text-sm">
-                    <span className="text-ink-soft">RSVPs confirmed</span>
+                    {/* Responses received, not "confirmed of everyone": a
+                        declined guest is an answered RSVP, and counting them
+                        as unconfirmed made a fully-answered list read 50%. */}
+                    <span className="text-ink-soft">RSVPs received</span>
                     <span className="font-medium text-ink">
-                      {headcount ? Math.round((confirmed / headcount) * 100) : 0}%
+                      {headcount ? Math.round(((headcount - pending) / headcount) * 100) : 0}%
                     </span>
                   </div>
                   <ProgressBar
-                    value={headcount ? (confirmed / headcount) * 100 : 0}
+                    value={headcount ? ((headcount - pending) / headcount) * 100 : 0}
                     tone="forest"
                   />
                   <p className="mt-1.5 text-xs text-ink-faint">
-                    {confirmed} of {headcount} guests
+                    {confirmed} attending · {pending} awaiting reply
                   </p>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/components/ui/toast";
 import { useState } from "react";
 import { Save, UserPlus, Mail, Copy, Check } from "lucide-react";
 import { Panel } from "@/components/dashboard/ui";
@@ -48,6 +49,7 @@ export function SettingsForm({ wedding }: { wedding: Wedding }) {
     });
     setSaving(false);
     setSaved(res.ok);
+    if (!res.ok) notifyError("Couldn’t save your wedding details. Please try again.");
   }
 
   /** Clear the "Saved ✓" as soon as the couple edits again — otherwise it
