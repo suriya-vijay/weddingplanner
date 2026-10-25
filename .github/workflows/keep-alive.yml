@@ -21,6 +21,12 @@ on:
     - cron: "0 9 * * *"
   workflow_dispatch: # lets you run it by hand any time to verify
 
+# GitHub auto-disables scheduled workflows after 60 days without repo activity.
+# The last step re-enables this workflow via the API, which resets that timer
+# (no commits needed).
+permissions:
+  actions: write
+
 jobs:
   ping:
     runs-on: ubuntu-latest
@@ -46,3 +52,13 @@ jobs:
             2*) echo "Project is awake." ;;
             *)  echo "::error::Unexpected status $code"; exit 1 ;;
           esac
+      - name: Reset GitHub's 60-day inactivity timer
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sSf -X PUT \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/keep-alive.yml/enable"
+          echo "Workflow re-enabled; inactivity timer reset."
